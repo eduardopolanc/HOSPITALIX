@@ -1,0 +1,10 @@
+pandas
+numpy
+XlsxWriter
+openpyxl
+streamlit
+streamlit-aggrid
+fpdf
+tabulate
+streamlit-option-menu
+streamlit-authenticator
