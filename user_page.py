@@ -112,9 +112,13 @@ def user_page():
 
       st.markdown(html, unsafe_allow_html=True)
 
-      if st.button("view PDF"):
-         st.session_state.page = "viewer"
-      if st.button("go to admin"):
-         st.session_state.page = "admin"
+  button_pdf = st.button("view pdf")
+  button_admin = st.button("go to admin")
 
-       
+  if button_pdf:
+    st.session_state.page = "viewer"
+    st.rerun()
+
+  if button_admin:
+    st.session_state.page = "admin"
+    st.rerun()

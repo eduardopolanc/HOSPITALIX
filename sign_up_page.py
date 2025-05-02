@@ -5,3 +5,4 @@ def sign_up_page():
 
     if button_retur:
         st.session_state.page = "login"
+        st.rerun()

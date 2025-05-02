@@ -7,7 +7,12 @@ def admin_page():
 
     if button_user:
         st.session_state.page = "user"
+        st.rerun()
+
     if button_pdf:
         st.session_state.page = "viewer"
+        st.rerun()
+
     if button_out:
         st.session_state.page = "login"
+        st.rerun()

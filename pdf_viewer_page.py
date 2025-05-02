@@ -7,7 +7,8 @@ def pdf_viewer_page():
 
     if button_user:
         st.session_state.page = "user"
-    
+        st.rerun()
+
     if button_admin:
         st.session_state.page = "admin"
-        
+        st.rerun()
