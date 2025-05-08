@@ -61,7 +61,8 @@ def sign_up_page():
                 <html>
                     <body>
                         <p>Une nouvelle demande de création de compte a été reçue :</p>
-                        <p><b>Nom :</b> {prenom} {nom}<br>
+                        <p><b>Nom :</b> {nom} <br>
+                        <b>Prenom :</b>{prenom} <br>
                         <b>Email :</b> {email}<br>
                         <b>Entreprise :</b> {entreprise}<br>
                         <b>Rôle :</b> {role}<br>
