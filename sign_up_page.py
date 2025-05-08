@@ -46,8 +46,6 @@ def sign_up_page():
             # Save the updated table to Excel
             all_requests.to_excel(request_file, index=False)
 
-            from dotenv import load_dotenv
-
             # Import emails from .env file
             load_dotenv()
             EMAIL_SENDER = os.getenv("EMAIL_SENDER")
@@ -63,9 +61,14 @@ def sign_up_page():
                 html_body = f"""
                 <html>
                 <body>
-                    <p>Une nouvelle demande de création de compte a été reçue :</p>
-                    {new_request.to_html(index=False, border=1)}
-                    <p><a href="http://TU_SERVIDOR_O_DOMINIO:8501" target="_blank">Accéder à l'application</a></p>
+                    <p>Se ha recibido una nueva solicitud de creación de cuenta.</p>
+                    <p><b>Nombre:</b> {prenom} {nom}<br>
+                    <b>Correo:</b> {email}<br>
+                    <b>Empresa:</b> {entreprise}<br>
+                    <b>Rol:</b> {role}<br>
+                    <b>Teléfono:</b> {telephone or 'No proporcionado'}</p>
+                    <p>Puedes revisar la solicitud en la siguiente página:</p>
+                    <p><a href="http://tudominio.com:8501">Ir a la aplicación</a></p>
                 </body>
                 </html>
                 """
