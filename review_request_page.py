@@ -4,74 +4,69 @@ import os
 import secrets
 import string
 
-# 🔐 Function to generate a random password (default length: 10 characters)
+# Function to generate a secure random password
 def generate_password(length=10):
-    alphabet = string.ascii_letters + string.digits  # Includes uppercase, lowercase letters and digits
-    return ''.join(secrets.choice(alphabet) for _ in range(length))  # Randomly select characters
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
 
-# 🌐 Main admin review page
+# This function defines the admin review page
 def review_request_page():
-    st.title("User Sign-Up Requests Validation")
+    st.title("Admin Review: Account Requests")
 
-    # Define file paths
-    demandes_file = "demandes_en_attente.xlsx"  # Contains pending user registration requests
-    comptes_file = "ALIX_4.0.xlsm"              # Will store only accepted users' email and password
+    # Define paths to data files
+    request_file = "demandes_en_attente.xlsx"
+    account_file = "ALIX_4.0.xlsm"
 
-    # Check if there are pending requests
-    if os.path.exists(demandes_file):
-        demandes = pd.read_excel(demandes_file)
+    # Check if the request file exists
+    if os.path.exists(request_file):
+        requests = pd.read_excel(request_file)
 
-        # If there are no requests
-        if demandes.empty:
-            st.info("No registration requests to review.")
+        if requests.empty:
+            st.info("There are no pending requests.")
         else:
             # Loop through each pending request
-            for index, row in demandes.iterrows():
-                with st.expander(f"{row['Prénom']} {row['Nom']} - {row['Email']}"):
-                    # Show the user's submitted information for admin to review
-                    st.write(f"**Last name:** {row['Nom']}")
-                    st.write(f"**First name:** {row['Prénom']}")
-                    st.write(f"**Phone:** {row['Téléphone']}")
-                    st.write(f"**Role / Profession:** {row['Rôle']}")
-                    st.write(f"**Company name:** {row['Entreprise']}")
-                    st.write(f"**Email (used as login):** {row['Email']}")
+            for index, row in requests.iterrows():
+                with st.expander(f"{row['First Name']} {row['Last Name']} - {row['Email']}"):
+                    # Display user-submitted information
+                    st.write(f"**Last Name:** {row['Last Name']}")
+                    st.write(f"**First Name:** {row['First Name']}")
+                    st.write(f"**Phone:** {row['Phone']}")
+                    st.write(f"**Role:** {row['Role']}")
+                    st.write(f"**Company:** {row['Company']}")
+                    st.write(f"**Email:** {row['Email']}")
 
-                    # Display Accept and Reject buttons side by side
                     col1, col2 = st.columns(2)
 
-                    # ✅ If the admin clicks "Accept"
+                    # Accept button logic
                     if col1.button(f"✅ Accept - {index}"):
-                        # Generate a random password
-                        mot_de_passe = generate_password()
+                        password = generate_password()
 
-                        # Create a new account record with email and password only
-                        nouveau_compte = {
+                        new_account = pd.DataFrame([{
                             "Email (username)": row['Email'],
-                            "Password": mot_de_passe
-                        }
+                            "Password": password
+                        }])
 
-                        # Save this new account to the final Excel file
-                        if os.path.exists(comptes_file):
-                            anciens = pd.read_excel(comptes_file)
-                            comptes = pd.concat([anciens, pd.DataFrame([nouveau_compte])], ignore_index=True)
+                        # Save accepted account to main file
+                        if os.path.exists(account_file):
+                            existing = pd.read_excel(account_file)
+                            all_accounts = pd.concat([existing, new_account], ignore_index=True)
                         else:
-                            comptes = pd.DataFrame([nouveau_compte])
+                            all_accounts = new_account
 
-                        comptes.to_excel(comptes_file, index=False)  # Save accepted user credentials
+                        all_accounts.to_excel(account_file, index=False)
 
-                        # Remove the accepted request from pending list
-                        demandes.drop(index, inplace=True)
-                        demandes.to_excel(demandes_file, index=False)
+                        # Remove request from pending list
+                        requests.drop(index, inplace=True)
+                        requests.to_excel(request_file, index=False)
 
-                        # Show success message with password (admin can send it to user)
-                        st.success(f"✅ Account created for {row['Email']}, password: {mot_de_passe}")
-                        st.rerun()  # Refresh the page to update list
+                        st.success(f"Account created for {row['Email']} with password: {password}")
+                        st.rerun()
 
-                    # ❌ If the admin clicks "Reject"
+                    # Reject button logic
                     if col2.button(f"❌ Reject - {index}"):
-                        demandes.drop(index, inplace=True)  # Just remove the request
-                        demandes.to_excel(demandes_file, index=False)
-                        st.warning(f"❌ Request rejected for {row['Email']}")
+                        requests.drop(index, inplace=True)
+                        requests.to_excel(request_file, index=False)
+                        st.warning(f"Request for {row['Email']} has been rejected.")
                         st.rerun()
     else:
-        st.info("No pending registration request file found.")
+        st.info("No request file found.")

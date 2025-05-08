@@ -2,42 +2,52 @@ import streamlit as st
 import pandas as pd
 import os
 
+# This function defines the user sign-up page
 def sign_up_page():
-    st.title("Demande de création de compte")
+    st.title("Account Creation Request")  # Page title
 
-    nom = st.text_input("Nom")
-    prenom = st.text_input("Prénom")
-    telephone = st.text_input("Téléphone (facultatif)")
-    lieu_travail = st.text_input("Nom de structure de l’entreprise")
-    email = st.text_input("Email")
+    # Input form fields
+    nom = st.text_input("Last Name")
+    prenom = st.text_input("First Name")
+    telephone = st.text_input("Phone (optional)")
+    role = st.text_input("Role / Profession")
+    entreprise = st.text_input("Company Name")
+    email = st.text_input("Email (used as login)")
 
-    if st.button("Envoyer la demande"):
-        if not (nom and prenom and email and lieu_travail):
-            st.warning("Veuillez remplir tous les champs obligatoires.")
+    # When the user submits the form
+    if st.button("Submit Request"):
+        # Check if required fields are filled
+        if not (nom and prenom and email and role and entreprise):
+            st.warning("Please fill in all required fields.")
         else:
-            # Crée un DataFrame avec les infos saisies
-            nouvelle_demande = pd.DataFrame([{
-                "Nom": nom,
-                "Prénom": prenom,
-                "Téléphone": telephone,
-                "Entreprise": lieu_travail,
+            # Create a DataFrame containing the user info
+            new_request = pd.DataFrame([{
+                "Last Name": nom,
+                "First Name": prenom,
+                "Phone": telephone,
+                "Role": role,
+                "Company": entreprise,
                 "Email": email
             }])
 
-            # Fichier Excel des demandes (à créer s’il n’existe pas)
-            fichier = "demandes_en_attente.xlsx"
+            # Define where the requests will be stored
+            request_file = "demandes_en_attente.xlsx"
 
-            if os.path.exists(fichier):
-                ancienne = pd.read_excel(fichier)
-                nouvelle = pd.concat([ancienne, nouvelle_demande], ignore_index=True)
+            # Append to existing file or create a new one
+            if os.path.exists(request_file):
+                existing = pd.read_excel(request_file)
+                all_requests = pd.concat([existing, new_request], ignore_index=True)
             else:
-                nouvelle = nouvelle_demande
+                all_requests = new_request
 
-            nouvelle.to_excel(fichier, index=False)
+            # Save the updated table to Excel
+            all_requests.to_excel(request_file, index=False)
 
-            st.success("Votre demande a été envoyée avec succès. Vous recevrez un email une fois le compte validé.")
+            # Notify the user of success
+            st.success("Your request has been submitted successfully.")
 
-    # Bouton de retour
-    if st.button("Retour à la connexion"):
+    # Button to return to login page
+    if st.button("Back to Login"):
         st.session_state.page = "login"
         st.rerun()
+
