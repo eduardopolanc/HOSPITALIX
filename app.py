@@ -4,6 +4,7 @@ from login_page import login_page
 from pdf_viewer_page import pdf_viewer_page
 from sign_up_page import sign_up_page
 from user_page import user_page
+from review_request_page import review_request_page
 
 if 'page' not in st.session_state:
     st.session_state.page = "login"
@@ -22,6 +23,8 @@ elif page == "signup":
     sign_up_page()
 elif page == "user":
     user_page()
+elif page == "review":
+    review_request_page()
 else:
     st.warning("Page not autorized. Redirecting to Login...")
     st.session_state.pagina = 'login'
