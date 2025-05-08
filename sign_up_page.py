@@ -45,41 +45,64 @@ def sign_up_page():
 
             # Save the updated table to Excel
             all_requests.to_excel(request_file, index=False)
-
-            # Import emails from .env file
             load_dotenv()
             EMAIL_SENDER = os.getenv("EMAIL_SENDER")
             EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
             EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
 
             if all([EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECEIVER]):
-                msg = EmailMessage()
-                msg["Subject"] = "Nouvelle demande de création de compte"
-                msg["From"] = EMAIL_SENDER
-                msg["To"] = EMAIL_RECEIVER
+                # -------------------- email to admin --------------------
+                msg_admin = EmailMessage()
+                msg_admin["Subject"] = "Nouvelle demande de création de compte"
+                msg_admin["From"] = EMAIL_SENDER
+                msg_admin["To"] = EMAIL_RECEIVER
 
-                html_body = f"""
+                html_admin = f"""
                 <html>
-                <body>
-                    <p>Se ha recibido una nueva solicitud de creación de cuenta.</p>
-                    <p><b>Nombre:</b> {prenom} {nom}<br>
-                    <b>Correo:</b> {email}<br>
-                    <b>Empresa:</b> {entreprise}<br>
-                    <b>Rol:</b> {role}<br>
-                    <b>Teléfono:</b> {telephone or 'No proporcionado'}</p>
-                    <p>Puedes revisar la solicitud en la siguiente página:</p>
-                    <p><a href="http://tudominio.com:8501">Ir a la aplicación</a></p>
-                </body>
+                    <body>
+                        <p>Une nouvelle demande de création de compte a été reçue :</p>
+                        <p><b>Nom :</b> {prenom} {nom}<br>
+                        <b>Email :</b> {email}<br>
+                        <b>Entreprise :</b> {entreprise}<br>
+                        <b>Rôle :</b> {role}<br>
+                        <b>Téléphone :</b> {telephone or 'Non fourni'}</p>
+                        <p>Vous pouvez consulter la demande sur la page suivante :</p>
+                        <p><a href="http://alix.iparme.com/">Accéder à l'application</a></p>
+                    </body>
                 </html>
                 """
 
-                msg.set_content("Tu cliente de correo no soporta HTML.")
-                msg.add_alternative(html_body, subtype='html')
+                msg_admin.set_content("Une nouvelle demande a été reçue (version texte).")
+                msg_admin.add_alternative(html_admin, subtype='html')
 
+
+                # -------------------- email to user --------------------
+                msg_user = EmailMessage()
+                msg_user["Subject"] = "Confirmation de votre demande"
+                msg_user["From"] = EMAIL_SENDER
+                msg_user["To"] = email
+
+                html_user = f"""
+                <html>
+                    <body>
+                        <p>Bonjour {prenom},</p>
+                        <p>Votre demande de création de compte a bien été reçue.</p>
+                        <p>Nous la traiterons dans les plus brefs délais.</p>
+                        <p>Merci,<br>L'équipe Hospitalix</p>
+                    </body>
+                </html>
+                """
+
+                msg_user.set_content("Votre demande a bien été reçue (version texte).")
+                msg_user.add_alternative(html_user, subtype='html')
+
+
+                # -------------------- sending --------------------
                 try:
                     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
                         server.login(EMAIL_SENDER, EMAIL_PASSWORD)
-                        server.send_message(msg)
+                        server.send_message(msg_admin)
+                        server.send_message(msg_user)
                 except:
                     pass
             
