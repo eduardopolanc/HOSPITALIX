@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import os
+import smtplib
+from email.message import EmailMessage
+from dotenv import load_dotenv
 
 # This function defines the user sign-up page
 def sign_up_page():
@@ -42,6 +45,42 @@ def sign_up_page():
 
             # Save the updated table to Excel
             all_requests.to_excel(request_file, index=False)
+
+            # load email credentials (.env file)
+            load_dotenv()
+
+            EMAIL_SENDER = os.getenv("EMAIL_SENDER")
+            EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+            EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
+
+            if not all([EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECEIVER]):
+                st.error("an error has occurred, we didn't recieve your credentials by email")
+            else:
+                # message to be send
+                msg = EmailMessage()
+                msg["Subject"] = "user request"
+                msg["From"] = EMAIL_SENDER
+                msg["To"] = EMAIL_RECEIVER
+
+                # email's body
+                body = f"""
+                New account request:
+
+                Prenom: {prenom}
+                Nom: {nom}
+                e-mail: {email}
+                enterprise: {entreprise}
+                Role: {role}
+                phone number: {telephone}
+                """
+                msg.set_content(body)
+
+                with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                    server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+                    server.send_message(msg)
+                
+
+
 
             # Notify the user of success
             st.success("Your request has been submitted successfully.")
