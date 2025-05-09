@@ -15,7 +15,7 @@ def review_request_page():
 
     # Define paths to data files
     request_file = "demandes_en_attente.xlsx"
-    account_file = "ALIX_4.0.xlsm"
+    account_file = "accepted_user_information.xlsm"
 
     # Check if the request file exists
     if os.path.exists(request_file):
