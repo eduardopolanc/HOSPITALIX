@@ -18,9 +18,9 @@ def admin_page():
         st.session_state.page = "login"
         st.rerun()
 
-def user_request():
     button_re = st.button("user's request")
     
     if button_re:
             st.session_state.page = "request"
             st.rerun()
+    
