@@ -3,6 +3,7 @@ import os
 import pandas as pd
 
 def admin_page():
+    st.markdown("<style>div.block-container{padding-top: 1rem;}</style>", unsafe_allow_html=True)
     st.set_page_config(layout="wide")  # Opcional: hace que la columna izquierda tenga más espacio útil
     st.markdown("<h1 style='text-align: center;'>Admin Page</h1>", unsafe_allow_html=True)
 
@@ -19,7 +20,7 @@ def admin_page():
     col1, col2, col3 = st.columns([2, 6, 2])
 
     with col1:
-        st.markdown("### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
+        st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
         if not requests.empty:
             for index, row in requests.iterrows():
