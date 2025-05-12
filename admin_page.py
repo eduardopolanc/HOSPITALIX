@@ -4,7 +4,7 @@ import pandas as pd
 
 def admin_page():
     st.set_page_config(layout="wide")  # Opcional: hace que la columna izquierda tenga más espacio útil
-    st.title("Admin Page")
+    st.markdown("<h1 style='text-align: center;'>Admin Page</h1>", unsafe_allow_html=True)
 
     # Leer solicitudes pendientes
     request_file = "demandes_en_attente.xlsx"
@@ -19,33 +19,38 @@ def admin_page():
     col1, col2, col3 = st.columns([2, 6, 2])
 
     with col1:
-        
+        st.markdown("### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
-        st.subheader("Demandes d'inscription")
-
         if not requests.empty:
             for index, row in requests.iterrows():
                 with st.expander(f"{row['First Name']} {row['Last Name']} - {row['Email']}"):
-                    st.write(f"**Nom :** {row['Last Name']}")
-                    st.write(f"**Prénom :** {row['First Name']}")
-                    st.write(f"**Téléphone :** {row['Phone']}")
-                    st.write(f"**Rôle :** {row['Role']}")
-                    st.write(f"**Entreprise :** {row['Company']}")
-                    st.write(f"**Email :** {row['Email']}")
+                    st.write(f"**Last Name:** {row['Last Name']}")
+                    st.write(f"**First Name:** {row['First Name']}")
+                    st.write(f"**Phone:** {row['Phone']}")
+                    st.write(f"**Role:** {row['Role']}")
+                    st.write(f"**Company:** {row['Company']}")
+                    st.write(f"**Email:** {row['Email']}")
         else:
             st.info("Aucune demande en attente.")
-    with col3:
+    
+    col8 = st.columns
+    
+    with col8:
         st.subheader("Navigation")
-
+    col4, col5, col6, col7 = st.columns([2,2,2,2])
+    with col4:
         if st.button("user page"):
             st.session_state.page = "user"
             st.rerun()
+    with col5:
         if st.button("pdf page"):
             st.session_state.page = "viewer"
             st.rerun()
+    with col6:
         if st.button("log out"):
             st.session_state.page = "login"
             st.rerun()
+    with col7:
         if st.button("user's request"):
             st.session_state.page = "request"
             st.rerun()
