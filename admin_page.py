@@ -3,8 +3,8 @@ import os
 import pandas as pd
 
 def admin_page():
+    st.set_page_config(layout="wide") # Opcional: hace que la columna izquierda tenga más espacio útil
     st.markdown("<style>div.block-container{padding-top: 1rem;}</style>", unsafe_allow_html=True)
-    st.set_page_config(layout="wide")  # Opcional: hace que la columna izquierda tenga más espacio útil
     st.markdown("<h1 style='text-align: center;'>Admin Page</h1>", unsafe_allow_html=True)
 
     # Leer solicitudes pendientes
