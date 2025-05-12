@@ -24,9 +24,8 @@ def admin_page():
             st.error("Erreur lors du chargement du fichier de demandes.")
 
     # Crear columnas: izquierda = navegación + solicitudes, derecha vacía
-    col1, col2, col3 = st.columns([1, 7, 2])
-
-    with col1:
+    col_full, _ = st.columns([3, 1])  # más ancho el contenido, menos margen
+    with col_full:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
         if not requests.empty:
