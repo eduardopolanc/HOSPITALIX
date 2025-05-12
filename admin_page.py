@@ -54,20 +54,27 @@ def admin_page():
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
-                # Contenedor con scroll vertical interno
-                st.markdown("""
-                    <div style="background-color: #2e2e2e; padding: 15px; border-radius: 10px;
-                                max-height: 250px; overflow-y: auto;">
-                """, unsafe_allow_html=True)
-
+                links_html = ""
                 for filename in pdf_files:
                     file_path = os.path.join(pdf_folder, filename)
                     with open(file_path, "rb") as f:
                         b64 = base64.b64encode(f.read()).decode()
-                        href = f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank" style="color: #00CFFF;">📄 {filename}</a><br>'
-                        st.markdown(href, unsafe_allow_html=True)
+                        link = f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank" style="color: #00CFFF;">📄 {filename}</a>'
+                        links_html += f"<div style='margin-bottom: 10px;'>{link}</div>"
 
-                st.markdown("</div>", unsafe_allow_html=True)
+                # Inserta HTML con scroll interno real
+                st.components.v1.html(f"""
+                    <div style="
+                        background-color: #2e2e2e;
+                        padding: 15px;
+                        border-radius: 10px;
+                        max-height: 250px;
+                        overflow-y: auto;
+                        color: white;
+                    ">
+                        {links_html}
+                    </div>
+                """, height=270)
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
