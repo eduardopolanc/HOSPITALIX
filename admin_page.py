@@ -4,8 +4,15 @@ import pandas as pd
 
 def admin_page():
     st.set_page_config(layout="wide") # Opcional: hace que la columna izquierda tenga más espacio útil
-    st.markdown("<style>div.block-container{padding-top: 1rem;}</style>", unsafe_allow_html=True)
-    st.markdown("<h1 style='text-align: center;'>Admin Page</h1>", unsafe_allow_html=True)
+    cola, cols, cold = st.columns([2,2,2])
+    with cols:
+        st.markdown("<style>div.block-container{padding-top: 1rem;}</style>", unsafe_allow_html=True)
+    with cold:
+        colq, colw = st.columns([3,1])
+        with colw:
+            if st.button("log out"):
+                st.session_state.page = "login"
+                st.rerun()
 
     # Leer solicitudes pendientes
     request_file = "demandes_en_attente.xlsx"
@@ -45,10 +52,6 @@ def admin_page():
     with col5:
         if st.button("pdf page"):
             st.session_state.page = "viewer"
-            st.rerun()
-    with col6:
-        if st.button("log out"):
-            st.session_state.page = "login"
             st.rerun()
     with col7:
         if st.button("user's request"):
