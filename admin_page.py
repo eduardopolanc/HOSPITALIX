@@ -33,7 +33,7 @@ def admin_page():
         else:
             st.info("Aucune demande en attente.")
     
-    st.subheader("Navigation")
+    st.markdown("<h3 style='text-align: center;'>Navigation</h3>", unsafe_allow_html=True)
 
     col4, col5, col6, col7 = st.columns([2,2,2,2])
 
