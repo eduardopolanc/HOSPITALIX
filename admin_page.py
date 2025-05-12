@@ -41,24 +41,29 @@ def admin_page():
         else:
             st.info("Aucune demande en attente.")
     with col2:
-        # Carpeta donde están los PDF
         pdf_folder = "pdf_reports"
 
         st.markdown("---")
         st.subheader("PDF générés")
 
         if os.path.exists(pdf_folder):
-            pdf_files = [f for f in os.listdir(pdf_folder) if f.endswith(".pdf")]
-            
+            pdf_files = sorted([f for f in os.listdir(pdf_folder) if f.endswith(".pdf")], reverse=True)
+
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
-                for filename in sorted(pdf_files, reverse=True):
+                st.markdown("""
+                    <div style="background-color: #f0f0f0; padding: 15px; border-radius: 10px; max-height: 200px; overflow-y: auto;">
+                """, unsafe_allow_html=True)
+
+                for filename in pdf_files:
                     file_path = os.path.join(pdf_folder, filename)
                     with open(file_path, "rb") as f:
                         b64 = base64.b64encode(f.read()).decode()
-                        href = f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">📄 {filename}</a>'
+                        href = f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">📄 {filename}</a><br>'
                         st.markdown(href, unsafe_allow_html=True)
+
+                st.markdown("</div>", unsafe_allow_html=True)
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
