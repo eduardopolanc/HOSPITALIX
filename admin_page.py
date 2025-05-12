@@ -16,8 +16,7 @@ def admin_page():
             st.error("Erreur lors du chargement du fichier de demandes.")
 
     # Crear columnas: izquierda = navegación + solicitudes, derecha vacía
-    col1 = st.columns([2, 6])
-    col2 = st.columns([5,6])
+    col1, col2, col3 = st.columns([2, 6, 2])
 
     with col1:
         
@@ -35,7 +34,7 @@ def admin_page():
                     st.write(f"**Email :** {row['Email']}")
         else:
             st.info("Aucune demande en attente.")
-    with col2:
+    with col3:
         st.subheader("Navigation")
 
         if st.button("user page"):
