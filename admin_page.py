@@ -3,6 +3,27 @@ import os
 import pandas as pd
 
 def admin_page():
+    # Mostrar solicitudes pendientes directamente
+    st.subheader("Demandes d'inscription en attente")
+
+    request_file = "demandes_en_attente.xlsx"
+    if os.path.exists(request_file):
+        requests = pd.read_excel(request_file)
+
+        if requests.empty:
+            st.info("Aucune demande en attente.")
+        else:
+            for index, row in requests.iterrows():
+                with st.expander(f"{row['First Name']} {row['Last Name']} - {row['Email']}"):
+                    st.write(f"**Nom :** {row['Last Name']}")
+                    st.write(f"**Prénom :** {row['First Name']}")
+                    st.write(f"**Téléphone :** {row['Phone']}")
+                    st.write(f"**Rôle :** {row['Role']}")
+                    st.write(f"**Entreprise :** {row['Company']}")
+                    st.write(f"**Email :** {row['Email']}")
+    else:
+        st.info("Fichier de demandes non trouvé.")
+    
     request_file = "demandes_en_attente.xlsx"
     pending_count = 0
     if os.path.exists(request_file):
