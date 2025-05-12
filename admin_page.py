@@ -68,13 +68,13 @@ def admin_page():
                         background-color: #2e2e2e;
                         padding: 15px;
                         border-radius: 10px;
-                        max-height: 250px;
+                        max-height: 100px;
                         overflow-y: auto;
                         color: white;
                     ">
                         {links_html}
                     </div>
-                """, height=270)
+                """, height=120)
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
