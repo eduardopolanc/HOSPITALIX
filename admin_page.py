@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import pandas as pd
+import base64
 
 def admin_page():
     st.set_page_config(layout="wide") # Opcional: hace que la columna izquierda tenga más espacio útil
@@ -24,8 +25,8 @@ def admin_page():
             st.error("Erreur lors du chargement du fichier de demandes.")
 
     # Crear columnas: izquierda = navegación + solicitudes, derecha vacía
-    col_full, _ = st.columns([3, 1])  # más ancho el contenido, menos margen
-    with col_full:
+    col1, col2  = st.columns([2, 6])  # más ancho el contenido, menos margen
+    with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
         if not requests.empty:
@@ -39,7 +40,28 @@ def admin_page():
                     st.write(f"**Email:** {row['Email']}")
         else:
             st.info("Aucune demande en attente.")
-    
+    with col2:
+        # Carpeta donde están los PDF
+        pdf_folder = "pdf_reports"
+
+        st.markdown("---")
+        st.subheader("PDF générés")
+
+        if os.path.exists(pdf_folder):
+            pdf_files = [f for f in os.listdir(pdf_folder) if f.endswith(".pdf")]
+            
+            if not pdf_files:
+                st.info("Aucun PDF trouvé.")
+            else:
+                for filename in sorted(pdf_files, reverse=True):
+                    file_path = os.path.join(pdf_folder, filename)
+                    with open(file_path, "rb") as f:
+                        b64 = base64.b64encode(f.read()).decode()
+                        href = f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">📄 {filename}</a>'
+                        st.markdown(href, unsafe_allow_html=True)
+        else:
+            st.warning("Le dossier des PDF n'existe pas.")
+
     st.markdown("<h3 style='text-align: center;'>Navigation</h3>", unsafe_allow_html=True)
 
     col4, col5, col6, col7 = st.columns([2,2,2,2])
