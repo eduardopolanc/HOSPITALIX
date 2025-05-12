@@ -33,11 +33,10 @@ def admin_page():
         else:
             st.info("Aucune demande en attente.")
     
-    col8 = st.columns
-    
-    with col8:
-        st.subheader("Navigation")
+    st.subheader("Navigation")
+
     col4, col5, col6, col7 = st.columns([2,2,2,2])
+
     with col4:
         if st.button("user page"):
             st.session_state.page = "user"
