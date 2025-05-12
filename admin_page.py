@@ -19,21 +19,7 @@ def admin_page():
     col1, col2 = st.columns([2, 6])
 
     with col1:
-        st.subheader("Navigation")
-
-        if st.button("user page"):
-            st.session_state.page = "user"
-            st.rerun()
-        if st.button("pdf page"):
-            st.session_state.page = "viewer"
-            st.rerun()
-        if st.button("log out"):
-            st.session_state.page = "login"
-            st.rerun()
-        if st.button("user's request"):
-            st.session_state.page = "request"
-            st.rerun()
-
+        
         st.markdown("---")
         st.subheader("Demandes d'inscription")
 
@@ -48,4 +34,18 @@ def admin_page():
                     st.write(f"**Email :** {row['Email']}")
         else:
             st.info("Aucune demande en attente.")
-    
+    with col2:
+        st.subheader("Navigation")
+
+        if st.button("user page"):
+            st.session_state.page = "user"
+            st.rerun()
+        if st.button("pdf page"):
+            st.session_state.page = "viewer"
+            st.rerun()
+        if st.button("log out"):
+            st.session_state.page = "login"
+            st.rerun()
+        if st.button("user's request"):
+            st.session_state.page = "request"
+            st.rerun()
