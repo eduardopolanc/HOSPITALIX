@@ -70,3 +70,7 @@ def review_request_page():
                         st.rerun()
     else:
         st.info("No request file found.")
+    # Add a button at the bottom to go back to admin or login page
+    if st.button("⬅️ Back"):
+        st.session_state.page = "admin"  # or "login", depending on your navigation logic
+        st.rerun()
