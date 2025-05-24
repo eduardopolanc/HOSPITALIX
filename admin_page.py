@@ -73,7 +73,7 @@ def admin_page():
                     ">
                         {links_html}
                     </div>
-                """, height=120)
+                """, height=300)
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
