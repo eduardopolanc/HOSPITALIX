@@ -9,10 +9,10 @@ def login_page():
     Les identifiants sont vérifiés dans un fichier Excel.
     Possibilité de naviguer vers inscription, utilisateur ou admin via 3 boutons.
     """
-
+    '''
     # Titre de la page
     st.title("Page de Connexion")
-'''
+
     # Champs de saisie
     email = st.text_input("Email")
     password = st.text_input("Mot de passe", type="password")
@@ -49,8 +49,8 @@ def login_page():
                         # Recharger la page pour appliquer le changement
                         st.experimental_rerun()
                     else:
-                        st.error("Mot de passe incorrect.")
-'''
+                        st.error("Mot de passe incorrect.") '''
+
     # Gestion des clics sur les boutons de navigation
     if st.button("Sign up"):
         st.session_state.page = "signup"
@@ -62,4 +62,3 @@ def login_page():
 
     if st.button("Go to admin"):
         st.session_state.page = "admin"
-#        st.experimental_rerun()
