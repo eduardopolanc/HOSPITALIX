@@ -3,18 +3,7 @@ import pandas as pd
 import os
 
 def login_page():
-        # Gestion des clics sur les boutons de navigation
-    if st.button("Sign up"):
-        st.session_state.page = "signup"
-        st.rerun()
 
-    if st.button("Go to user"):
-        st.session_state.page = "user"
-        st.rerun()
-
-    if st.button("Go to admin"):
-        st.session_state.page = "admin"
-        st.rerun()
     """
     Page de connexion utilisateur.
     L'utilisateur saisit son email et son mot de passe.
@@ -61,3 +50,15 @@ def login_page():
                         st.experimental_rerun()
                     else:
                         st.error("Mot de passe incorrect.") 
+            # Gestion des clics sur les boutons de navigation
+    if st.button("Sign up"):
+        st.session_state.page = "signup"
+        st.rerun()
+
+    if st.button("Go to user"):
+        st.session_state.page = "user"
+        st.rerun()
+
+    if st.button("Go to admin"):
+        st.session_state.page = "admin"
+        st.rerun()
