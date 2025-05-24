@@ -21,7 +21,7 @@ def login_page():
     Les identifiants sont vérifiés dans un fichier Excel.
     Possibilité de naviguer vers inscription, utilisateur ou admin via 3 boutons.
     """
-    '''
+    """
     # Titre de la page
     st.title("Page de Connexion")
 
@@ -61,4 +61,4 @@ def login_page():
                         # Recharger la page pour appliquer le changement
                         st.experimental_rerun()
                     else:
-                        st.error("Mot de passe incorrect.") '''
+                        st.error("Mot de passe incorrect.") """
