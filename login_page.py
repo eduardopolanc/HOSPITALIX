@@ -24,7 +24,6 @@ Possibilité de naviguer vers inscription, utilisateur ou admin via 3 boutons.
 
 # # Titre de la page
 # st.title("Page de Connexion")
-a
 # # Champs de saisie
 # email = st.text_input("Email")
 # password = st.text_input("Mot de passe", type="password")
