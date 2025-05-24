@@ -3,7 +3,6 @@ import pandas as pd
 import os
 
 def login_page():
-<<<<<<< HEAD
         # Gestion des clics sur les boutons de navigation
     if st.button("Sign up"):
         st.session_state.page = "signup"
