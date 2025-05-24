@@ -12,15 +12,10 @@ def login_page():
 
     # Titre de la page
     st.title("Page de Connexion")
-
+'''
     # Champs de saisie
     email = st.text_input("Email")
     password = st.text_input("Mot de passe", type="password")
-
-    # Boutons de navigation (en dehors du login)
-    button_signup = st.button("Sign up")
-    button_user = st.button("Go to user")
-    button_admin = st.button("Go to admin")
 
     # Bouton pour se connecter
     if st.button("Se connecter"):
@@ -55,16 +50,16 @@ def login_page():
                         st.experimental_rerun()
                     else:
                         st.error("Mot de passe incorrect.")
-
+'''
     # Gestion des clics sur les boutons de navigation
-    if button_signup:
+    if st.button("Sign up"):
         st.session_state.page = "signup"
-        st.experimental_rerun()
+#        st.experimental_rerun()
 
-    if button_user:
+    if st.button("Go to user"):
         st.session_state.page = "user"
-        st.experimental_rerun()
+#        st.experimental_rerun()
 
-    if button_admin:
+    if st.button("Go to admin"):
         st.session_state.page = "admin"
-        st.experimental_rerun()
+#        st.experimental_rerun()
