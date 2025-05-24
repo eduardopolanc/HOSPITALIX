@@ -24,8 +24,7 @@ def admin_page():
         except:
             st.error("Erreur lors du chargement du fichier de demandes.")
 
-    # Crear columnas: izquierda = navegación + solicitudes, derecha vacía
-    col1, col2  = st.columns([2, 6])  # más ancho el contenido, menos margen
+    col1, col2  = st.columns([2, 6])  
     with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
@@ -62,13 +61,13 @@ def admin_page():
                         link = f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank" style="color: #00CFFF;">📄 {filename}</a>'
                         links_html += f"<div style='margin-bottom: 10px;'>{link}</div>"
 
-                # Inserta HTML con scroll interno real
+                
                 st.components.v1.html(f"""
                     <div style="
                         background-color: #2e2e2e;
                         padding: 15px;
                         border-radius: 10px;
-                        max-height: 100px;
+                        max-height: 150px;
                         overflow-y: auto;
                         color: white;
                     ">
