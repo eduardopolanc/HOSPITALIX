@@ -84,6 +84,8 @@ def admin_page():
         
         else:
             st.info("Aucune demande en attente.")
+    
+    #PDF list visualization
     with col2:
         pdf_folder = "pdf_reports"
 
@@ -121,8 +123,11 @@ def admin_page():
                 """, height=300)
         else:
             st.warning("Le dossier des PDF n'existe pas.")
+        if st.button("user page"):
+            st.session_state.page = "user"
+            st.rerun()
 
-    #include User's list
+    #Accepted User's list
     st.markdown("---")
     st.subheader("👤 Gestion des utilisateurs")
 
@@ -160,16 +165,7 @@ def admin_page():
         st.warning("Fichier d'utilisateurs non trouvé.")
 
     col4, col5, col6, col7 = st.columns([2,2,2,2])
-
-    with col4:
-        if st.button("user page"):
-            st.session_state.page = "user"
-            st.rerun()
     with col5:
         if st.button("pdf page"):
             st.session_state.page = "viewer"
-            st.rerun()
-    with col7:
-        if st.button("user's request"):
-            st.session_state.page = "request"
             st.rerun()
