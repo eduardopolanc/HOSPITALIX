@@ -5,12 +5,13 @@ import base64
 import secrets
 import string
 
+st.set_page_config(layout="wide") #manage wideness of page
+
 def generate_password(length=10):
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 def admin_page():
-    st.set_page_config(layout="wide") # Opcional: hace que la columna izquierda tenga más espacio útil
     cola, cols, cold = st.columns([2,2,2])
     with cols:
         st.markdown("<h1 style='text-align: center;'>Admin Page</h1>", unsafe_allow_html=True)
@@ -31,7 +32,9 @@ def admin_page():
         except:
             st.error("Erreur lors du chargement du fichier de demandes.")
 
-    col1, col2  = st.columns([3, 5])  
+    col1, col2  = st.columns([3, 5])
+
+    # Users acceptance
     with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
@@ -116,7 +119,7 @@ def admin_page():
                     ">
                         {links_html}
                     </div>
-                """, height=150)
+                """, height=300)
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
