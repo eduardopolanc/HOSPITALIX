@@ -123,6 +123,43 @@ def admin_page():
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
+    #include User's list
+    st.markdown("---")
+    st.subheader("👤 Gestion des utilisateurs")
+
+    user_file = "accepted_user_information.xlsm"
+
+    if os.path.exists(user_file):
+        users_df = pd.read_excel(user_file)
+
+        if users_df.empty:
+            st.info("Aucun utilisateur enregistré.")
+        else:
+            for index, row in users_df.iterrows():
+                with st.expander(f"{row['Email (username)']}"):
+                    st.write(f"**Mot de passe actuel :** {row['Password']}")
+
+                    col1, col2, col3 = st.columns(3)
+
+                    # Cambiar contraseña
+                    with col1:
+                        new_password = st.text_input(f"Nouveau mot de passe pour {row['Email (username)']}", "", key=f"newpwd_{index}")
+                        if st.button("🔑 Changer mot de passe", key=f"update_{index}"):
+                            users_df.at[index, "Password"] = new_password
+                            users_df.to_excel(user_file, index=False)
+                            st.success(f"Mot de passe mis à jour pour {row['Email (username)']}")
+                            st.rerun()
+
+                    # Eliminar usuario
+                    with col3:
+                        if st.button("🗑️ Supprimer utilisateur", key=f"delete_{index}"):
+                            users_df.drop(index, inplace=True)
+                            users_df.to_excel(user_file, index=False)
+                            st.warning(f"Utilisateur supprimé : {row['Email (username)']}")
+                            st.rerun()
+    else:
+        st.warning("Fichier d'utilisateurs non trouvé.")
+
     col4, col5, col6, col7 = st.columns([2,2,2,2])
 
     with col4:
