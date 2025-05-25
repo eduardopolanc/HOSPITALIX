@@ -72,12 +72,12 @@ def admin_page():
                         st.success(f"Account created for {row['Email']} with password: {password}")
                         st.rerun()
 
-                        # Reject button logic
-                        if colr.button("❌ Rejeter"):
-                            requests.drop(index, inplace=True)
-                            requests.to_excel(request_file, index=False)
-                            st.warning(f"Request for {row['Email']} has been rejected.")
-                            st.rerun()
+                    # Reject button logic
+                    if colr.button("❌ Rejeter"):
+                        requests.drop(index, inplace=True)
+                        requests.to_excel(request_file, index=False)
+                        st.warning(f"Request for {row['Email']} has been rejected.")
+                        st.rerun()
         
         
         else:
