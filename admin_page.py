@@ -2,6 +2,12 @@ import streamlit as st
 import os
 import pandas as pd
 import base64
+import secrets
+import string
+
+def generate_password(length=10):
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 def admin_page():
     st.set_page_config(layout="wide") # Opcional: hace que la columna izquierda tenga más espacio útil
@@ -17,6 +23,7 @@ def admin_page():
 
     # Leer solicitudes pendientes
     request_file = "demandes_en_attente.xlsx"
+    account_file = "accepted_user_information.xlsm"
     requests = pd.DataFrame()
     if os.path.exists(request_file):
         try:
@@ -24,7 +31,7 @@ def admin_page():
         except:
             st.error("Erreur lors du chargement du fichier de demandes.")
 
-    col1, col2  = st.columns([2, 6])  
+    col1, col2  = st.columns([3, 5])  
     with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
@@ -37,6 +44,42 @@ def admin_page():
                     st.write(f"**Role:** {row['Role']}")
                     st.write(f"**Company:** {row['Company']}")
                     st.write(f"**Email:** {row['Email']}")
+                    
+                    cola, colr = st.columns(2)
+
+                    # Accept button logic
+                    if cola.button("✅ Accepter"):
+                        password = generate_password()
+
+                        new_account = pd.DataFrame([{
+                            "Email (username)": row['Email'],
+                            "Password": password
+                        }])
+
+                        # Save accepted account to main file
+                        if os.path.exists(account_file):
+                            existing = pd.read_excel(account_file)
+                            all_accounts = pd.concat([existing, new_account], ignore_index=True)
+                        else:
+                            all_accounts = new_account
+
+                        all_accounts.to_excel(account_file, index=False)
+
+                        # Remove request from pending list
+                        requests.drop(index, inplace=True)
+                        requests.to_excel(request_file, index=False)
+
+                        st.success(f"Account created for {row['Email']} with password: {password}")
+                        st.rerun()
+
+                        # Reject button logic
+                        if colr.button("❌ Rejeter"):
+                            requests.drop(index, inplace=True)
+                            requests.to_excel(request_file, index=False)
+                            st.warning(f"Request for {row['Email']} has been rejected.")
+                            st.rerun()
+        
+        
         else:
             st.info("Aucune demande en attente.")
     with col2:
