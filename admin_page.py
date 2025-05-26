@@ -108,7 +108,6 @@ def admin_page():
                         link = f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank" style="color: #00CFFF;">📄 {filename}</a>'
                         links_html += f"<div style='margin-bottom: 10px;'>{link}</div>"
 
-                
                 st.components.v1.html(f"""
                     <div style="
                         background-color: #2e2e2e;
@@ -123,7 +122,8 @@ def admin_page():
                 """, height=300)
         else:
             st.warning("Le dossier des PDF n'existe pas.")
-        if st.button("user page"):
+
+        if st.button("Generar un PDF"):
             st.session_state.page = "user"
             st.rerun()
 
