@@ -32,7 +32,7 @@ def login_page():
                 df_users = pd.read_excel(user_file)
 
                 # Rechercher l'utilisateur dans le fichier (colonne "Email")
-                user_row = df_users[df_users["Email"] == email]
+                user_row = df_users[df_users["Email (username)"] == email]
 
                 if user_row.empty:
                     st.error("Email non trouvé.")

@@ -4,14 +4,14 @@ import os
 import secrets
 import string
 
-# Fonction pour générer un mot de passe sécurisé aléatoire
+# Function to generate a secure random password
 def generate_password(length=10):
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for _ in range(length))
 
-# Fonction principale de la page d'administration
+# This function defines the admin review page
 def review_request_page():
-    st.title("Demandes d'inscription")
+    st.title("Revue Admin : Demandes de création de compte")
 
     fichier_demandes = "demandes_en_attente.xlsx"
     fichier_comptes = "accepted_user_information.xlsx"
@@ -33,45 +33,42 @@ def review_request_page():
 
                     col1, col2 = st.columns(2)
 
-                    # Bouton Accepter
-                    if col1.button("✅ Accepter", key=f"accepter_{index}"):
-                        mot_de_passe = generate_password()
+                    if col1.button("✅ Accepter", key=f"accept_{index}"):
+                        password = generate_password()
 
                         nouveau_compte = pd.DataFrame([{
                             "Nom": row["Nom"],
                             "Prenom": row["Prenom"],
+                            "Téléphone": row["Téléphone"],
+                            "Rôle": row["Rôle"],
                             "Entreprise": row["Entreprise"],
                             "Email": row["Email"],
-                            "Mot de passe": mot_de_passe
+                            "Mot de passe": password
                         }])
 
-                        # Enregistrement du compte accepté
                         if os.path.exists(fichier_comptes):
                             existant = pd.read_excel(fichier_comptes)
                             tous_les_comptes = pd.concat([existant, nouveau_compte], ignore_index=True)
                         else:
                             tous_les_comptes = nouveau_compte
 
-                        tous_les_comptes.to_excel(fichier_comptes, index=False)
+                        tous_les_comptes.to_excel(fichier_comptes, index=False, engine="openpyxl")
 
-                        # Supprimer la demande traitée
                         demandes.drop(index, inplace=True)
-                        demandes.to_excel(fichier_demandes, index=False)
+                        demandes.to_excel(fichier_demandes, index=False, engine="openpyxl")
 
-                        st.success(f"Compte créé pour {row['Email']} avec le mot de passe : {mot_de_passe}")
+                        st.success(f"Compte créé pour {row['Email']} avec mot de passe : {password}")
                         st.rerun()
 
-                    # Bouton Rejeter
-                    if col2.button("❌ Rejeter", key=f"rejeter_{index}"):
+                    if col2.button("❌ Rejeter", key=f"reject_{index}"):
                         demandes.drop(index, inplace=True)
-                        demandes.to_excel(fichier_demandes, index=False)
-                        st.warning(f"La demande pour {row['Email']} a été rejetée.")
+                        demandes.to_excel(fichier_demandes, index=False, engine="openpyxl")
+                        st.warning(f"Demande pour {row['Email']} rejetée.")
                         st.rerun()
-
     else:
-        st.info("Fichier de demandes introuvable.")
+        st.info("Fichier de demandes non trouvé.")
 
-    # Bouton de retour
-    if st.button("⬅ Retour", key="bouton_retour"):
+    if st.button("⬅️ Retour", key="back_button"):
         st.session_state.page = "admin"
         st.rerun()
+
