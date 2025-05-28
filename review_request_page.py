@@ -4,73 +4,74 @@ import os
 import secrets
 import string
 
-# Function to generate a secure random password
+# Fonction pour générer un mot de passe sécurisé aléatoire
 def generate_password(length=10):
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for _ in range(length))
 
-# This function defines the admin review page
+# Fonction principale de la page d'administration
 def review_request_page():
-    st.title("Admin Review: Account Requests")
+    st.title("Demandes d'inscription")
 
-    # Define paths to data files
-    request_file = "demandes_en_attente.xlsx"
-    account_file = "accepted_user_information.xlsm"
+    fichier_demandes = "demandes_en_attente.xlsx"
+    fichier_comptes = "accepted_user_information.xlsx"
 
-    # Check if the request file exists
-    if os.path.exists(request_file):
-        requests = pd.read_excel(request_file)
+    if os.path.exists(fichier_demandes):
+        demandes = pd.read_excel(fichier_demandes)
 
-        if requests.empty:
-            st.info("There are no pending requests.")
+        if demandes.empty:
+            st.info("Aucune demande en attente.")
         else:
-            # Loop through each pending request
-            for index, row in requests.iterrows():
-                with st.expander(f"{row['First Name']} {row['Last Name']} - {row['Email']}"):
-                    # Display user-submitted information
-                    st.write(f"**Last Name:** {row['Last Name']}")
-                    st.write(f"**First Name:** {row['First Name']}")
-                    st.write(f"**Phone:** {row['Phone']}")
-                    st.write(f"**Role:** {row['Role']}")
-                    st.write(f"**Company:** {row['Company']}")
-                    st.write(f"**Email:** {row['Email']}")
+            for index, row in demandes.iterrows():
+                with st.expander(f"{row['Nom']} {row['Prenom']} - {row['Email']}"):
+                    st.write(f"**Nom :** {row['Nom']}")
+                    st.write(f"**Prénom :** {row['Prenom']}")
+                    st.write(f"**Téléphone :** {row['Téléphone']}")
+                    st.write(f"**Rôle :** {row['Rôle']}")
+                    st.write(f"**Entreprise :** {row['Entreprise']}")
+                    st.write(f"**Email :** {row['Email']}")
 
                     col1, col2 = st.columns(2)
 
-                    # Accept button logic
-                    if col1.button(f"✅ Accept - {index}"):
-                        password = generate_password()
+                    # Bouton Accepter
+                    if col1.button("✅ Accepter", key=f"accepter_{index}"):
+                        mot_de_passe = generate_password()
 
-                        new_account = pd.DataFrame([{
-                            "Email (username)": row['Email'],
-                            "Password": password
+                        nouveau_compte = pd.DataFrame([{
+                            "Nom": row["Nom"],
+                            "Prenom": row["Prenom"],
+                            "Entreprise": row["Entreprise"],
+                            "Email": row["Email"],
+                            "Mot de passe": mot_de_passe
                         }])
 
-                        # Save accepted account to main file
-                        if os.path.exists(account_file):
-                            existing = pd.read_excel(account_file)
-                            all_accounts = pd.concat([existing, new_account], ignore_index=True)
+                        # Enregistrement du compte accepté
+                        if os.path.exists(fichier_comptes):
+                            existant = pd.read_excel(fichier_comptes)
+                            tous_les_comptes = pd.concat([existant, nouveau_compte], ignore_index=True)
                         else:
-                            all_accounts = new_account
+                            tous_les_comptes = nouveau_compte
 
-                        all_accounts.to_excel(account_file, index=False)
+                        tous_les_comptes.to_excel(fichier_comptes, index=False)
 
-                        # Remove request from pending list
-                        requests.drop(index, inplace=True)
-                        requests.to_excel(request_file, index=False)
+                        # Supprimer la demande traitée
+                        demandes.drop(index, inplace=True)
+                        demandes.to_excel(fichier_demandes, index=False)
 
-                        st.success(f"Account created for {row['Email']} with password: {password}")
+                        st.success(f"Compte créé pour {row['Email']} avec le mot de passe : {mot_de_passe}")
                         st.rerun()
 
-                    # Reject button logic
-                    if col2.button(f"❌ Reject - {index}"):
-                        requests.drop(index, inplace=True)
-                        requests.to_excel(request_file, index=False)
-                        st.warning(f"Request for {row['Email']} has been rejected.")
+                    # Bouton Rejeter
+                    if col2.button("❌ Rejeter", key=f"rejeter_{index}"):
+                        demandes.drop(index, inplace=True)
+                        demandes.to_excel(fichier_demandes, index=False)
+                        st.warning(f"La demande pour {row['Email']} a été rejetée.")
                         st.rerun()
+
     else:
-        st.info("No request file found.")
-    # Add a button at the bottom to go back to admin or login page
-    if st.button("⬅️ Back"):
-        st.session_state.page = "admin"  # or "login", depending on your navigation logic
+        st.info("Fichier de demandes introuvable.")
+
+    # Bouton de retour
+    if st.button("⬅ Retour", key="bouton_retour"):
+        st.session_state.page = "admin"
         st.rerun()

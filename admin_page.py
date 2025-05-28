@@ -39,13 +39,13 @@ def admin_page():
         st.markdown("---")
         if not requests.empty:
             for index, row in requests.iterrows():
-                with st.expander(f"{row['First Name']} {row['Last Name']} - {row['Email']}"):
-                    st.write(f"**Last Name:** {row['Last Name']}")
-                    st.write(f"**First Name:** {row['First Name']}")
-                    st.write(f"**Phone:** {row['Phone']}")
-                    st.write(f"**Role:** {row['Role']}")
-                    st.write(f"**Company:** {row['Company']}")
-                    st.write(f"**Email:** {row['Email']}")
+                 with st.expander(f"{row['Nom']} {row['Prenom']} - {row['Email']}"):
+                    st.write(f"**Nom :** {row['Nom']}")
+                    st.write(f"**Prénom :** {row['Prenom']}")
+                    st.write(f"**Téléphone :** {row['Téléphone']}")
+                    st.write(f"**Rôle :** {row['Rôle']}")
+                    st.write(f"**Entreprise :** {row['Entreprise']}")
+                    st.write(f"**Email :** {row['Email']}")
                     
                     cola, colr = st.columns(2)
 
