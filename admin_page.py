@@ -32,7 +32,6 @@ def admin_page():
 
     col1, col2 = st.columns([3, 5])
 
-    # Sección de solicitudes
     with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
@@ -72,7 +71,6 @@ def admin_page():
         else:
             st.info("Aucune demande en attente.")
 
-    # PDFs con scroll
     with col2:
         st.subheader("📄 PDF générés")
 
@@ -145,7 +143,6 @@ def admin_page():
             st.session_state.page = "user"
             st.rerun()
 
-    # Usuarios aceptados
     st.markdown("---")
     st.subheader("👤 Gestion des utilisateurs")
 
@@ -177,7 +174,6 @@ def admin_page():
     else:
         st.warning("Fichier d'utilisateurs non trouvé.")
 
-    # Navegación
     col4, col5, col6, col7 = st.columns([2,2,2,2])
     with col5:
         if st.button("pdf page"):
