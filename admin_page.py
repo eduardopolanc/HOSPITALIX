@@ -30,9 +30,7 @@ def admin_page():
         except:
             st.error("Erreur lors du chargement du fichier de demandes.")
 
-    col1, col2 = st.columns([3, 5])
-
-    with col1:
+    with st.container():
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
         if not requests.empty:
@@ -71,7 +69,7 @@ def admin_page():
         else:
             st.info("Aucune demande en attente.")
 
-    with col2:
+    with st.container():
         pdf_folder = "pdf_reports"
         st.subheader("📄 PDF générés")
 
@@ -84,9 +82,9 @@ def admin_page():
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
-                # Contenedor scrollable
+                # Carrusel horizontal scrollable
                 st.markdown("""
-                    <div style="overflow-x: auto; white-space: nowrap; padding: 10px 0;">
+                    <div style="overflow-x: auto; white-space: nowrap; padding: 10px 0; width: 100%;">
                 """, unsafe_allow_html=True)
 
                 for filename in pdf_files:
@@ -134,7 +132,6 @@ def admin_page():
                         </div>
                     """, unsafe_allow_html=True)
 
-                    # Capturar cambio de URL
                     query_params = st.query_params
                     if query_params.get("pdf_to_view", None) == filename:
                         st.session_state.pdf_to_view = filename
