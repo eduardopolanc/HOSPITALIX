@@ -90,14 +90,17 @@ def admin_page():
                     # HTML para limitar la altura
                     st.markdown("""
                         <style>
-                            div[data-testid="stVerticalBlock"] > div {
-                                max-height: 420px;
+                            #pdf-scroll-zone {
+                                max-height: 350px;
                                 overflow-y: auto;
-                            }
+                                }
                         </style>
+                        <div id="pdf-scroll-zone">
                     """, unsafe_allow_html=True)
+                    
+                    st.markdown("</div>", unsafe_allow_html=True)
 
-                    for filename in pdf_files:
+                    for filename in pdf_files[:10]:
                         file_path = os.path.join(pdf_folder, filename)
                         with open(file_path, "rb") as f:
                             b64 = base64.b64encode(f.read()).decode()
