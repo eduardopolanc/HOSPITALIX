@@ -89,13 +89,16 @@ def admin_page():
                     for filename in pdf_files[:50]:
                         file_path = os.path.join(pdf_folder, filename)
 
-                        st.write(f"📄 **{filename}**")
-
                         with open(file_path, "rb") as f:
                             b64 = base64.b64encode(f.read()).decode()
 
-                        col_a, col_b = st.columns([1, 1])
-                        with col_a:
+                        # Crear columnas horizontales por fila
+                        col_filename, col_download, col_view = st.columns([4, 1, 1])
+
+                        with col_filename:
+                            st.markdown(f"📄 **{filename}**")
+
+                        with col_download:
                             st.download_button(
                                 label="⬇️ Télécharger",
                                 data=base64.b64decode(b64),
@@ -103,12 +106,15 @@ def admin_page():
                                 mime="application/pdf",
                                 key=f"download_{filename}"
                             )
-                        with col_b:
-                            if st.button(f"👁️ Voir", key=f"view_{filename}"):
+
+                        with col_view:
+                            if st.button("👁️ Voir", key=f"view_{filename}"):
                                 st.session_state.pdf_to_view = filename
                                 st.session_state.page = "viewer"
                                 st.rerun()
-                        st.divider()
+
+                        st.markdown("---")  # Divider entre elementos
+
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
