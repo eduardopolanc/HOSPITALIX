@@ -85,8 +85,8 @@ def admin_page():
                 st.info("Aucun PDF trouvé.")
             else:
                 # Scroll manual: limitamos altura del contenedor con Streamlit y renderizamos cada bloque por separado
-#                scroll_container = st.container()
-                with st.container():
+                scroll_container = st.container()
+                with scroll_container():
                     # HTML para limitar la altura solo en este contenedor
                     st.markdown("""
                         <style>
