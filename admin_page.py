@@ -95,14 +95,32 @@ def admin_page():
                         b64 = base64.b64encode(f.read()).decode()
 
                     st.markdown(f"""
-                        <div style="display: flex; align-items: center; justify-content: space-between; 
-                                    background-color: #ffffff; border: 1px solid #ccc; 
-                                    padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
-                                    box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
-                            <div style="flex-grow: 1; display: flex; align-items: center;">
-                                <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px; display: inline-block;" title="{filename}">📄 {filename}</span>
+                        <div style="
+                            display: inline-block;
+                            vertical-align: top;
+                            width: 260px;
+                            margin-right: 12px;
+                            background-color: #ffffff;
+                            border: 1px solid #ccc;
+                            border-radius: 6px;
+                            padding: 8px 10px;
+                            font-size: 14px;
+                            color: black;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                            white-space: normal;
+                        ">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="
+                                    font-weight: 500;
+                                    color: black;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    max-width: 180px;
+                                    display: inline-block;
+                                " title="{filename}">📄 {filename}</span>
                             </div>
-                            <div style="display: flex; gap: 6px;">
+                            <div style="margin-top: 6px; display: flex; justify-content: space-between;">
                                 <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
                                     <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
                                         ⬇️ Télécharger
