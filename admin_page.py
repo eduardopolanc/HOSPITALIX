@@ -33,7 +33,7 @@ def admin_page():
 
     col1, col2  = st.columns([3, 5])
 
-    # Gestión de solicitudes
+    # Solicitudes
     with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
@@ -78,7 +78,7 @@ def admin_page():
         else:
             st.info("Aucune demande en attente.")
 
-    # Visualización de PDFs
+    # PDFs
     with col2:
         pdf_folder = "pdf_reports"
         st.subheader("📄 PDF générés")
@@ -97,17 +97,16 @@ def admin_page():
                     with open(file_path, "rb") as f:
                         b64 = base64.b64encode(f.read()).decode()
 
+                    # Tarjeta PDF
                     st.markdown(f"""
                         <div style="display: flex; align-items: center; justify-content: space-between; 
                                     background-color: #ffffff; border: 1px solid #ccc; 
                                     padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
                                     box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
-
                             <div style="flex-grow: 1; display: flex; align-items: center;">
                                 <span style="font-size: 16px; margin-right: 8px;">📄</span>
                                 <span style="font-weight: 500; color: black;">{filename}</span>
                             </div>
-
                             <div style="display: flex; gap: 6px;">
                                 <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
                                     <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
@@ -122,11 +121,12 @@ def admin_page():
                         </div>
                     """, unsafe_allow_html=True)
 
-                    # Captura el nombre del PDF desde la URL
-                    if st.experimental_get_query_params().get("pdf_to_view", [None])[0] == filename:
+                    # Capturar redirección
+                    query_params = st.experimental_get_query_params()
+                    if query_params.get("pdf_to_view", [None])[0] == filename:
                         st.session_state.pdf_to_view = filename
                         st.session_state.page = "viewer"
-                        st.experimental_set_query_params()  # limpia la URL
+                        st.experimental_set_query_params()  # limpia URL
                         st.rerun()
         else:
             st.warning("Le dossier des PDF n'existe pas.")
@@ -135,7 +135,7 @@ def admin_page():
             st.session_state.page = "user"
             st.rerun()
 
-    # Gestión de usuarios
+    # Usuarios
     st.markdown("---")
     st.subheader("👤 Gestion des utilisateurs")
 
@@ -175,19 +175,3 @@ def admin_page():
         if st.button("pdf page"):
             st.session_state.page = "viewer"
             st.rerun()
-
-"""
-with st.expander(f"📄 {filename}"):
-                        st.markdown(f"Nom du ficher : `{filename}`")
-
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            with open(file_path, "rb") as f:
-                                b64 = base64.b64encode(f.read()).decode()
-                                st.markdown(f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">📥 Télécharger</a>', unsafe_allow_html=True)
-                        with col2:
-                            if st.button(f"👁️ Voir", key=filename):
-                                st.session_state.pdf_to_view = filename
-                                st.session_state.page = "viewer"
-                                st.rerun()
-"""
