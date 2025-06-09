@@ -100,7 +100,7 @@ def admin_page():
                                     padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
                                     box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
                             <div style="flex-grow: 1; display: flex; align-items: center;">
-                                <span style="font-weight: 500; color: black; white-space:: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220 px; display: inline-block;" title="{filename}">📄 {filename}</span>
+                                <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: inline-block;" title="{filename}">📄 {filename}</span>
                             </div>
                             <div style="display: flex; gap: 6px;">
                                 <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
