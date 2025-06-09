@@ -32,6 +32,7 @@ def admin_page():
 
     col1, col2 = st.columns([3, 5])
 
+    # Sección de solicitudes
     with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
@@ -71,6 +72,7 @@ def admin_page():
         else:
             st.info("Aucune demande en attente.")
 
+    # PDFs con scroll
     with col2:
         st.subheader("📄 PDF générés")
 
@@ -84,18 +86,20 @@ def admin_page():
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
-                scroll_container = st.container()
-                with scroll_container:
+                with st.container():
+                    # Scroll CSS aislado con ID
                     st.markdown("""
                         <style>
-                            div[data-testid="stVerticalBlock"] > div {
+                            #scroll-pdf-zone {
                                 max-height: 420px;
                                 overflow-y: auto;
+                                padding-right: 8px;
                             }
                         </style>
+                        <div id="scroll-pdf-zone">
                     """, unsafe_allow_html=True)
 
-                    for filename in pdf_files:
+                    for filename in pdf_files[:50]:
                         file_path = os.path.join(pdf_folder, filename)
                         with open(file_path, "rb") as f:
                             b64 = base64.b64encode(f.read()).decode()
@@ -131,9 +135,51 @@ def admin_page():
                             st.query_params.clear()
                             st.rerun()
 
+                    # Cierre del div scroll
+                    st.markdown("</div>", unsafe_allow_html=True)
+
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
         if st.button("Generar un PDF"):
             st.session_state.page = "user"
+            st.rerun()
+
+    # Usuarios aceptados
+    st.markdown("---")
+    st.subheader("👤 Gestion des utilisateurs")
+
+    user_file = "accepted_user_information.xlsm"
+    if os.path.exists(user_file):
+        users_df = pd.read_excel(user_file)
+        if users_df.empty:
+            st.info("Aucun utilisateur enregistré.")
+        else:
+            for index, row in users_df.iterrows():
+                with st.expander(f"{row['Email (username)']}"):
+                    st.write(f"**Mot de passe actuel :** {row['Password']}")
+                    col1, col2, col3 = st.columns(3)
+
+                    with col1:
+                        new_password = st.text_input(f"Nouveau mot de passe pour {row['Email (username)']}", "", key=f"newpwd_{index}")
+                        if st.button("🔑 Changer mot de passe", key=f"update_{index}"):
+                            users_df.at[index, "Password"] = new_password
+                            users_df.to_excel(user_file, index=False)
+                            st.success(f"Mot de passe mis à jour pour {row['Email (username)']}")
+                            st.rerun()
+
+                    with col3:
+                        if st.button("🗑️ Supprimer utilisateur", key=f"delete_{index}"):
+                            users_df.drop(index, inplace=True)
+                            users_df.to_excel(user_file, index=False)
+                            st.warning(f"Utilisateur supprimé : {row['Email (username)']}")
+                            st.rerun()
+    else:
+        st.warning("Fichier d'utilisateurs non trouvé.")
+
+    # Navegación
+    col4, col5, col6, col7 = st.columns([2,2,2,2])
+    with col5:
+        if st.button("pdf page"):
+            st.session_state.page = "viewer"
             st.rerun()
