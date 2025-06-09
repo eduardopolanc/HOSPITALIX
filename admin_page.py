@@ -84,58 +84,31 @@ def admin_page():
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
+                # Contenedor con scroll automático si hay muchos PDFs
                 with st.container():
-                    # Scroll CSS aislado con ID
-                    st.markdown("""
-                        <style>
-                            #scroll-pdf-zone {
-                                max-height: 420px;
-                                overflow-y: auto;
-                                padding-right: 8px;
-                            }
-                        </style>
-                        <div id="scroll-pdf-zone">
-                    """, unsafe_allow_html=True)
-
                     for filename in pdf_files[:50]:
                         file_path = os.path.join(pdf_folder, filename)
+
+                        st.write(f"📄 **{filename}**")
+
                         with open(file_path, "rb") as f:
                             b64 = base64.b64encode(f.read()).decode()
 
-                        st.markdown(f"""
-                            <div style="display: flex; align-items: center; justify-content: space-between; 
-                                        background-color: #ffffff; border: 1px solid #ccc; 
-                                        padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
-                                        box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
-                                <div style="flex-grow: 1; display: flex; align-items: center;">
-                                    <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: inline-block;" title="{filename}">
-                                        📄 {filename}
-                                    </span>
-                                </div>
-                                <div style="display: flex; gap: 6px;">
-                                    <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
-                                        <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
-                                            ⬇️ Télécharger
-                                        </button>
-                                    </a>
-                                    <button onclick="window.location.href='/?pdf_to_view={filename}'"
-                                        style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff; color: black; border: none; border-radius: 4px;">
-                                        👁️ Voir
-                                    </button>
-                                </div>
-                            </div>
-                        """, unsafe_allow_html=True)
-
-                        query_params = st.query_params
-                        if query_params.get("pdf_to_view", None) == filename:
-                            st.session_state.pdf_to_view = filename
-                            st.session_state.page = "viewer"
-                            st.query_params.clear()
-                            st.rerun()
-
-                    # Cierre del div scroll
-                    st.markdown("</div>", unsafe_allow_html=True)
-
+                        col_a, col_b = st.columns([1, 1])
+                        with col_a:
+                            st.download_button(
+                                label="⬇️ Télécharger",
+                                data=base64.b64decode(b64),
+                                file_name=filename,
+                                mime="application/pdf",
+                                key=f"download_{filename}"
+                            )
+                        with col_b:
+                            if st.button(f"👁️ Voir", key=f"view_{filename}"):
+                                st.session_state.pdf_to_view = filename
+                                st.session_state.page = "viewer"
+                                st.rerun()
+                        st.divider()
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
