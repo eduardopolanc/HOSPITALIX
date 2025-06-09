@@ -21,7 +21,6 @@ def admin_page():
                 st.session_state.page = "login"
                 st.rerun()
 
-    # Leer solicitudes pendientes
     request_file = "demandes_en_attente.xlsx"
     account_file = "accepted_user_information.xlsm"
     requests = pd.DataFrame()
@@ -31,9 +30,8 @@ def admin_page():
         except:
             st.error("Erreur lors du chargement du fichier de demandes.")
 
-    col1, col2  = st.columns([3, 5])
+    col1, col2 = st.columns([3, 5])
 
-    # Solicitudes
     with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
@@ -46,27 +44,22 @@ def admin_page():
                     st.write(f"**Rôle :** {row['Rôle']}")
                     st.write(f"**Entreprise :** {row['Entreprise']}")
                     st.write(f"**Email :** {row['Email']}")
-                    
-                    cola, colr = st.columns(2)
 
+                    cola, colr = st.columns(2)
                     if cola.button("✅ Accepter", key=f"accept_{index}"):
                         password = generate_password()
-
                         new_account = pd.DataFrame([{
                             "Email (username)": row['Email'],
                             "Password": password
                         }])
-
                         if os.path.exists(account_file):
                             existing = pd.read_excel(account_file)
                             all_accounts = pd.concat([existing, new_account], ignore_index=True)
                         else:
                             all_accounts = new_account
-
                         all_accounts.to_excel(account_file, index=False)
                         requests.drop(index, inplace=True)
                         requests.to_excel(request_file, index=False)
-
                         st.success(f"Compte créé pour {row['Email']} avec mot de passe : {password}")
                         st.rerun()
 
@@ -78,7 +71,6 @@ def admin_page():
         else:
             st.info("Aucune demande en attente.")
 
-    # PDFs
     with col2:
         pdf_folder = "pdf_reports"
         st.subheader("📄 PDF générés")
@@ -92,12 +84,16 @@ def admin_page():
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
-                for filename in pdf_files[:5]:
+                # Contenedor scrollable
+                st.markdown("""
+                    <div style="max-height: 400px; overflow-y: auto; padding-right: 5px;" id="pdf-scroll-container">
+                """, unsafe_allow_html=True)
+
+                for filename in pdf_files:
                     file_path = os.path.join(pdf_folder, filename)
                     with open(file_path, "rb") as f:
                         b64 = base64.b64encode(f.read()).decode()
 
-                    # Tarjeta PDF
                     st.markdown(f"""
                         <div style="display: flex; align-items: center; justify-content: space-between; 
                                     background-color: #ffffff; border: 1px solid #ccc; 
@@ -121,13 +117,15 @@ def admin_page():
                         </div>
                     """, unsafe_allow_html=True)
 
-                    # Capturar redirección
-                    query_params = st.experimental_get_query_params()
-                    if query_params.get("pdf_to_view", [None])[0] == filename:
+                    # Capturar cambio de URL
+                    query_params = st.query_params
+                    if query_params.get("pdf_to_view", None) == filename:
                         st.session_state.pdf_to_view = filename
                         st.session_state.page = "viewer"
-                        st.experimental_set_query_params()  # limpia URL
+                        st.query_params.clear()
                         st.rerun()
+
+                st.markdown("</div>", unsafe_allow_html=True)
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
@@ -135,15 +133,12 @@ def admin_page():
             st.session_state.page = "user"
             st.rerun()
 
-    # Usuarios
     st.markdown("---")
     st.subheader("👤 Gestion des utilisateurs")
 
     user_file = "accepted_user_information.xlsm"
-
     if os.path.exists(user_file):
         users_df = pd.read_excel(user_file)
-
         if users_df.empty:
             st.info("Aucun utilisateur enregistré.")
         else:
@@ -152,7 +147,6 @@ def admin_page():
                     st.write(f"**Mot de passe actuel :** {row['Password']}")
 
                     col1, col2, col3 = st.columns(3)
-
                     with col1:
                         new_password = st.text_input(f"Nouveau mot de passe pour {row['Email (username)']}", "", key=f"newpwd_{index}")
                         if st.button("🔑 Changer mot de passe", key=f"update_{index}"):
