@@ -93,12 +93,11 @@ def admin_page():
                             #pdf-scroll-zone {
                                 max-height: 100px;
                                 overflow-y: auto;
+                                padding-right: 8px;
                                 }
                         </style>
                         <div id="pdf-scroll-zone">
                     """, unsafe_allow_html=True)
-
-                    st.markdown("</div>", unsafe_allow_html=True)
 
                     for filename in pdf_files[:10]:
                         file_path = os.path.join(pdf_folder, filename)
@@ -137,6 +136,7 @@ def admin_page():
                             st.session_state.page = "viewer"
                             st.query_params.clear()
                             st.rerun()
+                    st.markdown("</div>", unsafe_allow_html=True)
 
         else:
             st.warning("Le dossier des PDF n'existe pas.")
