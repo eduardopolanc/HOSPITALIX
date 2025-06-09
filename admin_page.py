@@ -102,7 +102,7 @@ def admin_page():
             else:
                 links_html = ""
                 for filename in pdf_files[:8]:
-                    file_path = os.path.join.join(pdf_folder, filename)
+                    file_path = os.path.join(pdf_folder, filename)
 
                     with st.expander(f"📄 {filename}"):
                         st.markdown(f"Nom du ficher : `{filename}`")
