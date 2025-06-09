@@ -84,9 +84,9 @@ def admin_page():
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
-                # Carrusel horizontal scrollable
+                # Contenedor scrollable
                 st.markdown("""
-                    <div style="overflow-x: auto; white-space: nowrap; padding-bottom: 10px;">
+                    <div style="max-height: 400px; overflow-y: auto; padding-right: 5px;" id="pdf-scroll-container">
                 """, unsafe_allow_html=True)
 
                 for filename in pdf_files:
@@ -95,16 +95,15 @@ def admin_page():
                         b64 = base64.b64encode(f.read()).decode()
 
                     st.markdown(f"""
-                        <div style="display: inline-block; vertical-align: top; min-width: 260px; max-width: 260px; 
-                                    margin-right: 10px; background-color: #ffffff; border: 1px solid #ccc;
-                                    padding: 6px 12px; border-radius: 6px; font-size: 14px; color: black;
-                                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                            <div style="display: flex; align-items: center; justify-content: space-between;">
-                                <span style="font-size: 16px; color: black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; display: inline-block;" title="{filename}">
-                                    📄 {filename}
-                                </span>
+                        <div style="display: flex; align-items: center; justify-content: space-between; 
+                                    background-color: #ffffff; border: 1px solid #ccc; 
+                                    padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
+                                    box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
+                            <div style="flex-grow: 1; display: flex; align-items: center;">
+                                <span style="font-size: 16px; margin-right: 8px;">📄</span>
+                                <span style="font-weight: 500; color: black;">{filename}</span>
                             </div>
-                            <div style="margin-top: 6px; display: flex; justify-content: space-between;">
+                            <div style="display: flex; gap: 6px;">
                                 <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
                                     <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
                                         ⬇️ Télécharger
@@ -118,6 +117,7 @@ def admin_page():
                         </div>
                     """, unsafe_allow_html=True)
 
+                    # Capturar cambio de URL
                     query_params = st.query_params
                     if query_params.get("pdf_to_view", None) == filename:
                         st.session_state.pdf_to_view = filename
