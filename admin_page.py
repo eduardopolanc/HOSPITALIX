@@ -84,10 +84,8 @@ def admin_page():
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
-                # Scroll manual: limitamos altura del contenedor con Streamlit y renderizamos cada bloque por separado
                 scroll_container = st.container()
                 with scroll_container:
-                    # HTML para limitar la altura
                     st.markdown("""
                         <style>
                             div[data-testid="stVerticalBlock"] > div {
@@ -102,32 +100,30 @@ def admin_page():
                         with open(file_path, "rb") as f:
                             b64 = base64.b64encode(f.read()).decode()
 
-                        with st.container():
-                            st.markdown(f"""
-                                <div style="display: flex; align-items: center; justify-content: space-between; 
-                                            background-color: #ffffff; border: 1px solid #ccc; 
-                                            padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
-                                            box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
-                                    <div style="flex-grow: 1; display: flex; align-items: center;">
-                                        <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: inline-block;" title="{filename}">
-                                            📄 {filename}
-                                        </span>
-                                    </div>
-                                    <div style="display: flex; gap: 6px;">
-                                        <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
-                                            <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
-                                                ⬇️ Télécharger
-                                            </button>
-                                        </a>
-                                        <button onclick="window.location.href='/?pdf_to_view={filename}'"
-                                            style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff; color: black; border: none; border-radius: 4px;">
-                                            👁️ Voir
-                                        </button>
-                                    </div>
+                        st.markdown(f"""
+                            <div style="display: flex; align-items: center; justify-content: space-between; 
+                                        background-color: #ffffff; border: 1px solid #ccc; 
+                                        padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
+                                        box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
+                                <div style="flex-grow: 1; display: flex; align-items: center;">
+                                    <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: inline-block;" title="{filename}">
+                                        📄 {filename}
+                                    </span>
                                 </div>
-                            """, unsafe_allow_html=True)
+                                <div style="display: flex; gap: 6px;">
+                                    <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
+                                        <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
+                                            ⬇️ Télécharger
+                                        </button>
+                                    </a>
+                                    <button onclick="window.location.href='/?pdf_to_view={filename}'"
+                                        style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff; color: black; border: none; border-radius: 4px;">
+                                        👁️ Voir
+                                    </button>
+                                </div>
+                            </div>
+                        """, unsafe_allow_html=True)
 
-                        # Navegación por parámetro
                         query_params = st.query_params
                         if query_params.get("pdf_to_view", None) == filename:
                             st.session_state.pdf_to_view = filename
@@ -140,48 +136,4 @@ def admin_page():
 
         if st.button("Generar un PDF"):
             st.session_state.page = "user"
-            st.rerun()
-
-        else:
-            st.warning("Le dossier des PDF n'existe pas.")
-
-        if st.button("Generar un PDF"):
-            st.session_state.page = "user"
-            st.rerun()
-
-    st.markdown("---")
-    st.subheader("👤 Gestion des utilisateurs")
-
-    user_file = "accepted_user_information.xlsm"
-    if os.path.exists(user_file):
-        users_df = pd.read_excel(user_file)
-        if users_df.empty:
-            st.info("Aucun utilisateur enregistré.")
-        else:
-            for index, row in users_df.iterrows():
-                with st.expander(f"{row['Email (username)']}"):
-                    st.write(f"**Mot de passe actuel :** {row['Password']}")
-
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        new_password = st.text_input(f"Nouveau mot de passe pour {row['Email (username)']}", "", key=f"newpwd_{index}")
-                        if st.button("🔑 Changer mot de passe", key=f"update_{index}"):
-                            users_df.at[index, "Password"] = new_password
-                            users_df.to_excel(user_file, index=False)
-                            st.success(f"Mot de passe mis à jour pour {row['Email (username)']}")
-                            st.rerun()
-
-                    with col3:
-                        if st.button("🗑️ Supprimer utilisateur", key=f"delete_{index}"):
-                            users_df.drop(index, inplace=True)
-                            users_df.to_excel(user_file, index=False)
-                            st.warning(f"Utilisateur supprimé : {row['Email (username)']}")
-                            st.rerun()
-    else:
-        st.warning("Fichier d'utilisateurs non trouvé.")
-
-    col4, col5, col6, col7 = st.columns([2,2,2,2])
-    with col5:
-        if st.button("pdf page"):
-            st.session_state.page = "viewer"
             st.rerun()
