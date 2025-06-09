@@ -30,7 +30,9 @@ def admin_page():
         except:
             st.error("Erreur lors du chargement du fichier de demandes.")
 
-    with st.container():
+    col1, col2 = st.columns([3, 5])
+
+    with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
         if not requests.empty:
@@ -69,10 +71,10 @@ def admin_page():
         else:
             st.info("Aucune demande en attente.")
 
-    with st.container():
-        pdf_folder = "pdf_reports"
+    with col2:
         st.subheader("📄 PDF générés")
 
+        pdf_folder = "pdf_reports"
         if os.path.exists(pdf_folder):
             pdf_files = sorted(
                 [f for f in os.listdir(pdf_folder) if f.endswith(".pdf")],
@@ -82,9 +84,9 @@ def admin_page():
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
-                # Carrusel horizontal scrollable
+                # Scroll vertical con altura limitada
                 st.markdown("""
-                    <div style="overflow-x: auto; white-space: nowrap; padding: 10px 0; width: 100%;">
+                    <div style="max-height: 400px; overflow-y: auto; padding-right: 8px;">
                 """, unsafe_allow_html=True)
 
                 for filename in pdf_files:
@@ -93,32 +95,16 @@ def admin_page():
                         b64 = base64.b64encode(f.read()).decode()
 
                     st.markdown(f"""
-                        <div style="
-                            display: inline-block;
-                            vertical-align: top;
-                            width: 260px;
-                            margin-right: 12px;
-                            background-color: #ffffff;
-                            border: 1px solid #ccc;
-                            border-radius: 6px;
-                            padding: 8px 10px;
-                            font-size: 14px;
-                            color: black;
-                            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                            white-space: normal;
-                        ">
-                            <div style="display: flex; align-items: center; justify-content: space-between;">
-                                <span style="
-                                    font-weight: 500;
-                                    color: black;
-                                    white-space: nowrap;
-                                    overflow: hidden;
-                                    text-overflow: ellipsis;
-                                    max-width: 180px;
-                                    display: inline-block;
-                                " title="{filename}">📄 {filename}</span>
+                        <div style="display: flex; align-items: center; justify-content: space-between; 
+                                    background-color: #ffffff; border: 1px solid #ccc; 
+                                    padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
+                                    box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
+                            <div style="flex-grow: 1; display: flex; align-items: center;">
+                                <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: inline-block;" title="{filename}">
+                                    📄 {filename}
+                                </span>
                             </div>
-                            <div style="margin-top: 6px; display: flex; justify-content: space-between;">
+                            <div style="display: flex; gap: 6px;">
                                 <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
                                     <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
                                         ⬇️ Télécharger
@@ -146,6 +132,7 @@ def admin_page():
         if st.button("Generar un PDF"):
             st.session_state.page = "user"
             st.rerun()
+
 
     st.markdown("---")
     st.subheader("👤 Gestion des utilisateurs")
