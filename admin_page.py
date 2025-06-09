@@ -101,22 +101,35 @@ def admin_page():
                 st.info("Aucun PDF trouvé.")
             else:
                 links_html = ""
-                for filename in pdf_files[:8]:
+
+                for filename in pdf_files[:5]:
                     file_path = os.path.join(pdf_folder, filename)
 
-                    with st.expander(f"📄 {filename}"):
-                        st.markdown(f"Nom du ficher : `{filename}`")
-
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            with open(file_path, "rb") as f:
-                                b64 = base64.b64encode(f.read()).decode()
-                                st.markdown(f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">📥 Télécharger</a>', unsafe_allow_html=True)
-                        with col2:
-                            if st.button(f"👁️ Voir", key=filename):
-                                st.session_state.pdf_to_view = filename
-                                st.session_state.page = "viewer"
-                                st.rerun()
+                    with open(file_path, "rb") as f:
+                        b64 = base64.b64encode(f.read()).decode()
+                    
+                    st.markdown(f"""
+                                <div style="background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; border-radius: 10px; margin-botton: 10px;">
+                                    <h4 style="margin-buttom: 10px;">📄 {filename}</h4>
+                                    <div style="display: flex; gap: 10px;">
+                                        <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
+                                            <button style="padding: 6px 12px; background_color: #00b300; color: white; border: none; border-radius: 5px;">⬇️ Télécharger</button>
+                                        </a>
+                                        <form action="" method="post">
+                                            <button name="view_pdf" value="{filename}" type="submit" style="padding: 6px 12px; background-color: #007acc; color: white; border: none; border-radius: 5px;">👁️ Voir</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                    
+                    if "view_pdf" in st.session_state and st.session_state.view_pdf == filename:
+                        st.session_state.pdf_to_view = filename
+                        st.session_state.page = "viewer"
+                        st.rerun()
+                    
+                    
+                    
+                    
 
                 st.components.v1.html(f"""
                     <div style="
@@ -179,3 +192,21 @@ def admin_page():
         if st.button("pdf page"):
             st.session_state.page = "viewer"
             st.rerun()
+
+
+
+"""
+with st.expander(f"📄 {filename}"):
+                        st.markdown(f"Nom du ficher : `{filename}`")
+
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            with open(file_path, "rb") as f:
+                                b64 = base64.b64encode(f.read()).decode()
+                                st.markdown(f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">📥 Télécharger</a>', unsafe_allow_html=True)
+                        with col2:
+                            if st.button(f"👁️ Voir", key=filename):
+                                st.session_state.pdf_to_view = filename
+                                st.session_state.page = "viewer"
+                                st.rerun()
+"""
