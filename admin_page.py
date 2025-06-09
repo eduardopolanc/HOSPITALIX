@@ -97,30 +97,36 @@ def admin_page():
                     with open(file_path, "rb") as f:
                         b64 = base64.b64encode(f.read()).decode()
 
-                    # Contenedor visual
                     st.markdown(f"""
                         <div style="display: flex; align-items: center; justify-content: space-between; 
-                                    background-color: #ffffff; border: 1px solid #ddd; 
-                                    padding: 10px 20px; border-radius: 8px; margin-bottom: 10px;
-                                    box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                    background-color: #ffffff; border: 1px solid #ccc; 
+                                    padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
+                                    box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
+
                             <div style="flex-grow: 1; display: flex; align-items: center;">
-                                <span style="font-size: 20px; margin-right: 10px;">📄</span>
-                                <span style="font-weight: 500;">{filename}</span>
+                                <span style="font-size: 16px; margin-right: 8px;">📄</span>
+                                <span style="font-weight: 500; color: black;">{filename}</span>
                             </div>
-                            <div style="display: flex; gap: 10px;">
+
+                            <div style="display: flex; gap: 6px;">
                                 <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
-                                    <button style="padding: 6px 12px; background-color: #6c757d; color: white; border: none; border-radius: 5px;">
+                                    <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
                                         ⬇️ Télécharger
                                     </button>
                                 </a>
+                                <button onclick="window.location.href='/?pdf_to_view={filename}'"
+                                    style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff; color: black; border: none; border-radius: 4px;">
+                                    👁️ Voir
+                                </button>
                             </div>
                         </div>
                     """, unsafe_allow_html=True)
 
-                    # Botón Voir (con Streamlit)
-                    if st.button(f"👁️ Voir {filename}", key=f"view_{filename}"):
+                    # Captura el nombre del PDF desde la URL
+                    if st.experimental_get_query_params().get("pdf_to_view", [None])[0] == filename:
                         st.session_state.pdf_to_view = filename
                         st.session_state.page = "viewer"
+                        st.experimental_set_query_params()  # limpia la URL
                         st.rerun()
         else:
             st.warning("Le dossier des PDF n'existe pas.")
