@@ -101,13 +101,23 @@ def admin_page():
                 st.info("Aucun PDF trouvé.")
             else:
                 links_html = ""
-                for filename in pdf_files:
-                    file_path = os.path.join(pdf_folder, filename)
-                    with open(file_path, "rb") as f:
-                        b64 = base64.b64encode(f.read()).decode()
-                        link = f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank" style="color: #00CFFF;">📄 {filename}</a>'
-                        links_html += f"<div style='margin-bottom: 10px;'>{link}</div>"
+                for filename in pdf_files[:8]:
+                     file_path = os.path.join.join(pdf_folder, filename)
 
+                    with st.expander(f"📄 {filename}"):
+                        st.markdown(f"Nom du ficher : `{filename}`")
+
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            with open(file_path, "rb") as f:
+                                b64 = base64.b64encode(f.read()).decode()
+                                st.markdown(f'<a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">📥 Télécharger</a>', unsafe_allow_html=True)
+                        with col2:
+                            if st.button(f"👁️ Voir", key=filename):
+                                st.session_state.pdf_to_view = filename
+                                st.session_state.page = "viewer"
+                                st.rerun()
+                                
                 st.components.v1.html(f"""
                     <div style="
                         background-color: #2e2e2e;
