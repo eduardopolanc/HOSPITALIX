@@ -91,13 +91,13 @@ def admin_page():
                     st.markdown("""
                         <style>
                             #pdf-scroll-zone {
-                                max-height: 350px;
+                                max-height: 100px;
                                 overflow-y: auto;
                                 }
                         </style>
                         <div id="pdf-scroll-zone">
                     """, unsafe_allow_html=True)
-                    
+
                     st.markdown("</div>", unsafe_allow_html=True)
 
                     for filename in pdf_files[:10]:
