@@ -84,57 +84,59 @@ def admin_page():
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
-                # CSS y apertura del contenedor scrollado limitado en tamaño y ancho
-                st.markdown("""
-                    <style>
-                        #pdf-list {
-                            max-height: 250px;
-                            overflow-y: auto;
-                            padding-right: 8px;
-                            width: 100%;
-                            max-width: 600px;
-                        }
-                    </style>
-                    <div id="pdf-list">
-                """, unsafe_allow_html=True)
-
-                for filename in pdf_files[:50]:
-                    file_path = os.path.join(pdf_folder, filename)
-                    with open(file_path, "rb") as f:
-                        b64 = base64.b64encode(f.read()).decode()
-
-                    st.markdown(f"""
-                        <div style="display: flex; align-items: center; justify-content: space-between; 
-                                    background-color: #ffffff; border: 1px solid #ccc; 
-                                    padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
-                                    box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
-                            <div style="flex-grow: 1; display: flex; align-items: center;">
-                                <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: inline-block;" title="{filename}">
-                                    📄 {filename}
-                                </span>
-                            </div>
-                            <div style="display: flex; gap: 6px;">
-                                <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
-                                    <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
-                                        ⬇️ Télécharger
-                                    </button>
-                                </a>
-                                <button onclick="window.location.href='/?pdf_to_view={filename}'"
-                                    style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff; color: black; border: none; border-radius: 4px;">
-                                    👁️ Voir
-                                </button>
-                            </div>
-                        </div>
+                # Contenedor visual para limitar altura del scroll
+                with st.container():
+                    # Aplica scroll SOLO a este contenedor
+                    st.markdown("""
+                        <style>
+                            .scrollable-pdf-list {
+                                max-height: 250px;
+                                overflow-y: auto;
+                            }
+                        </style>
+                        <div class="scrollable-pdf-list">
                     """, unsafe_allow_html=True)
 
-                    query_params = st.query_params
-                    if query_params.get("pdf_to_view", None) == filename:
-                        st.session_state.pdf_to_view = filename
-                        st.session_state.page = "viewer"
-                        st.query_params.clear()
-                        st.rerun()
+                    for filename in pdf_files[:50]:
+                        file_path = os.path.join(pdf_folder, filename)
+                        with open(file_path, "rb") as f:
+                            b64 = base64.b64encode(f.read()).decode()
 
-                st.markdown("</div>", unsafe_allow_html=True)
+                        # Cada PDF representado visualmente
+                        st.markdown(f"""
+                            <div style="display: flex; align-items: center; justify-content: space-between; 
+                                        background-color: #ffffff; border: 1px solid #ccc; 
+                                        padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
+                                        box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
+                                <div style="flex-grow: 1; display: flex; align-items: center;">
+                                    <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: inline-block;" title="{filename}">
+                                        📄 {filename}
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: 6px;">
+                                    <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
+                                        <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
+                                            ⬇️ Télécharger
+                                        </button>
+                                    </a>
+                                    <button onclick="window.location.href='/?pdf_to_view={filename}'"
+                                        style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff; color: black; border: none; border-radius: 4px;">
+                                        👁️ Voir
+                                    </button>
+                                </div>
+                            </div>
+                        """, unsafe_allow_html=True)
+
+                        # Cambio de página si se hace clic en "voir"
+                        query_params = st.query_params
+                        if query_params.get("pdf_to_view", None) == filename:
+                            st.session_state.pdf_to_view = filename
+                            st.session_state.page = "viewer"
+                            st.query_params.clear()
+                            st.rerun()
+
+                    # Cierre del div con scroll
+                    st.markdown("</div>", unsafe_allow_html=True)
 
         else:
             st.warning("Le dossier des PDF n'existe pas.")
