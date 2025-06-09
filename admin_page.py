@@ -102,7 +102,7 @@ def admin_page():
             else:
                 links_html = ""
                 for filename in pdf_files[:8]:
-                     file_path = os.path.join.join(pdf_folder, filename)
+                    file_path = os.path.join.join(pdf_folder, filename)
 
                     with st.expander(f"📄 {filename}"):
                         st.markdown(f"Nom du ficher : `{filename}`")
@@ -117,7 +117,7 @@ def admin_page():
                                 st.session_state.pdf_to_view = filename
                                 st.session_state.page = "viewer"
                                 st.rerun()
-                                
+
                 st.components.v1.html(f"""
                     <div style="
                         background-color: #2e2e2e;
