@@ -10,7 +10,7 @@ def generate_password(length=10):
     return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 def admin_page():
-    st.set_page_config(layout="wide") #manage wideness of page
+    st.set_page_config(layout="wide")
     cola, cols, cold = st.columns([2,2,2])
     with cols:
         st.markdown("<h1 style='text-align: center;'>Admin Page</h1>", unsafe_allow_html=True)
@@ -33,13 +33,13 @@ def admin_page():
 
     col1, col2  = st.columns([3, 5])
 
-    # Users acceptance
+    # Gestión de solicitudes
     with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
         if not requests.empty:
             for index, row in requests.iterrows():
-                 with st.expander(f"{row['Nom']} {row['Prenom']} - {row['Email']}"):
+                with st.expander(f"{row['Nom']} {row['Prenom']} - {row['Email']}"):
                     st.write(f"**Nom :** {row['Nom']}")
                     st.write(f"**Prénom :** {row['Prenom']}")
                     st.write(f"**Téléphone :** {row['Téléphone']}")
@@ -49,8 +49,7 @@ def admin_page():
                     
                     cola, colr = st.columns(2)
 
-                    # Accept button logic
-                    if cola.button("✅ Accepter"):
+                    if cola.button("✅ Accepter", key=f"accept_{index}"):
                         password = generate_password()
 
                         new_account = pd.DataFrame([{
@@ -58,7 +57,6 @@ def admin_page():
                             "Password": password
                         }])
 
-                        # Save accepted account to main file
                         if os.path.exists(account_file):
                             existing = pd.read_excel(account_file)
                             all_accounts = pd.concat([existing, new_account], ignore_index=True)
@@ -66,29 +64,23 @@ def admin_page():
                             all_accounts = new_account
 
                         all_accounts.to_excel(account_file, index=False)
-
-                        # Remove request from pending list
                         requests.drop(index, inplace=True)
                         requests.to_excel(request_file, index=False)
 
-                        st.success(f"Account created for {row['Email']} with password: {password}")
+                        st.success(f"Compte créé pour {row['Email']} avec mot de passe : {password}")
                         st.rerun()
 
-                    # Reject button logic
-                    if colr.button("❌ Rejeter"):
+                    if colr.button("❌ Rejeter", key=f"reject_{index}"):
                         requests.drop(index, inplace=True)
                         requests.to_excel(request_file, index=False)
-                        st.warning(f"Request for {row['Email']} has been rejected.")
+                        st.warning(f"Demande rejetée pour : {row['Email']}")
                         st.rerun()
-        
-        
         else:
             st.info("Aucune demande en attente.")
-    
-    #PDF list visualization
+
+    # Visualización de PDFs
     with col2:
         pdf_folder = "pdf_reports"
-
         st.subheader("📄 PDF générés")
 
         if os.path.exists(pdf_folder):
@@ -100,62 +92,36 @@ def admin_page():
             if not pdf_files:
                 st.info("Aucun PDF trouvé.")
             else:
-                links_html = ""
-
                 for filename in pdf_files[:5]:
                     file_path = os.path.join(pdf_folder, filename)
-
                     with open(file_path, "rb") as f:
                         b64 = base64.b64encode(f.read()).decode()
 
+                    # Contenedor visual
                     st.markdown(f"""
                         <div style="display: flex; align-items: center; justify-content: space-between; 
                                     background-color: #ffffff; border: 1px solid #ddd; 
                                     padding: 10px 20px; border-radius: 8px; margin-bottom: 10px;
                                     box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                            
                             <div style="flex-grow: 1; display: flex; align-items: center;">
                                 <span style="font-size: 20px; margin-right: 10px;">📄</span>
                                 <span style="font-weight: 500;">{filename}</span>
                             </div>
-
                             <div style="display: flex; gap: 10px;">
                                 <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
                                     <button style="padding: 6px 12px; background-color: #6c757d; color: white; border: none; border-radius: 5px;">
                                         ⬇️ Télécharger
                                     </button>
                                 </a>
-                                <form action="" method="post">
-                                    <button name="view_pdf" value="{filename}" type="submit" style="padding: 6px 12px; background-color: #007acc; color: white; border: none; border-radius: 5px;">
-                                        👁️ Voir
-                                    </button>
-                                </form>
                             </div>
                         </div>
                     """, unsafe_allow_html=True)
 
-                    # Lógica para capturar clic en "Voir"
-                    if "view_pdf" in st.session_state and st.session_state.view_pdf == filename:
+                    # Botón Voir (con Streamlit)
+                    if st.button(f"👁️ Voir {filename}", key=f"view_{filename}"):
                         st.session_state.pdf_to_view = filename
                         st.session_state.page = "viewer"
                         st.rerun()
-                    
-                    
-                    
-                    
-
-                st.components.v1.html(f"""
-                    <div style="
-                        background-color: #2e2e2e;
-                        padding: 15px;
-                        border-radius: 10px;
-                        max-height: 300px;
-                        overflow-y: auto;
-                        color: white;
-                    ">
-                        {links_html}
-                    </div>
-                """, height=300)
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
@@ -163,7 +129,7 @@ def admin_page():
             st.session_state.page = "user"
             st.rerun()
 
-    #Accepted User's list
+    # Gestión de usuarios
     st.markdown("---")
     st.subheader("👤 Gestion des utilisateurs")
 
@@ -181,7 +147,6 @@ def admin_page():
 
                     col1, col2, col3 = st.columns(3)
 
-                    # Cambiar contraseña
                     with col1:
                         new_password = st.text_input(f"Nouveau mot de passe pour {row['Email (username)']}", "", key=f"newpwd_{index}")
                         if st.button("🔑 Changer mot de passe", key=f"update_{index}"):
@@ -190,7 +155,6 @@ def admin_page():
                             st.success(f"Mot de passe mis à jour pour {row['Email (username)']}")
                             st.rerun()
 
-                    # Eliminar usuario
                     with col3:
                         if st.button("🗑️ Supprimer utilisateur", key=f"delete_{index}"):
                             users_df.drop(index, inplace=True)
@@ -205,8 +169,6 @@ def admin_page():
         if st.button("pdf page"):
             st.session_state.page = "viewer"
             st.rerun()
-
-
 
 """
 with st.expander(f"📄 {filename}"):
