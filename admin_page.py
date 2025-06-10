@@ -169,118 +169,76 @@ def admin_page():
         st.session_state.page = "user"
         st.rerun()
 
-    # --- Estado inicial necesario ---
-    if "selected_user_type" not in st.session_state:
-        st.session_state.selected_user_type = None  # "accepted" or "pending"
-    if "selected_user_data" not in st.session_state:
-        st.session_state.selected_user_data = None
-
-    # --- Input de búsqueda compartido ---
+    st.markdown("### 👥 Gestion des utilisateurs")
     search_email = st.text_input("🔍 Rechercher un utilisateur (email)").strip().lower()
 
-    col1, col2 = st.columns([2, 3])
+    col_accepted, col_pending = st.columns(2, border=True)
 
-    # --- Columna izquierda ---
-    with col1:
-        st.markdown("### ✅ Utilisateurs existants")
-
+    # --- Columna izquierda : utilisateurs existants ---
+    with col_accepted:
+        st.markdown("#### ✅ Utilisateurs acceptés")
         accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
         if search_email:
             accepted_users = accepted_users[accepted_users['Email (username)'].str.lower().str.contains(search_email)]
 
-        # Scroll para usuarios aceptados
-        with st.container():
-            with st.expander("Afficher les utilisateurs existants", expanded=True):
-                scroll_container_style = """
-                <style>
-                .scroll-box {
-                    max-height: 300px;
-                    overflow-y: auto;
-                    padding-right: 8px;
-                }
-                </style>
-                <div class="scroll-box">
-                """
-                st.markdown(scroll_container_style, unsafe_allow_html=True)
+        with st.container(height=300):
+            if accepted_users.empty:
+                st.info("Aucun utilisateur trouvé.")
+            else:
                 for i, (_, row) in enumerate(accepted_users.iterrows()):
-                    if st.button(f"{row['Email (username)']}", key=f"accepted_{i}"):
-                        st.session_state.selected_user_type = "accepted"
-                        st.session_state.selected_user_data = row.to_dict()
-                st.markdown("</div>", unsafe_allow_html=True)
+                    with st.expander(f"{row['Email (username)']}"):
+                        st.write(f"**Email :** {row['Email (username)']}")
+                        st.write(f"**Mot de passe :** {row['Password']}")
+                        if st.button("🗑️ Supprimer l'utilisateur", key=f"delete_{i}"):
+                            accepted_users = accepted_users[accepted_users['Email (username)'] != row['Email (username)']]
+                            accepted_users.to_excel("accepted_user_information.xlsm", index=False)
+                            st.success("Utilisateur supprimé.")
+                            st.rerun()
 
-        st.markdown("---")
-        st.markdown("### 🕒 Demandes en attente")
-
+    # --- Columna derecha : demandes en attente ---
+    with col_pending:
+        st.markdown("#### 🕒 Demandes en attente")
         requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
         if search_email:
             requests = requests[requests['Email'].str.lower().str.contains(search_email)]
 
-        with st.container():
-            with st.expander("Afficher les demandes en attente", expanded=True):
-                st.markdown(scroll_container_style, unsafe_allow_html=True)
+        with st.container(height=300):
+            if requests.empty:
+                st.info("Aucune demande trouvée.")
+            else:
                 for i, (_, row) in enumerate(requests.iterrows()):
-                    if st.button(f"{row['Email']}", key=f"pending_{i}"):
-                        st.session_state.selected_user_type = "pending"
-                        st.session_state.selected_user_data = row.to_dict()
-                st.markdown("</div>", unsafe_allow_html=True)
+                    with st.expander(f"{row['Email']}"):
+                        st.write(f"**Nom :** {row['Nom']}")
+                        st.write(f"**Prénom :** {row['Prenom']}")
+                        st.write(f"**Téléphone :** {row['Téléphone']}")
+                        st.write(f"**Entreprise :** {row['Entreprise']}")
+                        st.write(f"**Rôle :** {row['Rôle']}")
+                        st.write(f"**Email :** {row['Email']}")
 
-    # --- Columna derecha ---
-    with col2:
-        if st.session_state.selected_user_data:
-            user = st.session_state.selected_user_data
-            user_type = st.session_state.selected_user_type
+                        colA, colB = st.columns(2)
+                        with colA:
+                            if st.button("✅ Accepter", key=f"accept_{i}"):
+                                password = generate_password()
+                                new_account = pd.DataFrame([{
+                                    "Email (username)": row['Email'],
+                                    "Password": password
+                                }])
+                                if os.path.exists("accepted_user_information.xlsm"):
+                                    existing = pd.read_excel("accepted_user_information.xlsm")
+                                    all_accounts = pd.concat([existing, new_account], ignore_index=True)
+                                else:
+                                    all_accounts = new_account
+                                all_accounts.to_excel("accepted_user_information.xlsm", index=False)
 
-            if user_type == "accepted":
-                st.markdown("### 👤 Détails de l'utilisateur accepté")
-                st.write(f"**Email :** {user.get('Email (username)', '')}")
-                st.write(f"**Mot de passe :** {user.get('Password', '')}")
+                                requests = requests[requests['Email'] != row['Email']]
+                                requests.to_excel("demandes_en_attente.xlsx", index=False)
+                                st.success("Utilisateur accepté.")
+                                st.rerun()
 
-                if st.button("🗑️ Supprimer l'utilisateur"):
-                    accepted_users = accepted_users[accepted_users['Email (username)'] != user['Email (username)']]
-                    accepted_users.to_excel("accepted_user_information.xlsm", index=False)
-                    st.success("Utilisateur supprimé.")
-                    st.session_state.selected_user_data = None
-                    st.rerun()
+                        with colB:
+                            if st.button("❌ Rejeter", key=f"reject_{i}"):
+                                requests = requests[requests['Email'] != row['Email']]
+                                requests.to_excel("demandes_en_attente.xlsx", index=False)
+                                st.warning("Demande rejetée.")
+                                st.rerun()
 
-            elif user_type == "pending":
-                st.markdown("### ✉️ Détails de la demande d'inscription")
-                st.write(f"**Nom :** {user.get('Nom')}")
-                st.write(f"**Prénom :** {user.get('Prenom')}")
-                st.write(f"**Téléphone :** {user.get('Téléphone')}")
-                st.write(f"**Entreprise :** {user.get('Entreprise')}")
-                st.write(f"**Rôle :** {user.get('Rôle')}")
-                st.write(f"**Email :** {user.get('Email')}")
-
-                colA, colB = st.columns(2)
-                with colA:
-                    if st.button("✅ Accepter la demande"):
-                        password = generate_password()
-                        new_account = pd.DataFrame([{
-                            "Email (username)": user['Email'],
-                            "Password": password
-                        }])
-
-                        if os.path.exists("accepted_user_information.xlsm"):
-                            existing = pd.read_excel("accepted_user_information.xlsm")
-                            all_accounts = pd.concat([existing, new_account], ignore_index=True)
-                        else:
-                            all_accounts = new_account
-
-                        all_accounts.to_excel("accepted_user_information.xlsm", index=False)
-
-                        requests = requests[requests['Email'] != user['Email']]
-                        requests.to_excel("demandes_en_attente.xlsx", index=False)
-
-                        st.success("Utilisateur accepté.")
-                        st.session_state.selected_user_data = None
-                        st.rerun()
-
-                with colB:
-                    if st.button("❌ Rejeter la demande"):
-                        requests = requests[requests['Email'] != user['Email']]
-                        requests.to_excel("demandes_en_attente.xlsx", index=False)
-                        st.warning("Demande rejetée.")
-                        st.session_state.selected_user_data = None
-                        st.rerun()
-        else:
-            st.info("Sélectionnez un utilisateur dans la colonne de gauche pour voir les détails.")
