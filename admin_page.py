@@ -141,14 +141,19 @@ def admin_page():
         if not pdf_files:
             st.info("Aucun PDF trouvé.")
         else:
-            with st.container(height=420):
+            with st.container(height=300):
                 for filename in pdf_files[:50]:
                     st.markdown('<hr style="margin: 6px 0;">', unsafe_allow_html=True)
                     col1, col2, col3 = st.columns([3, 1, 1])
 
                     with col1:
-                        st.markdown(f"<div style='font-size: 30px; margin: 0; padding: 0;'>📄 <b>{filename}</b></div>", unsafe_allow_html=True)
-                    
+                        st.markdown(
+                            f"""
+                            <div style="font-size: 30px; margin: 0; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block;" title="{filename}">
+                                📄 <b>{filename}</b>
+                            </div>
+                            """, unsafe_allow_html=True)
+ 
                     with col2:
                         file_path = os.path.join(pdf_folder, filename)
                         with open(file_path, "rb") as f:
