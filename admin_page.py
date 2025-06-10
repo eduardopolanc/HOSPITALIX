@@ -93,7 +93,7 @@ def admin_page():
             <div style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
             """
 
-            for filename in pdf_files[:10]:
+            for filename in pdf_files[:50]:
                 file_path = os.path.join(pdf_folder, filename)
                 with open(file_path, "rb") as f:
                     b64 = base64.b64encode(f.read()).decode()
