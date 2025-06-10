@@ -9,7 +9,6 @@ from email.message import EmailMessage
 import smtplib
 from dotenv import load_dotenv
 import urllib.parse
-import html
 
 # Fonction pour générer un mot de passe aléatoire
 def generate_password(length=10):
@@ -91,10 +90,10 @@ def admin_page():
         else:
             # Empieza HTML completo para el scrollable container
             pdf_html = """
-            <div style="max-height: 420px; overflow-y: auto; padding-right: 8px;">
+            <div style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
             """
 
-            for filename in pdf_files[:50]:
+            for filename in pdf_files[:10]:
                 file_path = os.path.join(pdf_folder, filename)
                 with open(file_path, "rb") as f:
                     b64 = base64.b64encode(f.read()).decode()
@@ -109,7 +108,7 @@ def admin_page():
                         <div style="flex-grow: 1; display: flex; align-items: center;">
                             <span style="font-weight: 500; color: black; white-space: nowrap;
                                         overflow: hidden; text-overflow: ellipsis;
-                                        max-width: 220px; display: inline-block;"
+                                        max-width: 500px; display: inline-block;"
                                 title="{filename_safe}">
                                 📄 {filename_safe}
                             </span>
