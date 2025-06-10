@@ -91,7 +91,7 @@ def admin_page():
                 st.markdown("""
                     <style>
                         #scroll-pdf-zone {
-                            max-height: 420px;
+                            max-height: 200px;
                             overflow-y: auto;
                             padding-right: 8px;
                         }
@@ -99,7 +99,7 @@ def admin_page():
                     <div id="scroll-pdf-zone">
                 """, unsafe_allow_html=True)
 
-                for filename in pdf_files[:50]:
+                for filename in pdf_files:
                     file_path = os.path.join(pdf_folder, filename)
                     with open(file_path, "rb") as f:
                         b64 = base64.b64encode(f.read()).decode()
