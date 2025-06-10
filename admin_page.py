@@ -4,18 +4,63 @@ import pandas as pd
 import base64
 import secrets
 import string
+from email.message import EmailMessage
+import smtplib
+from dotenv import load_dotenv
+import urllib.parse
 
+# Fonction pour générer un mot de passe aléatoire
 def generate_password(length=10):
     alphabet = string.ascii_letters + string.digits
     return ''.join(secrets.choice(alphabet) for _ in range(length))
 
+# Fonction pour envoyer l'email de validation à l'utilisateur
+def send_account_email(to_email, password):
+    load_dotenv()
+    EMAIL_SENDER = os.getenv("EMAIL_SENDER")
+    EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+
+    if not (EMAIL_SENDER and EMAIL_PASSWORD):
+        return False
+
+    try:
+        msg = EmailMessage()
+        msg["Subject"] = "Votre compte ALIX a été activé"
+        msg["From"] = EMAIL_SENDER
+        msg["To"] = to_email
+        msg.set_content(f"""
+Bonjour,
+
+Votre compte ALIX a été validé.
+
+Voici vos identifiants :
+- Email : {to_email}
+- Mot de passe : {password}
+
+Rendez-vous ici pour vous connecter : http://alix.iparme.com/
+
+Cordialement,
+L'équipe Droits Quotidiens Legal Tech
+""")
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            smtp.send_message(msg)
+        return True
+    except Exception as e:
+        print(f"Erreur envoi email : {e}")
+        return False
+
+# Page Admin
 def admin_page():
     st.set_page_config(layout="wide")
-    cola, cols, cold = st.columns([2,2,2])
+    cola, cols, cold = st.columns([2, 2, 2])
+
+    # Titre de la page Admin
     with cols:
         st.markdown("<h1 style='text-align: center;'>Admin Page</h1>", unsafe_allow_html=True)
+
     with cold:
-        colq, colw = st.columns([2,2])
+        colq, colw = st.columns([2, 2])
         with colw:
             if st.button("log out"):
                 st.session_state.page = "login"
@@ -32,7 +77,7 @@ def admin_page():
 
     col1, col2 = st.columns([3, 5])
 
-    # Sección de solicitudes
+    # Section des demandes d'inscription
     with col1:
         st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
         st.markdown("---")
@@ -61,7 +106,10 @@ def admin_page():
                         all_accounts.to_excel(account_file, index=False)
                         requests.drop(index, inplace=True)
                         requests.to_excel(request_file, index=False)
-                        st.success(f"Compte créé pour {row['Email']} avec mot de passe : {password}")
+                        if send_account_email(row['Email'], password):
+                            st.success(f"Compte créé et email envoyé à {row['Email']}.")
+                        else:
+                            st.warning(f"Compte créé mais échec de l'envoi d'email à {row['Email']}.")
                         st.rerun()
 
                     if colr.button("❌ Rejeter", key=f"reject_{index}"):
@@ -72,7 +120,7 @@ def admin_page():
         else:
             st.info("Aucune demande en attente.")
 
-    # PDFs con scroll
+    # Section des PDFs générés
     with col2:
         st.subheader("📄 PDF générés")
 
@@ -87,7 +135,6 @@ def admin_page():
                 st.info("Aucun PDF trouvé.")
             else:
                 with st.container():
-                    # Scroll CSS aislado con ID
                     st.markdown("""
                         <style>
                             #scroll-pdf-zone {
@@ -104,9 +151,12 @@ def admin_page():
                         with open(file_path, "rb") as f:
                             b64 = base64.b64encode(f.read()).decode()
 
+                        # URL encoding du nom de fichier pour éviter des problèmes d'URL
+                        filename_encoded = urllib.parse.quote(filename)
+
                         st.markdown(f"""
-                            <div style="display: flex; align-items: center; justify-content: space-between; 
-                                        background-color: #ffffff; border: 1px solid #ccc; 
+                            <div style="display: flex; align-items: center; justify-content: space-between;
+                                        background-color: #ffffff; border: 1px solid #ccc;
                                         padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
                                         box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
                                 <div style="flex-grow: 1; display: flex; align-items: center;">
@@ -120,7 +170,7 @@ def admin_page():
                                             ⬇️ Télécharger
                                         </button>
                                     </a>
-                                    <button onclick="window.location.href='/?pdf_to_view={filename}'"
+                                    <button onclick="window.location.href='/pdf_viewer_page?pdf_to_view={filename_encoded}'"
                                         style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff; color: black; border: none; border-radius: 4px;">
                                         👁️ Voir
                                     </button>
@@ -128,24 +178,17 @@ def admin_page():
                             </div>
                         """, unsafe_allow_html=True)
 
-                        query_params = st.query_params
-                        if query_params.get("pdf_to_view", None) == filename:
-                            st.session_state.pdf_to_view = filename
-                            st.session_state.page = "viewer"
-                            st.query_params.clear()
-                            st.rerun()
-
-                    # Cierre del div scroll
+                    # Cierre du div scroll
                     st.markdown("</div>", unsafe_allow_html=True)
 
         else:
             st.warning("Le dossier des PDF n'existe pas.")
 
-        if st.button("Generar un PDF"):
+        if st.button("Generer un PDF"):
             st.session_state.page = "user"
             st.rerun()
 
-    # Usuarios aceptados
+    # Gestion des utilisateurs
     st.markdown("---")
     st.subheader("👤 Gestion des utilisateurs")
 
@@ -170,6 +213,7 @@ def admin_page():
 
                     with col3:
                         if st.button("🗑️ Supprimer utilisateur", key=f"delete_{index}"):
+
                             users_df.drop(index, inplace=True)
                             users_df.to_excel(user_file, index=False)
                             st.warning(f"Utilisateur supprimé : {row['Email (username)']}")
@@ -177,7 +221,7 @@ def admin_page():
     else:
         st.warning("Fichier d'utilisateurs non trouvé.")
 
-    # Navegación
+    # Navigation
     col4, col5, col6, col7 = st.columns([2,2,2,2])
     with col5:
         if st.button("pdf page"):
