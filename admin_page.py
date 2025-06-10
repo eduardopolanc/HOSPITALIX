@@ -124,6 +124,7 @@ def admin_page():
             st.error("Erreur lors du chargement du fichier de demandes.")
     
     col_Z, col_x = st.columns([1, 2])
+
     with col_Z:
         st.subheader("📄 PDF générés")
     with col_x:
@@ -142,15 +143,18 @@ def admin_page():
         else:
             with st.container(height=420):
                 for filename in pdf_files[:50]:
-                    st.markdown(f"📄 **{filename}**")
+                    col1, col2, col3 = st.columns([3, 1, 1])
 
-                    col1, col2 = st.columns([1, 1])
                     with col1:
+                        st.markdown(f"📄 **{filename}**")
+
+                    
+                    with col2:
                         file_path = os.path.join(pdf_folder, filename)
                         with open(file_path, "rb") as f:
                             st.download_button("⬇️ Télécharger", f, file_name=filename, mime="application/pdf")
 
-                    with col2:
+                    with col3:
                         if st.button("👁️ Voir", key=f"voir_{filename}"):
                             st.session_state.page = "viewer"
                             st.session_state.pdf_to_view = filename
