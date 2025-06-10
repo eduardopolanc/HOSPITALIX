@@ -224,7 +224,7 @@ def admin_page():
         if search_email:
             filtered_requests = requests[requests['Email'].str.lower().str.contains(search_email)]
         else:
-            filtered_requests = requests.head(2)
+            filtered_requests = requests.head(25)
 
         with st.container(height=300):
             if filtered_requests.empty:
@@ -270,10 +270,10 @@ def admin_page():
                     st.markdown("<br>", unsafe_allow_html=True)
                     st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
 
+    #General statistics
     st.markdown("---")
     st.markdown("### 📊 Statistiques générales")
 
-    # Charger les données
     accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
     requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
     pdf_folder = "static"
