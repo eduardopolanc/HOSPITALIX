@@ -23,6 +23,7 @@ EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
 def send_password_change_email(user_email):
     msg = EmailMessage()
     msg["Subject"] = "Changement de mot de passe"
@@ -78,7 +79,7 @@ def user_page():
         st.stop()
 
     if "user_email" in st.session_state:
-        with st.expander("⚙️ Options"):
+        with st.expander("^z^y ^o Options"):
             menu_options = ["Profil", "Déconnexion"]
             if st.session_state.user_email.lower() != ADMIN_EMAIL.lower():
                 menu_options.insert(1, "Changer mot de passe")
@@ -86,7 +87,7 @@ def user_page():
             menu_option = st.radio("Options", menu_options, key="user_menu")
 
             if menu_option == "Changer mot de passe":
-                st.subheader("🔐 Changer le mot de passe")
+                st.subheader("^=^t^p Changer le mot de passe")
                 current = st.text_input("Mot de passe actuel", type="password")
                 new_pwd = st.text_input("Nouveau mot de passe", type="password")
                 confirm_pwd = st.text_input("Confirmez le nouveau mot de passe", type="password")
@@ -109,7 +110,7 @@ def user_page():
                 st.rerun()
 
         st.sidebar.title('Choix')
-        list_contexte = st.sidebar.multiselect('Santé/contexte', (
+        list_contexte = st.sidebar.multiselect('Santé /contexte', (
             'mémoire', 'santé', 'surendettement', 'maltraitance', 'internet',
             'tuteur', 'rien', 'plus disponible', 'pas habitude papier', 'indifférent'))
         situation_perso = st.sidebar.selectbox('Situation perso', (
@@ -178,17 +179,16 @@ def user_page():
             except Exception as e:
                 st.error(f"Erreur lors de l'ajout du commentaire : {e}")
 
-         if st.button("Exporter le rapport"):
-             pdf = Make_pdf(FILE_NAME2, context)
+        if st.button("Exporter le rapport"):
+            pdf = Make_pdf(FILE_NAME2, context)
 
-             date_str = dt.now().strftime("%Y-%m-%d")
-             user_name = st.session_state.user_email.split("@")[0].replace(".", "").replace(" ", "")
-             filename = f"{date_str}_{user_name}.pdf"
+            date_str = dt.now().strftime("%Y-%m-%d")
+            user_name = st.session_state.user_email.split("@")[0].replace(".", "").replace(" ", "")
+            filename = f"{date_str}_{user_name}.pdf"
 
-             b64 = base64.b64encode(pdf.output(dest='S').encode('latin-1', 'ignore'))
-             html = f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{filename}">Download file</a>'
-             st.markdown(html, unsafe_allow_html=True)
-
+            b64 = base64.b64encode(pdf.output(dest='S').encode('latin-1', 'ignore'))
+            html = f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{filename}">Download file</a>'
+            st.markdown(html, unsafe_allow_html=True)
 
         if st.button("Voir le pdf"):
             st.session_state.page = "viewer"
@@ -204,9 +204,10 @@ def user_page():
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
             <p style="text-align:center; color:white; font-size:0.9em; margin:0;">
                 Droits Quotidiens Legal Tech<br>
-                📧 Pour toute question, contactez-nous à <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
+                ^=^s  Pour toute question, contactez-nous à <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
             </p>
         </div>
         """,
         unsafe_allow_html=True
     )
+
