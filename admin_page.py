@@ -181,14 +181,16 @@ def admin_page():
         if search_email:
             accepted_users = accepted_users[accepted_users['Email (username)'].str.lower().str.contains(search_email)]
 
-        with st.container(height=300):
+        with st.container(height=400):
             if accepted_users.empty:
                 st.info("Aucun utilisateur trouvé.")
             else:
                 for i, (_, row) in enumerate(accepted_users.iterrows()):
                     with st.expander(f"{row['Email (username)']}"):
-                        st.write(f"**Email :** {row['Email (username)']}")
-                        st.write(f"**Mot de passe :** {row['Password']}")
+                        for label in ["Email (username)", "Nom", "Prenom", "Téléphone", "Entreprise", "Rôle"]:
+                            if label in row and pd.notna(row[label]):
+                                st.write(f"**{label} :** {row[label]}")
+                        
                         if st.button("🗑️ Supprimer l'utilisateur", key=f"delete_{i}"):
                             accepted_users = accepted_users[accepted_users['Email (username)'] != row['Email (username)']]
                             accepted_users.to_excel("accepted_user_information.xlsm", index=False)
@@ -202,7 +204,7 @@ def admin_page():
         if search_email:
             requests = requests[requests['Email'].str.lower().str.contains(search_email)]
 
-        with st.container(height=300):
+        with st.container(height=400):
             if requests.empty:
                 st.info("Aucune demande trouvée.")
             else:
@@ -220,7 +222,12 @@ def admin_page():
                             if st.button("✅ Accepter", key=f"accept_{i}"):
                                 password = generate_password()
                                 new_account = pd.DataFrame([{
-                                    "Email (username)": row['Email'],
+                                    "Email (username)": row["Email"],
+                                    "Nom": row.get("Nom", ""),
+                                    "Prenom": row.get("Prenom", ""),
+                                    "Téléphone": row.get("Téléphone", ""),
+                                    "Entreprise": row.get("Entreprise", ""),
+                                    "Rôle": row.get("Rôle", ""),
                                     "Password": password
                                 }])
                                 if os.path.exists("accepted_user_information.xlsm"):
