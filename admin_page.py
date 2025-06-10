@@ -143,6 +143,7 @@ def admin_page():
         else:
             with st.container(height=420):
                 for filename in pdf_files[:50]:
+                    st.markdown("---")
                     col1, col2, col3 = st.columns([3, 1, 1])
 
                     with col1:
