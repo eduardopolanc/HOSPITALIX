@@ -7,8 +7,7 @@ def pdf_viewer_page():
     st.markdown("<h3 style='text-align: center;'>Visualiseur de PDF</h3>", unsafe_allow_html=True)
 
     # Recupera el nombre del PDF desde la URL
-    params = st.query_params
-    filename = params.get("pdf_to_view", None)
+    filename = st.session_state.get("pdf_to_view", None)
 
     if not filename:
         st.warning("Aucun PDF sélectionné.")
