@@ -7,8 +7,7 @@ from user_page import user_page
 from review_request_page import review_request_page
 
 # Redirigir automáticamente a la URL con embed=true si no está presente
-query_params = st.experimental_get_query_params()
-if "embed" not in query_params:
+if "embed" not in st.query_params():
     js = """
     <script>
     const currentUrl = window.location.href;
