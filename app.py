@@ -8,7 +8,7 @@ from review_request_page import review_request_page
 
 # Session state defaults
 if 'page' not in st.session_state:
-    st.session_state.page = "login"
+    st.session_state.page = "admin"
 if "autentication" not in st.session_state:
     st.session_state.autentication = False
 
