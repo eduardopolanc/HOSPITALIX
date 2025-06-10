@@ -77,7 +77,20 @@ def admin_page():
     
     st.subheader("📄 PDF générés")
 
+    # Estilo de scroll (debe ir fuera de cualquier contenedor)
+    st.markdown("""
+        <style>
+            #scroll-pdf-zone {
+                max-height: 250px;
+                overflow-y: auto;
+                padding-right: 8px;
+                margin-bottom: 1rem;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
     pdf_folder = "pdf_reports"
+
     if os.path.exists(pdf_folder):
         pdf_files = sorted(
             [f for f in os.listdir(pdf_folder) if f.endswith(".pdf")],
@@ -87,26 +100,13 @@ def admin_page():
         if not pdf_files:
             st.info("Aucun PDF trouvé.")
         else:
-            # Estilo global definido antes de insertarlo
-            st.markdown("""
-                <style>
-                    #scroll-pdf-zone {
-                        max-height: 200px;
-                        overflow-y: auto;
-                        padding-right: 8px;
-                        margin-bottom: 1rem;
-                    }
-                </style>
-            """, unsafe_allow_html=True)
-
-            # Contenedor de tarjetas PDF
+            # Comienza HTML acumulado
             pdf_html = "<div id='scroll-pdf-zone'>"
 
-            for filename in pdf_files:
+            for filename in pdf_files[:50]:
                 file_path = os.path.join(pdf_folder, filename)
                 with open(file_path, "rb") as f:
                     b64 = base64.b64encode(f.read()).decode()
-
                 filename_encoded = urllib.parse.quote(filename)
 
                 pdf_html += f"""
@@ -115,28 +115,31 @@ def admin_page():
                                 padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
                                 box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
                         <div style="flex-grow: 1; display: flex; align-items: center;">
-                            <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; display: inline-block;" title="{filename}">
+                            <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden;
+                                        text-overflow: ellipsis; max-width: 220px; display: inline-block;"
+                                title="{filename}">
                                 📄 {filename}
                             </span>
                         </div>
                         <div style="display: flex; gap: 6px;">
                             <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
-                                <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black; border: none; border-radius: 4px;">
+                                <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black;
+                                            border: none; border-radius: 4px;">
                                     ⬇️ Télécharger
                                 </button>
                             </a>
-                            <button onclick="window.location.href='/pdf_viewer_page?pdf_to_view={filename_encoded}'"
-                                style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff; color: black; border: none; border-radius: 4px;">
+                            <button onclick="window.location.href='/?pdf_to_view={filename_encoded}'"
+                                style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff; color: black;
+                                    border: none; border-radius: 4px;">
                                 👁️ Voir
                             </button>
                         </div>
                     </div>
                 """
 
-                pdf_html += "</div>"
-                st.markdown(pdf_html, unsafe_allow_html=True)
-
-
+            pdf_html += "</div>"
+            # Renderizar todo el HTML acumulado
+            st.markdown(pdf_html, unsafe_allow_html=True)
     else:
         st.warning("Le dossier des PDF n'existe pas.")
 
