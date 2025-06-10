@@ -147,16 +147,7 @@ def admin_page():
                     col1, col2, col3 = st.columns([3, 1, 1])
 
                     with col1:
-                        st.markdown(
-                            f"""
-                            <div style="width: 100%; text-align: center;">
-                                <span style="font-size: 18px; font-weight: bold; color: white;">
-                                    📄 {filename}
-                                </span>
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
+                        st.markdown(f"<div style='font-size: 30px; margin: 0; padding: 0;'>📄 <b>{filename}</b></div>", unsafe_allow_html=True)
                     
                     with col2:
                         file_path = os.path.join(pdf_folder, filename)
