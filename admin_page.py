@@ -96,8 +96,9 @@ def admin_page():
                             padding-right: 8px;
                         }
                     </style>
-                    <div id="scroll-pdf-zone">
                 """, unsafe_allow_html=True)
+
+                pdf_html = '<div id="scroll-pdf-zone">'
 
                 for filename in pdf_files:
                     file_path = os.path.join(pdf_folder, filename)
@@ -107,7 +108,7 @@ def admin_page():
                     # URL encoding du nom de fichier pour éviter des problèmes d'URL
                     filename_encoded = urllib.parse.quote(filename)
 
-                    st.markdown(f"""
+                    pdf_html += f"""
                         <div style="display: flex; align-items: center; justify-content: space-between;
                                     background-color: #ffffff; border: 1px solid #ccc;
                                     padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
@@ -129,10 +130,11 @@ def admin_page():
                                 </button>
                             </div>
                         </div>
-                    """, unsafe_allow_html=True)
+                    """
 
                 # Cierre du div scroll
-                st.markdown("</div>", unsafe_allow_html=True)
+                pdf_html += '</div>'
+                st.markdown(pdf_html, unsafe_allow_html=True)
 
     else:
         st.warning("Le dossier des PDF n'existe pas.")
