@@ -215,7 +215,7 @@ def admin_page():
         if search_email:
             filtered_requests = requests[requests['Email'].str.lower().str.contains(search_email)]
         else:
-            filtered_requests = requests.head(25)
+            filtered_requests = requests.head(2)
 
         with st.container(height=300):
             if filtered_requests.empty:
