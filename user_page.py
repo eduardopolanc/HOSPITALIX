@@ -12,113 +12,196 @@ from fpdf import FPDF
 import base64
 from script.pdf.pdf_generator import Make_pdf
 from datetime import datetime as dt
+import hashlib
+import pandas as pd
+import smtplib
+from email.message import EmailMessage
+from dotenv import load_dotenv
+
+load_dotenv()
+EMAIL_SENDER = os.getenv("EMAIL_SENDER")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+
+ADMIN_EMAIL = "flo.oerlemans@epfedu.fr"
+
+def send_password_change_email(user_email):
+    msg = EmailMessage()
+    msg["Subject"] = "Changement de mot de passe"
+    msg["From"] = EMAIL_SENDER
+    msg["To"] = user_email
+
+    html_content = f"""
+    <html>
+        <body>
+            <p>Bonjour,</p>
+            <p>Votre mot de passe a été modifié avec succès.</p>
+            <p>Si vous n'êtes pas à l'origine de cette modification, veuillez contacter notre équipe à l'adresse suivante :
+            <a href='mailto:contact@droitsquotidiens.fr'>contact@droitsquotidiens.fr</a>.</p>
+            <p>Merci,<br>L'équipe Droits Quotidiens</p>
+        </body>
+    </html>
+    """
+
+    msg.set_content("Votre mot de passe a été modifié.")
+    msg.add_alternative(html_content, subtype='html')
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            server.send_message(msg)
+    except Exception as e:
+        logging.error(f"Erreur lors de l'envoi de l'email : {e}")
+
 
 def user_page():
-  File_name1 = "/data/copie_windows/version Windows alix02/Desktop/ALIX_APP/script/fonction/Fiche1.txt"
-  File_name2 = "/data/copie_windows/version Windows alix02/Desktop/ALIX_APP/script/fonction/Fiche2.txt"
-  v1,v2,v3,v4,v5='Z','Z','Z','Z','Z'
+    st.image("dq-legaltech-logo.ico", width=100)
+    st.markdown("<h3 style='text-align: center;'>Génération de fiches</h3>", unsafe_allow_html=True)
 
-  memory_fiche1 = open(File_name1,encoding='utf-8').readlines()
-  memory_fiche2 = open(File_name2,encoding='utf-8').readlines()
+    FILE_NAME1 = "script/fonction/Fiche1.txt"
+    FILE_NAME2 = "script/fonction/Fiche2.txt"
+    USER_FILE = "accepted_user_information.xlsm"
+    COMMENT_FILE = "Commentaire.xlsx"
 
-  st.sidebar.title('Choose')
-  list_contexte=st.sidebar.multiselect('Santé/contexte',('mémoire','santé','surendettement','maltraitance','internet','tuteur','rien','plus disponible','pas habitude papier','indifférent'))
-  list_varaibale_situ_perso=st.sidebar.selectbox('Situation perso	',('Seule','Veuf', 'Divorce','Conjoint pas autonome','Conjoint autonome','indifférent'))
-  list_aidant=st.sidebar.selectbox('Famille',('famille proche','famille éloignée','autre','aucun','plus disponible','indifférent'))
-  list_patrimoine=st.sidebar.selectbox('Patrimoine',('Faible','moyen','important','gestion pat','indifférent'))
-  list_relation=st.sidebar.multiselect('Qualité relation/pb gestion	',('bonnes relations','relation tendues','admin','budget','suivi med','aucun pb','gestion pat','indifférent'))
+    def load_users():
+        if not os.path.exists(USER_FILE):
+            return None
+        try:
+            df = pd.read_excel(USER_FILE, engine="openpyxl")
+            if not all(col in df.columns for col in ["Email (username)", "Password"]):
+                return None
+            return df
+        except:
+            return None
 
+    df_users = load_users()
+    if df_users is None:
+        st.error("Erreur de chargement des utilisateurs. Veuillez contacter l'administrateur.")
+        st.stop()
 
-  context = []
-  context.append(list_contexte)
-  context.append(list_varaibale_situ_perso)
-  context.append(list_aidant)
-  context.append(list_patrimoine)
-  context.append(list_relation)
+    if "user_email" in st.session_state:
+        with st.expander("⚙️ Options"):
+            menu_options = ["Profil", "Déconnexion"]
+            if st.session_state.user_email.lower() != ADMIN_EMAIL.lower():
+                menu_options.insert(1, "Changer mot de passe")
 
-  array_vchoisi =[]
-  array_contexte=[]
-  array_relation=[]
+            menu_option = st.radio("Options", menu_options, key="user_menu")
 
-  v1 = [fonction.val_contexte2(x) for x in list_contexte] 
-  array_vchoisi.append(v1)
+            if menu_option == "Changer mot de passe":
+                st.subheader("🔐 Changer le mot de passe")
+                current = st.text_input("Mot de passe actuel", type="password")
+                new_pwd = st.text_input("Nouveau mot de passe", type="password")
+                confirm_pwd = st.text_input("Confirmez le nouveau mot de passe", type="password")
+                if st.button("Mettre à jour"):
+                    row = df_users[df_users["Email (username)"].str.lower() == st.session_state.user_email.lower()]
+                    if not row.empty and current == str(row.iloc[0]["Password"]):
+                        if new_pwd == confirm_pwd:
+                            df_users.loc[row.index, "Password"] = new_pwd
+                            df_users.to_excel(USER_FILE, index=False, engine="openpyxl")
+                            send_password_change_email(st.session_state.user_email)
+                            st.success("Mot de passe mis à jour.")
+                        else:
+                            st.error("Les mots de passe ne correspondent pas.")
+                    else:
+                        st.error("Mot de passe actuel incorrect.")
 
-  v2 = fonction.val_situ_perso2(list_varaibale_situ_perso)
-  array_vchoisi.append(v2[0])
+            elif menu_option == "Déconnexion":
+                st.session_state.clear()
+                st.success("Déconnecté avec succès.")
+                st.rerun()
 
-  v3 = fonction.val_aidant2(list_aidant)
-  array_vchoisi.append(v3[0])
+        st.sidebar.title('Choose')
+        list_contexte = st.sidebar.multiselect('Santé/contexte', (
+            'mémoire', 'santé', 'surendettement', 'maltraitance', 'internet',
+            'tuteur', 'rien', 'plus disponible', 'pas habitude papier', 'indifférent'))
+        situation_perso = st.sidebar.selectbox('Situation perso', (
+            'Seule', 'Veuf', 'Divorce', 'Conjoint pas autonome', 'Conjoint autonome', 'indifférent'))
+        aidant = st.sidebar.selectbox('Famille', (
+            'famille proche', 'famille éloignée', 'autre', 'aucun', 'plus disponible', 'indifférent'))
+        patrimoine = st.sidebar.selectbox('Patrimoine', (
+            'Faible', 'moyen', 'important', 'gestion pat', 'indifférent'))
+        relation = st.sidebar.multiselect('Qualité relation/pb gestion', (
+            'bonnes relations', 'relation tendues', 'admin', 'budget', 'suivi med', 'aucun pb', 'gestion pat', 'indifférent'))
 
-  v4 = fonction.val_patrimoine2(list_patrimoine)
-  array_vchoisi.append(v4[0])
+        context = [list_contexte, situation_perso, aidant, patrimoine, relation]
+        array_vchoisi = []
 
-  v5 = [fonction.val_relation2(x) for x in list_relation]
-  array_vchoisi.append(v5)
+        v1 = [fonction.val_contexte2(x) for x in list_contexte]
+        array_vchoisi.append(v1)
+        v2 = fonction.val_situ_perso2(situation_perso)
+        array_vchoisi.append(v2[0])
+        v3 = fonction.val_aidant2(aidant)
+        array_vchoisi.append(v3[0])
+        v4 = fonction.val_patrimoine2(patrimoine)
+        array_vchoisi.append(v4[0])
+        v5 = [fonction.val_relation2(x) for x in relation]
+        array_vchoisi.append(v5)
 
-  if(st.button("Click to display the form")): 
-    st.title('Code fiche :')
-    st.write(v1,v2,v3,v4,v5)
-    if (len(v1)>1) or (len(v5)>1):
-      fonction.generate(array_vchoisi,File_name1)
-      fonction.generate_with_regle(array_vchoisi,File_name2)
-      fiche1 = open(File_name1,encoding='utf-8').readlines()
-      fiche2 = open(File_name2,encoding='utf-8').readlines()
-      st.title('Fiche sans regle:')
-      st.write(fiche1)
-      st.title('Fiche avec regle:')
-      st.write(fiche2)
-      memory_fiche1 = fiche1
-      memory_fiche2 = fiche2
-    else:
-      fonction.generate(array_vchoisi,File_name2)
-      fiche2 = open(File_name2,encoding='utf-8').readlines()
-      st.title('Fiche simple:')
-      st.write(fiche2)
+        if "show_form" not in st.session_state:
+            st.session_state.show_form = False
 
-      memory_fiche2 = fiche2
+        st.toggle("Afficher / Masquer le formulaire", key="show_form")
 
+        if st.session_state.show_form:
+            st.subheader('Code fiche :')
+            st.write(v1, v2, v3, v4, v5)
+            if (len(v1) > 1) or (len(v5) > 1):
+                fonction.generate(array_vchoisi, FILE_NAME1)
+                fonction.generate_with_regle(array_vchoisi, FILE_NAME2)
+                fiche1 = open(FILE_NAME1, encoding='utf-8').readlines()
+                fiche2 = open(FILE_NAME2, encoding='utf-8').readlines()
+                st.title('Fiche sans règle:')
+                st.write(fiche1)
+                st.title('Fiche avec règle:')
+                st.write(fiche2)
+            else:
+                fonction.generate(array_vchoisi, FILE_NAME2)
+                fiche2 = open(FILE_NAME2, encoding='utf-8').readlines()
+                st.title('Fiche simple:')
+                st.write(fiche2)
 
+        st.write('Commentaire')
+        title = st.text_input('Commentaire', '')
 
-  st.write('Commentaire')
-  title = st.text_input('Commentaire', '')
+        v1 = fonction.recup_variable_com(v1)
+        v2 = fonction.recup_variable_com(v2)
+        v3 = fonction.recup_variable_com(v3)
+        v4 = fonction.recup_variable_com(v4)
+        v5 = fonction.recup_variable_com(v5)
 
-  v1 = fonction.recup_variable_com(v1)
-  v2 = fonction.recup_variable_com(v2)
-  v3 = fonction.recup_variable_com(v3)
-  v4 = fonction.recup_variable_com(v4)
-  v5 = fonction.recup_variable_com(v5)
+        if st.button("ajouter le commentaire"):
+            com = [dt.now(), 'Code fiche :', v1, v2, v3, v4, v5, title]
+            try:
+                wb = load_workbook("Commentaire.xlsx")
+                ws = wb["Com"]
+                ws.append(com)
+                wb.save("Commentaire.xlsx")
+                st.success("Commentaire ajouté avec succès.")
+            except Exception as e:
+                st.error(f"Erreur lors de l'ajout du commentaire : {e}")
 
-  if(st.button("ajouter le commentaire")):
-    com =[dt.now(),'Code fiche :',v1, v2, v3, v4, v5,title]
-    file = "Commentaire.xlsx"
-    wb = load_workbook(file)
-    ws = wb["Com"]
-    ws.append(com)
-    wb.save(file)
+        if st.button("Export Report"):
+            pdf = Make_pdf(FILE_NAME2, context)
+            b64 = base64.b64encode(pdf.output(dest='S').encode('latin-1', 'ignore'))
+            html = f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="FICHE_AUTOMATISEE.pdf">Download file</a>'
+            st.markdown(html, unsafe_allow_html=True)
 
+        if st.button("view pdf"):
+            st.session_state.page = "viewer"
+            st.rerun()
 
-  export_as_pdf = st.button("Export Report")
+        if st.session_state.user_email.lower() == ADMIN_EMAIL.lower():
+            if st.button("go to admin"):
+                st.session_state.page = "admin"
+                st.rerun()
 
-  def create_download_link(val, filename):
-      b64 = base64.b64encode(val)  # val looks like b'...'
-      return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{filename}.pdf">Download file</a>'
-
-
-  if export_as_pdf:
-
-      pdf = Make_pdf(File_name2,context)
-
-      html = create_download_link(pdf.output(dest='S').encode('latin-1','ignore'),filename='FICHE AUTOMATISEE D’INFORMATIONS PERSONNALISEES')
-
-      st.markdown(html, unsafe_allow_html=True)
-
-  button_pdf = st.button("view pdf")
-  button_admin = st.button("go to admin")
-
-  if button_pdf:
-    st.session_state.page = "viewer"
-    st.rerun()
-
-  if button_admin:
-    st.session_state.page = "admin"
-    st.rerun()
+    st.markdown(
+        """
+        <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
+            <p style="text-align:center; color:white; font-size:0.9em; margin:0;">
+                Droits Quotidiens Legal Tech<br>
+                📧 Pour toute question, contactez-nous à <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
