@@ -163,27 +163,46 @@ def admin_page():
     # --- Columna izquierda ---
     with col1:
         st.markdown("### ✅ Utilisateurs existants")
-        accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
 
+        accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
         if search_email:
             accepted_users = accepted_users[accepted_users['Email (username)'].str.lower().str.contains(search_email)]
 
-        for i, (_, row) in enumerate(accepted_users.head(5).iterrows()):
-            if st.button(f"{row['Email (username)']}", key=f"accepted_{i}"):
-                st.session_state.selected_user_type = "accepted"
-                st.session_state.selected_user_data = row.to_dict()
+        # Scroll para usuarios aceptados
+        with st.container():
+            with st.expander("Afficher les utilisateurs existants", expanded=True):
+                scroll_container_style = """
+                <style>
+                .scroll-box {
+                    max-height: 300px;
+                    overflow-y: auto;
+                    padding-right: 8px;
+                }
+                </style>
+                <div class="scroll-box">
+                """
+                st.markdown(scroll_container_style, unsafe_allow_html=True)
+                for i, (_, row) in enumerate(accepted_users.iterrows()):
+                    if st.button(f"{row['Email (username)']}", key=f"accepted_{i}"):
+                        st.session_state.selected_user_type = "accepted"
+                        st.session_state.selected_user_data = row.to_dict()
+                st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown("---")
         st.markdown("### 🕒 Demandes en attente")
-        requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
 
+        requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
         if search_email:
             requests = requests[requests['Email'].str.lower().str.contains(search_email)]
 
-        for i, (_, row) in enumerate(requests.head(5).iterrows()):
-            if st.button(f"{row['Email']}", key=f"pending_{i}"):
-                st.session_state.selected_user_type = "pending"
-                st.session_state.selected_user_data = row.to_dict()
+        with st.container():
+            with st.expander("Afficher les demandes en attente", expanded=True):
+                st.markdown(scroll_container_style, unsafe_allow_html=True)
+                for i, (_, row) in enumerate(requests.iterrows()):
+                    if st.button(f"{row['Email']}", key=f"pending_{i}"):
+                        st.session_state.selected_user_type = "pending"
+                        st.session_state.selected_user_data = row.to_dict()
+                st.markdown("</div>", unsafe_allow_html=True)
 
     # --- Columna derecha ---
     with col2:
