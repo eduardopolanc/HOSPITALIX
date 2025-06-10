@@ -131,38 +131,47 @@ def admin_page():
         search_term = st.text_input("Rechercher un PDF", "")
 
     pdf_folder = "static"
-    if os.path.exists(pdf_folder):
-        pdf_files = sorted([f for f in os.listdir(pdf_folder) if f.endswith(".pdf")], reverse=True)
+    all_pdfs = sorted([f for f in os.listdir(pdf_folder) if f.endswith(".pdf")], reverse=True) if os.path.exists(pdf_folder) else []
 
-        if search_term:
-            pdf_files = [f for f in pdf_files if search_term.lower() in f.lower()]
+    # Filtrado por búsqueda
+    if search_term:
+        filtered_pdfs = [f for f in all_pdfs if search_term in f.lower()]
+    else:
+        filtered_pdfs = all_pdfs[:10]  # Limitar a 25 si no se está buscando
 
-        if not pdf_files:
-            st.info("Aucun PDF trouvé.")
-        else:
-            with st.container(height=300):
-                for filename in pdf_files[:50]:
-                    st.markdown('<hr style="margin: 6px 0;">', unsafe_allow_html=True)
-                    col1, col2, col3 = st.columns([3, 1, 1])
+    # Mostrar PDFs
+    if not filtered_pdfs:
+        st.info("Aucun PDF trouvé.")
+    else:
+        with st.container(height=300):
+            for filename in filtered_pdfs:
+                st.markdown('<hr style="margin: 6px 0;">', unsafe_allow_html=True)
+                col1, col2, col3 = st.columns([3, 1, 1])
 
-                    with col1:
-                        st.markdown(
-                            f"""
-                            <div style="font-size: 30px; margin: 0; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block;" title="{filename}">
-                                📄 <b>{filename}</b>
-                            </div>
-                            """, unsafe_allow_html=True)
- 
-                    with col2:
-                        file_path = os.path.join(pdf_folder, filename)
-                        with open(file_path, "rb") as f:
-                            st.download_button("⬇️ Télécharger", f, file_name=filename, mime="application/pdf")
+                with col1:
+                    st.markdown(
+                        f"""
+                        <div style="font-size: 25px; margin: 0; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block;" title="{filename}">
+                            📄 <b>{filename}</b>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
-                    with col3:
-                        pdf_url = f"/app/static/{urllib.parse.quote(filename)}"
-                        st.link_button("👁️ Voir", url=pdf_url)
-                        
-                    st.markdown('<hr style="margin: 6px 0;">', unsafe_allow_html=True)
+                with col2:
+                    file_path = os.path.join(pdf_folder, filename)
+                    with open(file_path, "rb") as f:
+                        st.download_button("⬇️ Télécharger", f, file_name=filename, mime="application/pdf")
+
+                with col3:
+                    import urllib.parse
+                    pdf_url = f"/app/static/{urllib.parse.quote(filename)}"
+                    st.link_button("👁️ Voir", url=pdf_url)
+
+            # Mostrar mensaje si hay más de 25 y no hay búsqueda activa
+            if not search_term and len(all_pdfs) > 10:
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
 
     if st.button("Generer un PDF"):
         st.session_state.page = "user"
@@ -176,7 +185,7 @@ def admin_page():
     with colr:
         search_email = st.text_input("🔍 Rechercher un utilisateur (email)").strip().lower()
 
-    col_accepted, col_pending = st.columns(2)
+    col_accepted, col_pending = st.columns(25)
 
     # ---- Utilisateurs acceptés ----
     with col_accepted:
@@ -257,6 +266,6 @@ def admin_page():
                                 st.warning("Demande rejetée.")
                                 st.rerun()
                 # Message en bas
-                if not search_email and len(requests) > 2:
+                if not search_email and len(requests) > 25:
                     st.markdown("<br>", unsafe_allow_html=True)
                     st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
