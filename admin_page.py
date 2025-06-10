@@ -134,7 +134,6 @@ def admin_page():
     if os.path.exists(pdf_folder):
         pdf_files = sorted([f for f in os.listdir(pdf_folder) if f.endswith(".pdf")], reverse=True)
 
-        # Filtrar por texto si se busca algo
         if search_term:
             pdf_files = [f for f in pdf_files if search_term.lower() in f.lower()]
 
@@ -169,12 +168,17 @@ def admin_page():
         st.session_state.page = "user"
         st.rerun()
 
-    st.markdown("### 👥 Gestion des utilisateurs")
-    search_email = st.text_input("🔍 Rechercher un utilisateur (email)").strip().lower()
+
+    cole, colr = st.columns([2,4])
+
+    with cole:
+        st.markdown("### 👥 Gestion des utilisateurs")
+    with colr:
+        search_email = st.text_input("🔍 Rechercher un utilisateur (email)").strip().lower()
 
     col_accepted, col_pending = st.columns(2, border=True)
 
-    # --- Columna izquierda : utilisateurs existants ---
+    # --- utilisateurs existants ---
     with col_accepted:
         st.markdown("#### ✅ Utilisateurs acceptés")
         accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
@@ -197,7 +201,7 @@ def admin_page():
                             st.success("Utilisateur supprimé.")
                             st.rerun()
 
-    # --- Columna derecha : demandes en attente ---
+    # --- demandes en attente ---
     with col_pending:
         st.markdown("#### 🕒 Demandes en attente")
         requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
