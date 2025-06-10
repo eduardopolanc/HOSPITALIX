@@ -8,16 +8,20 @@ from review_request_page import review_request_page
 
 # Redirigir automáticamente a la URL con embed=true si no está presente
 if "embed" not in st.query_params:
-    placeholder = st.empty()
-    placeholder.markdown("Redirection en cours vers la version intégrée...")
+    st.markdown("""
+        <script>
+        const current = window.location.href;
+        if (!current.includes("embed=true")) {
+            const clean = current.split("?")[0];
+            window.location.replace(clean + "?embed=true");
+        }
+        </script>
+    """, unsafe_allow_html=True)
 
-    js_redirect = """
-    <script>
-    const url = window.location.href.split("?")[0];
-    window.location.replace(url + "?embed=true");
-    </script>
-    """
-    st.markdown(js_redirect, unsafe_allow_html=True)
+    # Evita que se dibuje el resto de la app
+    st.markdown("<p style='text-align:center;'>Redirection en cours vers la version intégrée...</p>", unsafe_allow_html=True)
+    st.markdown("<style>main, footer, header {visibility: hidden;}</style>", unsafe_allow_html=True)
+    st.stop()
 
 
 
