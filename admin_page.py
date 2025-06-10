@@ -91,15 +91,13 @@ def admin_page():
                 st.markdown("""
                     <style>
                         #scroll-pdf-zone {
-                            max-height: 300px;
+                            max-height: 200px;
                             overflow-y: auto;
                             padding-right: 8px;
                         }
                     </style>
                 """, unsafe_allow_html=True)
-
-                pdf_html = '<div id="scroll-pdf-zone">'
-
+                pdf_html = "<div id='scroll-pdf-zone'>"
                 for filename in pdf_files:
                     file_path = os.path.join(pdf_folder, filename)
                     with open(file_path, "rb") as f:
@@ -133,7 +131,7 @@ def admin_page():
                     """
 
                 # Cierre du div scroll
-                pdf_html += '</div>'
+                pdf_html += "</div>"
                 st.markdown(pdf_html, unsafe_allow_html=True)
 
     else:
