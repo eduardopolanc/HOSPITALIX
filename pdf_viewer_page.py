@@ -20,15 +20,10 @@ def pdf_viewer_page():
         return
 
     # Leer el contenido y convertir a base64
-    with open(file_path, "rb") as f:
-        b64_pdf = base64.b64encode(f.read()).decode()
-
-    # Mostrar el PDF embebido
-    pdf_display = f"""
-        <iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="700px"
-                style="border: none;"></iframe>
-    """
-    st.components.v1.html(pdf_display, height=720, scrolling=False)
+    st.markdown(f"""
+        <p>Cliquez ci-dessous pour ouvrir le PDF dans un nouvel onglet :</p>
+        <a href="./pdf_reports/{filename}" target="_blank" style="font-size: 18px;">📄 {filename}</a>
+    """, unsafe_allow_html=True)
 
     # Botones de navegación
     col1, col2 = st.columns(2)
