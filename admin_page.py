@@ -137,7 +137,7 @@ def admin_page():
     if search_term:
         filtered_pdfs = [f for f in all_pdfs if search_term in f.lower()]
     else:
-        filtered_pdfs = all_pdfs[:10]  # Limitar a 25 si no se está buscando
+        filtered_pdfs = all_pdfs[:25]  # Limitar a 25 si no se está buscando
 
     # Mostrar PDFs
     if not filtered_pdfs:
@@ -169,7 +169,7 @@ def admin_page():
                     st.link_button("👁️ Voir", url=pdf_url)
 
             # Mostrar mensaje si hay más de 25 y no hay búsqueda activa
-            if not search_term and len(all_pdfs) > 10:
+            if not search_term and len(all_pdfs) > 25:
                 st.markdown("<br>", unsafe_allow_html=True)
                 st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
 
@@ -185,7 +185,7 @@ def admin_page():
     with colr:
         search_email = st.text_input("🔍 Rechercher un utilisateur (email)").strip().lower()
 
-    col_accepted, col_pending = st.columns(25)
+    col_accepted, col_pending = st.columns(2)
 
     # ---- Utilisateurs acceptés ----
     with col_accepted:
