@@ -21,8 +21,11 @@ def pdf_viewer_page():
 
     # Leer el contenido y convertir a base64
     st.markdown(f"""
-        <iframe src="/static/pdf_reports/{filename}" width="100%" height="700px"
-                style="border: none;"></iframe>
+        <iframe src="/static/pdf_reports/{filename}" width="100%" height="700px" style="border: none;"></iframe>
+
+        <p style="margin-top: 10px;">
+            🔗 Si le PDF ne s'affiche pas, <a href="/static/pdf_reports/{filename}" target="_blank">cliquez ici pour l'ouvrir dans un nouvel onglet</a>.
+        </p>
     """, unsafe_allow_html=True)
 
 
