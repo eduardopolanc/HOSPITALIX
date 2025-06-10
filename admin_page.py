@@ -76,15 +76,24 @@ def admin_page():
         except:
             st.error("Erreur lors du chargement du fichier de demandes.")
     
-    st.subheader("📄 PDF générés")
+    col_Z, col_x = st.columns([1, 2])
+
+    with col_Z:
+        st.subheader("📄 PDF générés")
+
+    with col_x:
+        search_term = st.text_input("Rechercher un PDF", "", key="pdf_search")
 
     pdf_folder = "pdf_reports"
+
     if os.path.exists(pdf_folder):
         pdf_files = sorted(
             [f for f in os.listdir(pdf_folder) if f.endswith(".pdf")],
             reverse=True
         )
 
+        if search_term:
+            pdf_files = [f for f in pdf_files if search_term.lower() in f.lower()]
         if not pdf_files:
             st.info("Aucun PDF trouvé.")
         else:
@@ -132,7 +141,7 @@ def admin_page():
             pdf_html += "</div>"
 
             # Renderiza todo con soporte HTML completo
-            components.html(pdf_html, height=440, scrolling=False)
+            components.html(pdf_html, height=400, scrolling=False)
     else:
         st.warning("Le dossier des PDF n'existe pas.")
 
