@@ -141,7 +141,7 @@ def admin_page():
             pdf_html += "</div>"
 
             # Renderiza todo con soporte HTML completo
-            components.html(pdf_html, height=400, scrolling=False)
+            components.html(pdf_html, height=300, scrolling=False)
     else:
         st.warning("Le dossier des PDF n'existe pas.")
 
