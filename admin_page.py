@@ -124,54 +124,37 @@ def admin_page():
             st.error("Erreur lors du chargement du fichier de demandes.")
     
     col_Z, col_x = st.columns([1, 2])
-
     with col_Z:
         st.subheader("📄 PDF générés")
-
     with col_x:
-        search_term = st.text_input("Rechercher un PDF", "", key="pdf_search")
+        search_term = st.text_input("Rechercher un PDF", "")
 
     pdf_folder = "pdf_reports"
-
     if os.path.exists(pdf_folder):
-        pdf_files = sorted(
-            [f for f in os.listdir(pdf_folder) if f.endswith(".pdf")],
-            reverse=True
-        )
+        pdf_files = sorted([f for f in os.listdir(pdf_folder) if f.endswith(".pdf")], reverse=True)
 
+        # Filtrar por texto si se busca algo
         if search_term:
             pdf_files = [f for f in pdf_files if search_term.lower() in f.lower()]
+
         if not pdf_files:
             st.info("Aucun PDF trouvé.")
         else:
-            # Empieza HTML completo para el scrollable container
-            pdf_html = """
-            <div style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
-            """
+            with st.container(height=420):
+                for filename in pdf_files[:50]:
+                    st.markdown(f"📄 **{filename}**")
 
-            for filename in pdf_files:
-                file_path = os.path.join("pdf_reports", filename)
-                with open(file_path, "rb") as f:
-                    b64 = base64.b64encode(f.read()).decode()
-
-                with st.container():
-                    col1, col2 = st.columns([4, 1])
+                    col1, col2 = st.columns([1, 1])
                     with col1:
-                        st.markdown(f"📄 **{filename}**")
+                        file_path = os.path.join(pdf_folder, filename)
+                        with open(file_path, "rb") as f:
+                            st.download_button("⬇️ Télécharger", f, file_name=filename, mime="application/pdf")
+
                     with col2:
-                        with st.form(key=f"form_{filename}"):
-                            submit = st.form_submit_button("👁️ Voir")
-                            if submit:
-                                st.session_state.page = "viewer"
-                                st.session_state.pdf_to_view = filename
-                                st.rerun()
-
-            pdf_html += "</div>"
-
-            # Renderiza todo con soporte HTML completo
-            components.html(pdf_html, height=300, scrolling=False)
-    else:
-        st.warning("Le dossier des PDF n'existe pas.")
+                        if st.button("👁️ Voir", key=f"voir_{filename}"):
+                            st.session_state.page = "viewer"
+                            st.session_state.pdf_to_view = filename
+                            st.rerun()
 
     if st.button("Generer un PDF"):
         st.session_state.page = "user"
