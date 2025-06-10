@@ -182,9 +182,14 @@ def admin_page():
     with col_accepted:
         st.markdown("#### ✅ Utilisateurs acceptés")
         accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
+        
         if search_email:
-            accepted_users = accepted_users[accepted_users['Email (username)'].str.lower().str.contains(search_email)]
-
+            filtered_accepted = accepted_users[accepted_users['Email (username)'].str.lower().str.contains(search_email)]
+        else:
+            filtered_accepted = accepted_users.head(25)
+            if len(accepted_users) > 25:
+                st.info("Utilisez la barre de recherche pour voir les suivants...")
+                
         with st.container(height=400):
             if accepted_users.empty:
                 st.info("Aucun utilisateur trouvé.")
@@ -205,8 +210,13 @@ def admin_page():
     with col_pending:
         st.markdown("#### 🕒 Demandes en attente")
         requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
+ 
         if search_email:
-            requests = requests[requests['Email'].str.lower().str.contains(search_email)]
+            filtered_requests = requests[requests['Email'].str.lower().str.contains(search_email)]
+        else:
+            filtered_requests = requests.head(2)
+            if len(requests) > 2:
+                st.info("Utilisez la barre de recherche pour voir les suivantes...")
 
         with st.container(height=400):
             if requests.empty:
