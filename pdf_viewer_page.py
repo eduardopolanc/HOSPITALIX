@@ -17,7 +17,7 @@ def pdf_viewer_page():
         st.warning("Aucun PDF sélectionné.")
         return
 
-    file_path = os.path.join("static", "pdf_reports", filename)
+    file_path = os.path.join("static", filename)
 
     if not os.path.exists(file_path):
         st.error("Le fichier PDF sélectionné n'existe pas.")

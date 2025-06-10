@@ -130,7 +130,7 @@ def admin_page():
     with col_x:
         search_term = st.text_input("Rechercher un PDF", "")
 
-    pdf_folder = "static/pdf_reports"
+    pdf_folder = "static"
     if os.path.exists(pdf_folder):
         pdf_files = sorted([f for f in os.listdir(pdf_folder) if f.endswith(".pdf")], reverse=True)
 
