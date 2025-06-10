@@ -8,6 +8,7 @@ from email.message import EmailMessage
 import smtplib
 from dotenv import load_dotenv
 import urllib.parse
+import html
 
 # Fonction pour générer un mot de passe aléatoire
 def generate_password(length=10):
@@ -117,8 +118,8 @@ def admin_page():
                         <div style="flex-grow: 1; display: flex; align-items: center;">
                             <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden;
                                         text-overflow: ellipsis; max-width: 220px; display: inline-block;"
-                                title="{filename}">
-                                📄 {filename}
+                                title="{html.escape(filename)}">
+                                📄 {html.escape(filename)}
                             </span>
                         </div>
                         <div style="display: flex; gap: 6px;">
