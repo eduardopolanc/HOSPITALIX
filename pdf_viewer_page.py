@@ -21,9 +21,10 @@ def pdf_viewer_page():
 
     # Leer el contenido y convertir a base64
     st.markdown(f"""
-        <p>Cliquez ci-dessous pour ouvrir le PDF dans un nouvel onglet :</p>
-        <a href="./pdf_reports/{filename}" target="_blank" style="font-size: 18px;">📄 {filename}</a>
+        <iframe src="/static/pdf_reports/{filename}" width="100%" height="700px"
+                style="border: none;"></iframe>
     """, unsafe_allow_html=True)
+
 
     # Botones de navegación
     col1, col2 = st.columns(2)
