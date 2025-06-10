@@ -160,14 +160,9 @@ def admin_page():
                             st.download_button("⬇️ Télécharger", f, file_name=filename, mime="application/pdf")
 
                     with col3:
-                        if st.button("👁️ Voir", key=f"voir_{filename}"):
-                            pdf_url = f"/app/static/pdf_reports/{urllib.parse.quote(filename)}"
-                            js = f"""
-                                <script>
-                                window.open("{pdf_url}", "_blank").focus();
-                                </script>
-                            """
-                            st.markdown(js, unsafe_allow_html=True)
+                        pdf_url = f"/app/static/{urllib.parse.quote(filename)}"
+                        st.link_button("👁️ Voir", url=pdf_url)
+                        
                     st.markdown('<hr style="margin: 6px 0;">', unsafe_allow_html=True)
 
     if st.button("Generer un PDF"):
