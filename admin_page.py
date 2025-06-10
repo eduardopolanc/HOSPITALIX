@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import os
 import pandas as pd
 import base64
@@ -78,20 +79,7 @@ def admin_page():
     
     st.subheader("📄 PDF générés")
 
-    # Estilo de scroll (debe ir fuera de cualquier contenedor)
-    st.markdown("""
-        <style>
-            #scroll-pdf-zone {
-                max-height: 250px;
-                overflow-y: auto;
-                padding-right: 8px;
-                margin-bottom: 1rem;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
     pdf_folder = "pdf_reports"
-
     if os.path.exists(pdf_folder):
         pdf_files = sorted(
             [f for f in os.listdir(pdf_folder) if f.endswith(".pdf")],
@@ -101,14 +89,17 @@ def admin_page():
         if not pdf_files:
             st.info("Aucun PDF trouvé.")
         else:
-            # Comienza HTML acumulado
-            pdf_html = "<div id='scroll-pdf-zone'>"
+            # Empieza HTML completo para el scrollable container
+            pdf_html = """
+            <div style="max-height: 420px; overflow-y: auto; padding-right: 8px;">
+            """
 
             for filename in pdf_files[:50]:
                 file_path = os.path.join(pdf_folder, filename)
                 with open(file_path, "rb") as f:
                     b64 = base64.b64encode(f.read()).decode()
                 filename_encoded = urllib.parse.quote(filename)
+                filename_safe = filename.replace('"', '&quot;').replace("'", "&#39;")
 
                 pdf_html += f"""
                     <div style="display: flex; align-items: center; justify-content: space-between;
@@ -116,22 +107,23 @@ def admin_page():
                                 padding: 6px 12px; border-radius: 6px; margin-bottom: 8px;
                                 box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 14px; color: black;">
                         <div style="flex-grow: 1; display: flex; align-items: center;">
-                            <span style="font-weight: 500; color: black; white-space: nowrap; overflow: hidden;
-                                        text-overflow: ellipsis; max-width: 220px; display: inline-block;"
-                                title="{html.escape(filename)}">
-                                📄 {html.escape(filename)}
+                            <span style="font-weight: 500; color: black; white-space: nowrap;
+                                        overflow: hidden; text-overflow: ellipsis;
+                                        max-width: 220px; display: inline-block;"
+                                title="{filename_safe}">
+                                📄 {filename_safe}
                             </span>
                         </div>
                         <div style="display: flex; gap: 6px;">
-                            <a href="data:application/pdf;base64,{b64}" download="{filename}" target="_blank">
-                                <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0; color: black;
-                                            border: none; border-radius: 4px;">
+                            <a href="data:application/pdf;base64,{b64}" download="{filename_safe}" target="_blank">
+                                <button style="font-size: 12px; padding: 4px 8px; background-color: #e0e0e0;
+                                            color: black; border: none; border-radius: 4px;">
                                     ⬇️ Télécharger
                                 </button>
                             </a>
                             <button onclick="window.location.href='/?pdf_to_view={filename_encoded}'"
-                                style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff; color: black;
-                                    border: none; border-radius: 4px;">
+                                style="font-size: 12px; padding: 4px 8px; background-color: #d0e7ff;
+                                    color: black; border: none; border-radius: 4px;">
                                 👁️ Voir
                             </button>
                         </div>
@@ -139,8 +131,9 @@ def admin_page():
                 """
 
             pdf_html += "</div>"
-            # Renderizar todo el HTML acumulado
-            st.markdown(pdf_html, unsafe_allow_html=True)
+
+            # Renderiza todo con soporte HTML completo
+            components.html(pdf_html, height=440, scrolling=False)
     else:
         st.warning("Le dossier des PDF n'existe pas.")
 
