@@ -91,7 +91,7 @@ def admin_page():
                 st.markdown("""
                     <style>
                         #scroll-pdf-zone {
-                            max-height: 200px;
+                            max-height: 300px;
                             overflow-y: auto;
                             padding-right: 8px;
                         }
