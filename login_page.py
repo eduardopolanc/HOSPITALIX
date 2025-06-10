@@ -21,8 +21,8 @@ def login_page():
 
     # Fichier Excel des utilisateurs
     user_file = "accepted_user_information.xlsm"
-    ADMIN_EMAIL = "flo.oerlemans@epfedu.fr"
-    ADMIN_PASSWORD = "123456"
+    ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
     # Chargement du fichier
     def load_users():

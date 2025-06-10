@@ -21,9 +21,8 @@ from dotenv import load_dotenv
 load_dotenv()
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-
-ADMIN_EMAIL = "flo.oerlemans@epfedu.fr"
-
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 def send_password_change_email(user_email):
     msg = EmailMessage()
     msg["Subject"] = "Changement de mot de passe"
@@ -55,7 +54,7 @@ def send_password_change_email(user_email):
 
 def user_page():
     st.image("dq-legaltech-logo.ico", width=100)
-    st.markdown("<h3 style='text-align: center;'>Génération de fiches</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>Générateur de fiches</h3>", unsafe_allow_html=True)
 
     FILE_NAME1 = "script/fonction/Fiche1.txt"
     FILE_NAME2 = "script/fonction/Fiche2.txt"
@@ -109,7 +108,7 @@ def user_page():
                 st.success("Déconnecté avec succès.")
                 st.rerun()
 
-        st.sidebar.title('Choose')
+        st.sidebar.title('Choix')
         list_contexte = st.sidebar.multiselect('Santé/contexte', (
             'mémoire', 'santé', 'surendettement', 'maltraitance', 'internet',
             'tuteur', 'rien', 'plus disponible', 'pas habitude papier', 'indifférent'))
@@ -139,7 +138,7 @@ def user_page():
         if "show_form" not in st.session_state:
             st.session_state.show_form = False
 
-        st.toggle("Afficher / Masquer le formulaire", key="show_form")
+        st.toggle("Afficher le formulaire", key="show_form")
 
         if st.session_state.show_form:
             st.subheader('Code fiche :')
@@ -179,18 +178,18 @@ def user_page():
             except Exception as e:
                 st.error(f"Erreur lors de l'ajout du commentaire : {e}")
 
-        if st.button("Export Report"):
+        if st.button("Exporter le rapport"):
             pdf = Make_pdf(FILE_NAME2, context)
             b64 = base64.b64encode(pdf.output(dest='S').encode('latin-1', 'ignore'))
             html = f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="FICHE_AUTOMATISEE.pdf">Download file</a>'
             st.markdown(html, unsafe_allow_html=True)
 
-        if st.button("view pdf"):
+        if st.button("Voir le pdf"):
             st.session_state.page = "viewer"
             st.rerun()
 
         if st.session_state.user_email.lower() == ADMIN_EMAIL.lower():
-            if st.button("go to admin"):
+            if st.button("Retour vers l'administrateur"):
                 st.session_state.page = "admin"
                 st.rerun()
 
