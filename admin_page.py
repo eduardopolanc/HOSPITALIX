@@ -149,48 +149,7 @@ def admin_page():
         st.session_state.page = "user"
         st.rerun()
 
-    search_user_email = st.text_input("🔍 Rechercher un utilisateur (par email)").strip().lower()
-
-    col1, col2 = st.columns(2)
-
-    # Scroll container style
-    scroll_style = """
-    <div style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
-    {}
-    </div>
-    """
-
-    # Bloque des demandes en attente
-    with col1:
-        st.subheader("🕒 Utilisateurs à valider")
-        filtered_requests = requests[requests['Email'].str.lower().str.contains(search_user_email)] if search_user_email else requests
-
-        html_pending = ""
-        for index, row in filtered_requests.iterrows():
-            html_pending += f"""
-                <div style="margin-bottom:10px; padding:8px; border:1px solid #ccc; border-radius:6px; background:#fff;">
-                    <strong>{row['Nom']} {row['Prenom']}</strong><br>
-                    {row['Email']}<br>
-                    <button onclick="alert('Accepter non implémenté ici')">✅ Accepter</button>
-                    <button onclick="alert('Rejeter non implémenté ici')">❌ Rejeter</button>
-                </div>
-            """
-        components.html(scroll_style.format(html_pending), height=320, scrolling=False)
-
-    # Bloque des utilisateurs enregistrés
-    with col2:
-        st.subheader("✅ Utilisateurs existants")
-        filtered_users = users_df[users_df['Email (username)'].str.lower().str.contains(search_user_email)] if search_user_email else users_df
-
-        html_existing = ""
-        for index, row in filtered_users.iterrows():
-            html_existing += f"""
-                <div style="margin-bottom:10px; padding:8px; border:1px solid #ccc; border-radius:6px; background:#f7f7f7;">
-                    <strong>{row['Email (username)']}</strong><br>
-                    🔐 {row['Password']}
-                </div>
-            """
-        components.html(scroll_style.format(html_existing), height=320, scrolling=False)
+    
 
 
 
