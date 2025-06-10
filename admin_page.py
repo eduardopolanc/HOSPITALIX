@@ -176,72 +176,67 @@ def admin_page():
     with colr:
         search_email = st.text_input("🔍 Rechercher un utilisateur (email)").strip().lower()
 
-    col_accepted, col_pending = st.columns(2, border=True)
+    col_accepted, col_pending = st.columns(2)
 
-    # --- utilisateurs existants ---
+    # ---- Utilisateurs acceptés ----
     with col_accepted:
         st.markdown("#### ✅ Utilisateurs acceptés")
         accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
-        
+
         if search_email:
             filtered_accepted = accepted_users[accepted_users['Email (username)'].str.lower().str.contains(search_email)]
         else:
             filtered_accepted = accepted_users.head(25)
-            if len(accepted_users) > 25:
-                st.info("Utilisez la barre de recherche pour voir les suivants...")
-                
-        with st.container(height=400):
-            if accepted_users.empty:
+
+        with st.container(height=300):
+            if filtered_accepted.empty:
                 st.info("Aucun utilisateur trouvé.")
             else:
-                for i, (_, row) in enumerate(accepted_users.iterrows()):
+                for i, (_, row) in enumerate(filtered_accepted.iterrows()):
                     with st.expander(f"{row['Email (username)']}"):
-                        for label in ["Email (username)", "Nom", "Prenom", "Téléphone", "Entreprise", "Rôle"]:
-                            if label in row and pd.notna(row[label]):
-                                st.write(f"**{label} :** {row[label]}")
-                        
-                        if st.button("🗑️ Supprimer l'utilisateur", key=f"delete_{i}"):
+                        for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email (username)"]:
+                            if field in row and pd.notna(row[field]):
+                                st.write(f"**{field} :** {row[field]}")
+                        if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
                             accepted_users = accepted_users[accepted_users['Email (username)'] != row['Email (username)']]
                             accepted_users.to_excel("accepted_user_information.xlsm", index=False)
                             st.success("Utilisateur supprimé.")
                             st.rerun()
+                # Message en bas
+                if not search_email and len(accepted_users) > 25:
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
 
-    # --- demandes en attente ---
+    # ---- Demandes en attente ----
     with col_pending:
         st.markdown("#### 🕒 Demandes en attente")
         requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
- 
+
         if search_email:
             filtered_requests = requests[requests['Email'].str.lower().str.contains(search_email)]
         else:
-            filtered_requests = requests.head(2)
-            if len(requests) > 2:
-                st.info("Utilisez la barre de recherche pour voir les suivantes...")
+            filtered_requests = requests.head(25)
 
-        with st.container(height=400):
-            if requests.empty:
+        with st.container(height=300):
+            if filtered_requests.empty:
                 st.info("Aucune demande trouvée.")
             else:
-                for i, (_, row) in enumerate(requests.iterrows()):
+                for i, (_, row) in enumerate(filtered_requests.iterrows()):
                     with st.expander(f"{row['Email']}"):
-                        st.write(f"**Nom :** {row['Nom']}")
-                        st.write(f"**Prénom :** {row['Prenom']}")
-                        st.write(f"**Téléphone :** {row['Téléphone']}")
-                        st.write(f"**Entreprise :** {row['Entreprise']}")
-                        st.write(f"**Rôle :** {row['Rôle']}")
-                        st.write(f"**Email :** {row['Email']}")
-
+                        for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email"]:
+                            if field in row and pd.notna(row[field]):
+                                st.write(f"**{field} :** {row[field]}")
                         colA, colB = st.columns(2)
                         with colA:
                             if st.button("✅ Accepter", key=f"accept_{i}"):
                                 password = generate_password()
                                 new_account = pd.DataFrame([{
-                                    "Email (username)": row["Email"],
                                     "Nom": row.get("Nom", ""),
                                     "Prenom": row.get("Prenom", ""),
                                     "Téléphone": row.get("Téléphone", ""),
                                     "Entreprise": row.get("Entreprise", ""),
                                     "Rôle": row.get("Rôle", ""),
+                                    "Email (username)": row["Email"],
                                     "Password": password
                                 }])
                                 if os.path.exists("accepted_user_information.xlsm"):
@@ -255,11 +250,13 @@ def admin_page():
                                 requests.to_excel("demandes_en_attente.xlsx", index=False)
                                 st.success("Utilisateur accepté.")
                                 st.rerun()
-
                         with colB:
                             if st.button("❌ Rejeter", key=f"reject_{i}"):
                                 requests = requests[requests['Email'] != row['Email']]
                                 requests.to_excel("demandes_en_attente.xlsx", index=False)
                                 st.warning("Demande rejetée.")
                                 st.rerun()
-
+                # Message en bas
+                if not search_email and len(requests) > 2:
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
