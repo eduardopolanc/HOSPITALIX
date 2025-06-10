@@ -178,7 +178,7 @@ def user_page():
             except Exception as e:
                 st.error(f"Erreur lors de l'ajout du commentaire : {e}")
 
-        if st.button("Exporter le rapport"):
+            if st.button("Exporter le rapport"):
             pdf = Make_pdf(FILE_NAME2, context)
             b64 = base64.b64encode(pdf.output(dest='S').encode('latin-1', 'ignore'))
             html = f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="FICHE_AUTOMATISEE.pdf">Download file</a>'
