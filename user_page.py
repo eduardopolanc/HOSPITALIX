@@ -178,11 +178,17 @@ def user_page():
             except Exception as e:
                 st.error(f"Erreur lors de l'ajout du commentaire : {e}")
 
-        if st.button("Exporter le rapport"):
-            pdf = Make_pdf(FILE_NAME2, context)
-            b64 = base64.b64encode(pdf.output(dest='S').encode('latin-1', 'ignore'))
-            html = f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="FICHE_AUTOMATISEE.pdf">Download file</a>'
-            st.markdown(html, unsafe_allow_html=True)
+         if st.button("Exporter le rapport"):
+             pdf = Make_pdf(FILE_NAME2, context)
+
+             date_str = dt.now().strftime("%Y-%m-%d")
+             user_name = st.session_state.user_email.split("@")[0].replace(".", "").replace(" ", "")
+             filename = f"{date_str}_{user_name}.pdf"
+
+             b64 = base64.b64encode(pdf.output(dest='S').encode('latin-1', 'ignore'))
+             html = f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{filename}">Download file</a>'
+             st.markdown(html, unsafe_allow_html=True)
+
 
         if st.button("Voir le pdf"):
             st.session_state.page = "viewer"
