@@ -87,23 +87,27 @@ def admin_page():
         if not pdf_files:
             st.info("Aucun PDF trouvé.")
         else:
+            # Estilo global definido antes de insertarlo
+            st.markdown("""
+                <style>
+                    #scroll-pdf-zone {
+                        max-height: 200px;
+                        overflow-y: auto;
+                        padding-right: 8px;
+                        margin-bottom: 1rem;
+                    }
+                </style>
+            """, unsafe_allow_html=True)
+
+            # Contenedor de tarjetas PDF
             with st.container():
-                st.markdown("""
-                    <style>
-                        #scroll-pdf-zone {
-                            max-height: 200px;
-                            overflow-y: auto;
-                            padding-right: 8px;
-                        }
-                    </style>
-                """, unsafe_allow_html=True)
                 pdf_html = "<div id='scroll-pdf-zone'>"
+
                 for filename in pdf_files:
                     file_path = os.path.join(pdf_folder, filename)
                     with open(file_path, "rb") as f:
                         b64 = base64.b64encode(f.read()).decode()
 
-                    # URL encoding du nom de fichier pour éviter des problèmes d'URL
                     filename_encoded = urllib.parse.quote(filename)
 
                     pdf_html += f"""
@@ -130,9 +134,9 @@ def admin_page():
                         </div>
                     """
 
-                # Cierre du div scroll
                 pdf_html += "</div>"
                 st.markdown(pdf_html, unsafe_allow_html=True)
+
 
     else:
         st.warning("Le dossier des PDF n'existe pas.")
