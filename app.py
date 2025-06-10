@@ -6,6 +6,23 @@ from sign_up_page import sign_up_page
 from user_page import user_page
 from review_request_page import review_request_page
 
+# Redirigir automáticamente a la URL con embed=true si no está presente
+query_params = st.experimental_get_query_params()
+if "embed" not in query_params:
+    js = """
+    <script>
+    const currentUrl = window.location.href;
+    if (!currentUrl.includes("?embed=true")) {
+        const cleanUrl = currentUrl.split("?")[0];  // remove any existing query
+        window.location.replace(cleanUrl + "?embed=true");
+    }
+    </script>
+    """
+    st.markdown(js, unsafe_allow_html=True)
+    st.stop()
+
+
+
 # Session state defaults
 if 'page' not in st.session_state:
     st.session_state.page = "login"
