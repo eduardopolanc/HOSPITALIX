@@ -147,7 +147,6 @@ def admin_page():
 
                     with col1:
                         st.markdown(f"📄 **{filename}**")
-
                     
                     with col2:
                         file_path = os.path.join(pdf_folder, filename)
@@ -159,6 +158,7 @@ def admin_page():
                             st.session_state.page = "viewer"
                             st.session_state.pdf_to_view = filename
                             st.rerun()
+                    st.markdown("---")
 
     if st.button("Generer un PDF"):
         st.session_state.page = "user"
@@ -279,99 +279,3 @@ def admin_page():
                         st.rerun()
         else:
             st.info("Sélectionnez un utilisateur dans la colonne de gauche pour voir les détails.")
-
-
-
-
-
-
-
-'''
-    col1, col2 = st.columns([3, 5])
-
-    # Section des demandes d'inscription
-    with col1:
-        st.markdown("#### <small>Demandes d'inscription</small>", unsafe_allow_html=True)
-        st.markdown("---")
-        if not requests.empty:
-            for index, row in requests.iterrows():
-                with st.expander(f"{row['Nom']} {row['Prenom']} - {row['Email']}"):
-                    st.write(f"**Nom :** {row['Nom']}")
-                    st.write(f"**Prénom :** {row['Prenom']}")
-                    st.write(f"**Téléphone :** {row['Téléphone']}")
-                    st.write(f"**Rôle :** {row['Rôle']}")
-                    st.write(f"**Entreprise :** {row['Entreprise']}")
-                    st.write(f"**Email :** {row['Email']}")
-
-                    cola, colr = st.columns(2)
-                    if cola.button("✅ Accepter", key=f"accept_{index}"):
-                        password = generate_password()
-                        new_account = pd.DataFrame([{
-                            "Email (username)": row['Email'],
-                            "Password": password
-                        }])
-                        if os.path.exists(account_file):
-                            existing = pd.read_excel(account_file)
-                            all_accounts = pd.concat([existing, new_account], ignore_index=True)
-                        else:
-                            all_accounts = new_account
-                        all_accounts.to_excel(account_file, index=False)
-                        requests.drop(index, inplace=True)
-                        requests.to_excel(request_file, index=False)
-                        if send_account_email(row['Email'], password):
-                            st.success(f"Compte créé et email envoyé à {row['Email']}.")
-                        else:
-                            st.warning(f"Compte créé mais échec de l'envoi d'email à {row['Email']}.")
-                        st.rerun()
-
-                    if colr.button("❌ Rejeter", key=f"reject_{index}"):
-                        requests.drop(index, inplace=True)
-                        requests.to_excel(request_file, index=False)
-                        st.warning(f"Demande rejetée pour : {row['Email']}")
-                        st.rerun()
-        else:
-            st.info("Aucune demande en attente.")
-
-    # Section des PDFs générés
-    with col2:
-        # Gestion des utilisateurs
-        st.markdown("---")
-        st.subheader("👤 Gestion des utilisateurs")
-
-        user_file = "accepted_user_information.xlsm"
-        if os.path.exists(user_file):
-            users_df = pd.read_excel(user_file)
-            if users_df.empty:
-                st.info("Aucun utilisateur enregistré.")
-            else:
-                for index, row in users_df.iterrows():
-                    with st.expander(f"{row['Email (username)']}"):
-                        st.write(f"**Mot de passe actuel :** {row['Password']}")
-                        col1, col2, col3 = st.columns(3)
-
-                        with col1:
-                            new_password = st.text_input(f"Nouveau mot de passe pour {row['Email (username)']}", "", key=f"newpwd_{index}")
-                            if st.button("🔑 Changer mot de passe", key=f"update_{index}"):
-                                users_df.at[index, "Password"] = new_password
-                                users_df.to_excel(user_file, index=False)
-                                st.success(f"Mot de passe mis à jour pour {row['Email (username)']}")
-                                st.rerun()
-
-                        with col3:
-                            if st.button("🗑️ Supprimer utilisateur", key=f"delete_{index}"):
-
-                                users_df.drop(index, inplace=True)
-                                users_df.to_excel(user_file, index=False)
-                                st.warning(f"Utilisateur supprimé : {row['Email (username)']}")
-                                st.rerun()
-        else:
-            st.warning("Fichier d'utilisateurs non trouvé.")
-
-    # Navigation
-    col4, col5, col6, col7 = st.columns([2,2,2,2])
-    with col5:
-        if st.button("pdf page"):
-            st.session_state.page = "viewer"
-            st.rerun()
-
-'''
