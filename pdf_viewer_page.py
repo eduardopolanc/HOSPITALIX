@@ -6,7 +6,11 @@ def pdf_viewer_page():
     st.set_page_config(layout="centered")
     st.markdown("<h3 style='text-align: center;'>Visualiseur de PDF</h3>", unsafe_allow_html=True)
 
-    # Recupera el nombre del PDF desde la URL
+    # Bouton "Retour à la page précédente" sans flèche
+    if st.button("Retour à la page précédente"):
+        st.session_state.page = "user"
+        st.rerun()
+
     filename = st.session_state.get("pdf_to_view", None)
 
     if not filename:
@@ -19,20 +23,19 @@ def pdf_viewer_page():
         st.error("Le fichier PDF sélectionné n'existe pas.")
         return
 
-    # Leer el contenido y convertir a base64
+    # Affichage du PDF
     st.markdown(f"""
         <iframe src="/static/pdf_reports/{filename}" width="100%" height="700px"
                 style="border: none;"></iframe>
     """, unsafe_allow_html=True)
 
-
-    # Botones de navegación
+    # Boutons en bas
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("⬅️ Retour Admin"):
+        if st.button("Retour Admin"):
             st.session_state.page = "admin"
             st.rerun()
     with col2:
-        if st.button("🏠 Accueil Utilisateur"):
+        if st.button("Accueil Utilisateur"):
             st.session_state.page = "user"
             st.rerun()
