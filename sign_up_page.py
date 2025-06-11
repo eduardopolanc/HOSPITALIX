@@ -65,14 +65,14 @@ def sign_up_page():
             load_dotenv()
             EMAIL_SENDER = os.getenv("EMAIL_SENDER")
             EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-            EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
+            ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
-            if all([EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECEIVER]):
+            if all([EMAIL_SENDER, EMAIL_PASSWORD, ADMIN_EMAIL]):
                 # Email à l'admin
                 msg_admin = EmailMessage()
                 msg_admin["Subject"] = "Nouvelle demande de création de compte"
                 msg_admin["From"] = EMAIL_SENDER
-                msg_admin["To"] = EMAIL_RECEIVER
+                msg_admin["To"] = ADMIN_EMAIL
 
                 html_admin = f"""
                 <html>
