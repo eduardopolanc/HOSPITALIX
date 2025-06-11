@@ -45,11 +45,11 @@ def sign_up_page():
 
             # Affichage des cas bloquants
             if already_pending:
-                st.warning("⏳ Une demande est déjà en attente pour cette adresse.")
+                st.warning("⏳ Une demande de création de compte a déjà été envoyée pour cette adresse email. Veuillez utiliser une autre adresse ou contacter contact@droitsquotidiens.fr.")
             elif user_exists:
-                st.info("✅ Ce compte est déjà actif.")
+                st.info("🚫 Un compte est déjà associé à cette adresse email. Veuillez utiliser une autre adresse.")
             elif deleted_user:
-                st.error("🚫 Ce compte a été supprimé. Contactez contact@droitsquotidiens.fr")
+                st.error("🚫 Un compte associé à cette adresse email a été précédemment supprimé. Veuillez utiliser une autre adresse ou contacter contact@droitsquotidiens.fr.")
             else:
                 # Création de la ligne de demande
                 new_request = pd.DataFrame([{
