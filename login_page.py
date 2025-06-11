@@ -101,9 +101,13 @@ L'équipe Droits Quotidiens
             elif df_users is not None:
                 user_row = df_users[df_users["Email (username)"].str.lower() == email.lower()]
                 if not user_row.empty:
-                    user_password = str(user_row.iloc[0]["Password"])
-                    if send_password_email(email, user_password):
-                        st.success("Email de récupération envoyé.")
+                    statut = user_row.iloc[0].get("Statut", "actif")
+                    if statut == "supprimé":
+                        st.error("🚫 Ce compte a été supprimé. Pour plus d'informations, contactez contact@droitsquotidiens.fr")
+                    else:
+                        user_password = str(user_row.iloc[0]["Password"])
+                        if send_password_email(email, user_password):
+                            st.success("Email de récupération envoyé.")
                 else:
                     st.error("Aucun compte associé à cet email.")
             else:
