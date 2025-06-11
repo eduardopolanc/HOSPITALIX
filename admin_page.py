@@ -171,7 +171,7 @@ def admin_page():
                                     "Rôle": row.get("Rôle", ""),
                                     "Email (username)": row["Email"],
                                     "Password": password,
-                                    "Status": "actif"
+                                    "Statut": "actif"
                                 }])
                                 if os.path.exists("accepted_user_information.xlsm"):
                                     existing = pd.read_excel("accepted_user_information.xlsm")
@@ -203,7 +203,7 @@ def admin_page():
         if "Statut" not in accepted_users.columns:
             accepted_users["Statut"] = "actif"
 
-        actifs = accepted_users[accepted_users["Status"] == "actif"]
+        actifs = accepted_users[accepted_users["Statut"] == "actif"]
 
         if search_email:
             actifs = actifs[actifs['Email (username)'].str.lower().str.contains(search_email)]
@@ -231,7 +231,7 @@ def admin_page():
         
     with col_s:
         st.markdown("#### 🗑️ Utilisateurs supprimés")
-        supprimes = accepted_users[accepted_users["Status"] == "supprimé"]
+        supprimes = accepted_users[accepted_users["Statut"] == "supprimé"]
         if search_email:
             supprimes = supprimes[supprimes["Email (username)"].str.lower().str.contains(search_email)]
 
