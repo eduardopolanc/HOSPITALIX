@@ -54,7 +54,7 @@ def send_password_change_email(user_email):
 
 
 def user_page():
-    colq, colw = st.columns([2])
+    colq, colw = st.columns([2,2])
 
     with colq:
         st.image("dq-legaltech-logo.ico", width=100)
