@@ -154,7 +154,7 @@ def admin_page():
             else:
                 for i, (_, row) in enumerate(filtered_requests.iterrows()):
                     with st.expander(f"{row['Email']}"):
-                        for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email"]:
+                        for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
                         colA, colB = st.columns(2)
@@ -164,7 +164,7 @@ def admin_page():
                                 send_account_email(row["Email"], password)
                                 new_account = pd.DataFrame([{
                                     "Nom": row.get("Nom", ""),
-                                    "Prenom": row.get("Prenom", ""),
+                                    "Prénom": row.get("Prénom", ""),
                                     "Téléphone": row.get("Téléphone", ""),
                                     "Entreprise": row.get("Entreprise", ""),
                                     "Rôle": row.get("Rôle", ""),
@@ -210,7 +210,7 @@ def admin_page():
             else:
                 for i, (_, row) in enumerate(actifs.iterrows()):
                     with st.expander(f"{row['Email (username)']}"):
-                        for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
+                        for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
                         if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
@@ -235,15 +235,12 @@ def admin_page():
             else:
                 for i, (_, row) in enumerate(supprimes.iterrows()):
                     with st.expander(f"{row['Email (username)']}"):
-                        for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
+                        for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
                 if not search_email and len(supprimes) > 25:
                     st.markdown("<br>", unsafe_allow_html=True)
                     st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
-
-
-
 
     #General statistics
     st.markdown("---")
