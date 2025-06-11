@@ -196,6 +196,7 @@ def user_page():
             html = f'<a href="data:application/octet-stream;base64,{b64}" download="{filename}">Download file</a>'
             st.markdown(html, unsafe_allow_html=True)
 
+
         if st.session_state.user_email.lower() == ADMIN_EMAIL.lower():
             if st.button("Retour vers l'administrateur"):
                 st.session_state.page = "admin"
