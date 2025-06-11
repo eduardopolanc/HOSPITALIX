@@ -54,8 +54,12 @@ def send_password_change_email(user_email):
 
 
 def user_page():
-    st.image("dq-legaltech-logo.ico", width=100)
-    st.markdown("<h3 style='text-align: center;'>Générateur de fiches</h3>", unsafe_allow_html=True)
+    colq, colw = st.columns([2])
+
+    with colq:
+        st.image("dq-legaltech-logo.ico", width=100)
+    with colw:
+        st.markdown("<h3 style='text-align: center;'>Générateur de fiches</h3>", unsafe_allow_html=True)
 
     FILE_NAME1 = "script/fonction/Fiche1.txt"
     FILE_NAME2 = "script/fonction/Fiche2.txt"
@@ -79,7 +83,7 @@ def user_page():
         st.stop()
 
     if "user_email" in st.session_state:
-        with st.expander("^z^y ^o Options"):
+        with st.expander("Options"):
             menu_options = ["Profil", "Déconnexion"]
             if st.session_state.user_email.lower() != ADMIN_EMAIL.lower():
                 menu_options.insert(1, "Changer mot de passe")
@@ -87,7 +91,7 @@ def user_page():
             menu_option = st.radio("Options", menu_options, key="user_menu")
 
             if menu_option == "Changer mot de passe":
-                st.subheader("^=^t^p Changer le mot de passe")
+                st.subheader("Changer le mot de passe")
                 current = st.text_input("Mot de passe actuel", type="password")
                 new_pwd = st.text_input("Nouveau mot de passe", type="password")
                 confirm_pwd = st.text_input("Confirmez le nouveau mot de passe", type="password")
