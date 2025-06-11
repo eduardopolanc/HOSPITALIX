@@ -137,7 +137,7 @@ def admin_page():
     with colr:
         search_email = st.text_input("🔍 Rechercher un utilisateur (email)").strip().lower()
 
-    col_o, col_p = st.columns(2)
+    col_o, col_p, col_s = st.columns(3)
 
     # ---- Demandes en attente ----
     with col_o:
@@ -170,7 +170,8 @@ def admin_page():
                                     "Entreprise": row.get("Entreprise", ""),
                                     "Rôle": row.get("Rôle", ""),
                                     "Email (username)": row["Email"],
-                                    "Password": password
+                                    "Password": password,
+                                    "Status": "actif"
                                 }])
                                 if os.path.exists("accepted_user_information.xlsm"):
                                     existing = pd.read_excel("accepted_user_information.xlsm")
@@ -199,30 +200,57 @@ def admin_page():
         st.markdown("#### ✅ Utilisateurs acceptés")
         accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
 
+        if "Statut" not in accepted_users.columns:
+            accepted_users["Statut"] = "actif"
+
+        actifs = accepted_users[accepted_users["Status"] == "actif"]
+
         if search_email:
-            filtered_accepted = accepted_users[accepted_users['Email (username)'].str.lower().str.contains(search_email)]
+            actifs = actifs[actifs['Email (username)'].str.lower().str.contains(search_email)]
         else:
-            filtered_accepted = accepted_users.head(25)
+            actifs = accepted_users.head(25)
 
         with st.container(height=300):
-            if filtered_accepted.empty:
+            if actifs.empty:
                 st.info("Aucun utilisateur trouvé.")
             else:
-                for i, (_, row) in enumerate(filtered_accepted.iterrows()):
+                for i, (_, row) in enumerate(actifs.iterrows()):
                     with st.expander(f"{row['Email (username)']}"):
-                        for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email (username)"]:
+                        for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
                         if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
-                            accepted_users = accepted_users[accepted_users['Email (username)'] != row['Email (username)']]
+                            accepted_users.loc[accepted_users["Email (username)"] == row["Email (username)"], "Statut"] = 'supprimé'
                             accepted_users.to_excel("accepted_user_information.xlsm", index=False)
-                            st.success("Utilisateur supprimé.")
+                            st.success("Utilisateur marqué comme supprimé.")
                             st.rerun()
                 # Message en bas
-                if not search_email and len(accepted_users) > 25:
+                if not search_email and len(actifs) > 25:
                     st.markdown("<br>", unsafe_allow_html=True)
                     st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
         
+    with col_s:
+        st.markdown("#### 🗑️ Utilisateurs supprimés")
+        supprimes = accepted_users[accepted_users["Status"] == "supprimé"]
+        if search_email:
+            supprimes = supprimes[supprimes["Email (username)"].str.lower().str.contains(search_email)]
+
+        with st.container(height=300):
+            if supprimes.empty:
+                st.info("Aucun utilisateur supprimé.")
+            else:
+                for i (_,row) in enumerate(supprimes.iterrows()):
+                    with st.expander(f"{row["Email (username)"]}"):
+                        for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
+                            if field in row and pd.notna(row[field]):
+                                st.write(f"**{field} :** {row[field]}")
+                
+                if not search_email and len(supprimes) > 25:
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
+
+
+
     #General statistics
     st.markdown("---")
     st.markdown("### 📊 Statistiques générales")
