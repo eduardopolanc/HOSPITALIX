@@ -239,7 +239,7 @@ def admin_page():
             if supprimes.empty:
                 st.info("Aucun utilisateur supprimé.")
             else:
-                for i (_,row) in enumerate(supprimes.iterrows()):
+                for i, (_,row) in enumerate(supprimes.iterrows()):
                     with st.expander(f"{row["Email (username)"]}"):
                         for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
                             if field in row and pd.notna(row[field]):
