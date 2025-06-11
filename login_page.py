@@ -1,70 +1,123 @@
 import streamlit as st
 import pandas as pd
 import os
+import smtplib
+from email.message import EmailMessage
+from dotenv import load_dotenv
 
 def login_page():
-    """
-    Page de connexion utilisateur.
-    L'utilisateur saisit son email et son mot de passe.
-    Les identifiants sont vérifiés dans un fichier Excel.
-    Possibilité de naviguer vers inscription, utilisateur ou admin via 3 boutons.
-    """
-
-    # Titre de la page
+    st.image("dq-legaltech-logo.ico", width=100)
+    st.markdown("<h3 style='text-align: center;'>Bienvenue sur ALIX</h3>", unsafe_allow_html=True)
     st.title("Page de Connexion")
 
     # Champs de saisie
-    email = st.text_input("Email")
+    email = st.text_input("Email").strip()
     password = st.text_input("Mot de passe", type="password")
 
-    # Boutons de navigation (en dehors du login)
-    button_signup = st.button("Sign up")
-    button_user = st.button("Go to user")
-    button_admin = st.button("Go to admin")
+    # Chargement des variables d'environnement
+    load_dotenv()
+    EMAIL_SENDER = os.getenv("EMAIL_SENDER")
+    EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
-    # Bouton pour se connecter
-    if st.button("Se connecter"):
-        # Vérification que les champs ne sont pas vides
-        if not email or not password:
-            st.warning("Merci de remplir à la fois email et mot de passe.")
-        else:
-            # Vérifier que le fichier Excel existe
-            user_file = "accepted_user_information.xlsm"
-            if not os.path.exists(user_file):
-                st.error("Le fichier des utilisateurs acceptés est introuvable.")
+    # Fichier Excel des utilisateurs
+    user_file = "accepted_user_information.xlsm"
+    ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
+    # Chargement du fichier
+    def load_users():
+        if not os.path.exists(user_file):
+            return None
+        try:
+            df = pd.read_excel(user_file, engine="openpyxl")
+            if not all(col in df.columns for col in ["Email (username)", "Password"]):
+                return None
+            return df
+        except:
+            return None
+
+    # Vérification email + mot de passe
+    def is_valid_user(email, password, df):
+        user_row = df[df["Email (username)"].str.lower() == email.lower()]
+        if not user_row.empty:
+            return password == str(user_row.iloc[0]["Password"])
+        return False
+
+    # Envoi d'un email si l'utilisateur a oublié son mot de passe
+    def send_password_email(to_email, password):
+        if not (EMAIL_SENDER and EMAIL_PASSWORD):
+            st.error("Configuration email manquante.")
+            return False
+        try:
+            msg = EmailMessage()
+            msg["Subject"] = "Mot de passe oublié - ALIX"
+            msg["From"] = EMAIL_SENDER
+            msg["To"] = to_email
+            msg.set_content(f"""
+Bonjour,
+
+Voici votre mot de passe : {password}
+
+Si vous n'avez pas fait cette demande, merci d'ignorer ce message.
+
+Cordialement,
+L'équipe Droits Quotidiens
+""")
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+                smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
+                smtp.send_message(msg)
+            return True
+        except Exception as e:
+            st.error(f"Erreur lors de l'envoi de l'email : {e}")
+            return False
+
+    df_users = load_users()
+
+    # Trois boutons alignés
+    col1, col2, col3 = st.columns([1, 1, 1])
+
+    with col1:
+        if st.button("Connexion"):
+            if email.lower() == ADMIN_EMAIL.lower() and password == ADMIN_PASSWORD:
+                st.session_state.page = "admin"
+                st.session_state.user_email = email
+                st.rerun()
+            elif df_users is not None and is_valid_user(email, password, df_users):
+                st.session_state.page = "user"
+                st.session_state.user_email = email
+                st.rerun()
             else:
-                # Lire le fichier Excel
-                df_users = pd.read_excel(user_file)
+                st.error("Email ou mot de passe incorrect.")
 
-                # Rechercher l'utilisateur dans le fichier (colonne "Email")
-                user_row = df_users[df_users["Email"] == email]
+    with col2:
+        if st.button("S'inscrire"):
+            st.session_state.page = "signup"
+            st.rerun()
 
-                if user_row.empty:
-                    st.error("Email non trouvé.")
+    with col3:
+        if st.button("Mot de passe oublié ?"):
+            if not email:
+                st.warning("Veuillez entrer votre adresse email ci-dessus.")
+            elif df_users is not None:
+                user_row = df_users[df_users["Email (username)"].str.lower() == email.lower()]
+                if not user_row.empty:
+                    user_password = str(user_row.iloc[0]["Password"])
+                    if send_password_email(email, user_password):
+                        st.success("Email de récupération envoyé.")
                 else:
-                    # Récupérer le mot de passe stocké
-                    stored_password = user_row.iloc[0]["Password"]
+                    st.error("Aucun compte associé à cet email.")
+            else:
+                st.error("Impossible de charger les utilisateurs.")
 
-                    # Comparer avec le mot de passe saisi
-                    if password == stored_password:
-                        st.success("Connexion réussie !")
-                        # Modifier la page pour rediriger l'utilisateur
-                        st.session_state.page = "user"
-                        st.session_state.user_email = email
-                        # Recharger la page pour appliquer le changement
-                        st.experimental_rerun()
-                    else:
-                        st.error("Mot de passe incorrect.")
-
-    # Gestion des clics sur les boutons de navigation
-    if button_signup:
-        st.session_state.page = "signup"
-        st.experimental_rerun()
-
-    if button_user:
-        st.session_state.page = "user"
-        st.experimental_rerun()
-
-    if button_admin:
-        st.session_state.page = "admin"
-        st.experimental_rerun()
+    # Pied de page 
+    st.markdown(
+        """
+        <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
+            <p style="text-align:center; color:white; font-size:0.9em; margin:0;">
+                Droits Quotidiens Legal Tech<br>
+                📧 Pour toute question, contactez-nous à <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
