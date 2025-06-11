@@ -186,12 +186,14 @@ def user_page():
         if st.button("Exporter le rapport"):
             pdf = Make_pdf(FILE_NAME2, context)
 
-            date_str = dt.now().strftime("%Y-%m-%d")
+            date_str = dt.now().strftime("%Y-%m-%d_%H%M%S")
             user_name = st.session_state.user_email.split("@")[0].replace(".", "").replace(" ", "")
             filename = f"{date_str}_{user_name}.pdf"
+            output_path = os.path.join("static",filename)
+            pdf.output(name=output_path, dest="F")
 
-            b64 = base64.b64encode(pdf.output(dest='S').encode('latin-1', 'ignore'))
-            html = f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{filename}">Download file</a>'
+            b64 = base64.b64encode(open(output_path, "rb").read()).decode()
+            html = f'<a href="data:application/octet-stream;base64,{b64}" download="{filename}">Download file</a>'
             st.markdown(html, unsafe_allow_html=True)
 
         if st.session_state.user_email.lower() == ADMIN_EMAIL.lower():
