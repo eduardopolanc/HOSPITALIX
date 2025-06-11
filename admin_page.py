@@ -130,7 +130,6 @@ def admin_page():
         st.session_state.page = "user"
         st.rerun()
 
-
     cole, colr = st.columns([2,4])
 
     with cole:
@@ -138,39 +137,10 @@ def admin_page():
     with colr:
         search_email = st.text_input("🔍 Rechercher un utilisateur (email)").strip().lower()
 
-    col_accepted, col_pending = st.columns(2)
-
-    # ---- Utilisateurs acceptés ----
-    with col_accepted:
-        st.markdown("#### ✅ Utilisateurs acceptés")
-        accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
-
-        if search_email:
-            filtered_accepted = accepted_users[accepted_users['Email (username)'].str.lower().str.contains(search_email)]
-        else:
-            filtered_accepted = accepted_users.head(25)
-
-        with st.container(height=300):
-            if filtered_accepted.empty:
-                st.info("Aucun utilisateur trouvé.")
-            else:
-                for i, (_, row) in enumerate(filtered_accepted.iterrows()):
-                    with st.expander(f"{row['Email (username)']}"):
-                        for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email (username)"]:
-                            if field in row and pd.notna(row[field]):
-                                st.write(f"**{field} :** {row[field]}")
-                        if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
-                            accepted_users = accepted_users[accepted_users['Email (username)'] != row['Email (username)']]
-                            accepted_users.to_excel("accepted_user_information.xlsm", index=False)
-                            st.success("Utilisateur supprimé.")
-                            st.rerun()
-                # Message en bas
-                if not search_email and len(accepted_users) > 25:
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
+    col_o, col_p = st.columns(2)
 
     # ---- Demandes en attente ----
-    with col_pending:
+    with col_o:
         st.markdown("#### 🕒 Demandes en attente")
         requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
 
@@ -222,8 +192,37 @@ def admin_page():
                 # Message en bas
                 if not search_email and len(requests) > 25:
                     st.markdown("<br>", unsafe_allow_html=True)
-                    st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
+                    st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")       
+    
+    # ---- Utilisateurs acceptés ----
+    with col_p:
+        st.markdown("#### ✅ Utilisateurs acceptés")
+        accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
 
+        if search_email:
+            filtered_accepted = accepted_users[accepted_users['Email (username)'].str.lower().str.contains(search_email)]
+        else:
+            filtered_accepted = accepted_users.head(25)
+
+        with st.container(height=300):
+            if filtered_accepted.empty:
+                st.info("Aucun utilisateur trouvé.")
+            else:
+                for i, (_, row) in enumerate(filtered_accepted.iterrows()):
+                    with st.expander(f"{row['Email (username)']}"):
+                        for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Email (username)"]:
+                            if field in row and pd.notna(row[field]):
+                                st.write(f"**{field} :** {row[field]}")
+                        if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
+                            accepted_users = accepted_users[accepted_users['Email (username)'] != row['Email (username)']]
+                            accepted_users.to_excel("accepted_user_information.xlsm", index=False)
+                            st.success("Utilisateur supprimé.")
+                            st.rerun()
+                # Message en bas
+                if not search_email and len(accepted_users) > 25:
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
+        
     #General statistics
     st.markdown("---")
     st.markdown("### 📊 Statistiques générales")
