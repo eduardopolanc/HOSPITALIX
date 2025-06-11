@@ -10,53 +10,6 @@ import smtplib
 from dotenv import load_dotenv
 import urllib.parse
 
-def render_scrollable_user_list(users, user_type, selected_email, key_prefix):
-    container_html = """
-    <div style="max-height: 300px; overflow-y: auto; padding-right: 6px;">
-    """
-
-    for i, (_, row) in enumerate(users.iterrows()):
-        email = row['Email (username)'] if user_type == "accepted" else row['Email']
-        safe_email = email.replace('"', '&quot;').replace("'", "&#39;")
-        selected = (selected_email == email)
-
-        style = f"""
-            background-color: {'#ffdddd' if selected else '#222'};
-            color: white;
-            padding: 8px 12px;
-            border: 1px solid {'#cc0000' if selected else '#555'};
-            border-radius: 6px;
-            margin-bottom: 6px;
-            cursor: pointer;
-            font-family: sans-serif;
-        """
-
-        js_callback = f"""
-        <script>
-        const data = {{type: '{user_type}', email: '{urllib.parse.quote(email)}'}};
-        fetch(window.location.href, {{
-            method: 'POST',
-            headers: {{ 'Content-Type': 'application/json' }},
-            body: JSON.stringify(data)
-        }}).then(() => window.location.reload());
-        </script>
-        """
-
-        container_html += f"""
-            <div style="{style}" onclick="document.dispatchEvent(new Event('select_{key_prefix}_{i}'))">
-                {safe_email}
-            </div>
-            <script>
-                document.addEventListener('select_{key_prefix}_{i}', function() {{
-                    {js_callback}
-                }});
-            </script>
-        """
-
-    container_html += "</div>"
-    return container_html
-
-
 # Fonction pour générer un mot de passe aléatoire
 def generate_password(length=10):
     alphabet = string.ascii_letters + string.digits
@@ -77,19 +30,19 @@ def send_account_email(to_email, password):
         msg["From"] = EMAIL_SENDER
         msg["To"] = to_email
         msg.set_content(f"""
-Bonjour,
+            Bonjour,
 
-Votre compte ALIX a été validé.
+            Votre compte ALIX a été validé.
 
-Voici vos identifiants :
-- Email : {to_email}
-- Mot de passe : {password}
+            Voici vos identifiants :
+            - Email : {to_email}
+            - Mot de passe : {password}
 
-Rendez-vous ici pour vous connecter : http://alix.iparme.com/
+            Rendez-vous ici pour vous connecter : http://alix.iparme.com/
 
-Cordialement,
-L'équipe Droits Quotidiens Legal Tech
-""")
+            Cordialement,
+            L'équipe Droits Quotidiens Legal Tech
+            """)
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
             smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
             smtp.send_message(msg)
@@ -239,6 +192,7 @@ def admin_page():
                         with colA:
                             if st.button("✅ Accepter", key=f"accept_{i}"):
                                 password = generate_password()
+                                send_account_email(row["Email"], password)
                                 new_account = pd.DataFrame([{
                                     "Nom": row.get("Nom", ""),
                                     "Prenom": row.get("Prenom", ""),
