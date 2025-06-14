@@ -33,6 +33,10 @@ def sign_up_page():
                     statut = match.iloc[0].get("Statut", "actif")
                     if statut == "supprimé":
                         deleted_user = True
+                    elif statut == "supprimé_def":
+                        # Supprimer la ligne définitivement supprimée pour recréer
+                        accepted_df = accepted_df[accepted_df["Email (username)"].str.lower() != email]
+                        accepted_df.to_excel(accepted_path, index=False)
                     else:
                         user_exists = True
 
@@ -114,8 +118,6 @@ def sign_up_page():
                         pass
 
                 st.success("✅ Votre demande a été soumise avec succès.")
-
-                # Nettoyage du formulaire et retour à la connexion
                 st.session_state.page = "login"
                 st.rerun()
 
