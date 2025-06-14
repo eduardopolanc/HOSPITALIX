@@ -104,6 +104,53 @@ def user_page():
         st.stop()
 
     if "user_email" in st.session_state:
+        with st.expander("Options"):
+            menu_options = ["Profil", "Déconnexion"]
+            if st.session_state.user_email.lower() != ADMIN_EMAIL.lower():
+                menu_options.insert(1, "Changer mot de passe")
+
+            menu_option = st.radio("Options", menu_options, key="user_menu")
+
+            if menu_option == "Changer mot de passe":
+                st.subheader("Changer le mot de passe")
+
+                if "show_pwd_form" not in st.session_state:
+                    st.session_state["show_pwd_form"] = True
+
+                if not st.session_state["show_pwd_form"]:
+                    st.session_state["show_pwd_form"] = True
+                    for key in ["current_pwd", "new_pwd", "confirm_pwd"]:
+                        st.session_state.pop(key, None)
+                    st.rerun()
+
+                if st.session_state["show_pwd_form"]:
+                    st.text_input("Mot de passe actuel", type="password", key="current_pwd")
+                    st.text_input("Nouveau mot de passe", type="password", key="new_pwd")
+                    st.text_input("Confirmez le nouveau mot de passe", type="password", key="confirm_pwd")
+
+                    if st.button("Mettre à jour"):
+                        current = st.session_state.get("current_pwd", "")
+                        new_pwd = st.session_state.get("new_pwd", "")
+                        confirm_pwd = st.session_state.get("confirm_pwd", "")
+
+                        row = df_users[df_users["Email (username)"].str.lower() == st.session_state.user_email.lower()]
+                        if not row.empty and current == str(row.iloc[0]["Password"]):
+                            if new_pwd == confirm_pwd:
+                                df_users.loc[row.index, "Password"] = new_pwd
+                                df_users.to_excel(USER_FILE, index=False, engine="openpyxl")
+                                send_password_change_email(st.session_state.user_email)
+                                st.success("Mot de passe mis à jour.")
+                                st.session_state["show_pwd_form"] = False
+                            else:
+                                st.error("Les mots de passe ne correspondent pas.")
+                        else:
+                            st.error("Mot de passe actuel incorrect.")
+
+            elif menu_option == "Déconnexion":
+                st.session_state.clear()
+                st.success("Déconnecté avec succès.")
+                st.rerun()
+
         st.sidebar.title('Choix')
         list_contexte = st.sidebar.multiselect('Santé /contexte', (
             'mémoire', 'santé', 'surendettement', 'maltraitance', 'internet',
@@ -134,6 +181,7 @@ def user_page():
         if st.session_state.show_form:
             st.subheader('Code fiche :')
             st.write(*array_vchoisi)
+
             if len(array_vchoisi[0]) > 1 or len(array_vchoisi[4]) > 1:
                 fonction.generate(array_vchoisi, FILE_NAME1)
                 fonction.generate_with_regle(array_vchoisi, FILE_NAME2)
@@ -177,6 +225,7 @@ def user_page():
                 show_pdf_section = True
                 st.session_state["last_generated_pdf"] = filename
                 st.session_state["last_context"] = context
+
         with col2:
             if "pdf_to_view" in st.session_state:
                 file_to_display = st.session_state["pdf_to_view"]
@@ -195,6 +244,8 @@ def user_page():
                     st.rerun()
 
     commentaire_path = "Commentaire.xlsx"
+
+
 
     # Fonction de sauvegarde du commentaire
     def enregistrer_commentaire(texte):
