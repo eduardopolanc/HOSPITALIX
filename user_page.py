@@ -233,7 +233,7 @@ def user_page():
         df.to_excel(commentaire_path, index=False, engine="openpyxl")
         st.success("✅ Commentaire envoyé avec succès.")
         st.session_state.comment_text = ""
-        st.session_state.comment_submitted = True
+        st.rerun()
 
     # Dialogue de confirmation
     @st.dialog("Confirmation d'envoi")
@@ -244,7 +244,6 @@ def user_page():
         with col1:
             if st.button("✅ Oui, envoyer", key="confirm_envoyer"):
                 enregistrer_commentaire(texte)
-                st.rerun()
 
         with col2:
             if st.button("❌ Annuler", key="cancel_envoyer"):
@@ -260,9 +259,6 @@ def user_page():
     else:
         if "comment_text" not in st.session_state:
             st.session_state.comment_text = ""
-
-        if "comment_submitted" in st.session_state:
-            del st.session_state.comment_submitted
 
         txt = st.text_area(
             "Votre commentaire :",
