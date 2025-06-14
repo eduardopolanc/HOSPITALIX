@@ -270,11 +270,9 @@ def admin_page():
                 for _, row in df_comments.iterrows():
                     titre = f"📄 {row['PDF']} — ✉️ {row['Utilisateur']} — 🕒 {row['Horodatage']}"
                     with st.expander(titre):
-                        st.write(f"**Commentaire :**{row['Commentaire']}")
+                        st.write(f"**Commentaire :** {row['Commentaire']}")
 
-                        for var in ["Santé/contexte", "Situation perso", "Famille", "Patrimoine", "Qualité relation/pb gestion"]:
-                            if var in row and pd.notna(row[var]):
-                                st.write(f"**{var} :** {row[var]}")
+                        st.write(f"**'Santé/contexte' : {row['Santé/contexte']}, **'Situation perso' : {row['Situation perso']}, **'Famille' : {row['Famille']}, **'Patrimoine' : {row['Patrimoine']}, **'Qualité relation/pb gestion' : {row['Qualité relation/pb gestion']}")
                         
                         if os.path.exists(accepted_users_file):
                             df_users = pd.read_excel(accepted_users_file, engine="openpyxl")
