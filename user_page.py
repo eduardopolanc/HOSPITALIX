@@ -149,9 +149,6 @@ def user_page():
                 st.title('Fiche simple:')
                 st.write(fiche2)
 
-        st.write('Commentaire')
-        title = st.text_input('Commentaire', '')
-
         v1 = fonction.recup_variable_com(array_vchoisi[0])
         v2 = fonction.recup_variable_com(array_vchoisi[1])
         v3 = fonction.recup_variable_com(array_vchoisi[2])
@@ -166,44 +163,36 @@ def user_page():
             "Qualité relation/pb gestion": v5
         }
 
-        if st.button("ajouter le commentaire"):
-            com = [dt.now(), 'Code fiche :', v1, v2, v3, v4, v5, title]
-            try:
-                wb = load_workbook("Commentaire.xlsx")
-                ws = wb["Com"]
-                ws.append(com)
-                wb.save("Commentaire.xlsx")
-                st.success("Commentaire ajouté avec succès.")
-            except Exception as e:
-                st.error(f"Erreur lors de l'ajout du commentaire : {e}")
-
         show_pdf_section = False
+        col1, col2, col3 = st.columns(2)
 
-        if st.button("Exporter le rapport"):
-            pdf = Make_pdf(FILE_NAME2, context)
-            date_str = dt.now().strftime("%Y-%m-%d_%H%M%S")
-            user_name = st.session_state.user_email.split("@")[0].replace(".", "").replace(" ", "")
-            filename = f"{date_str}_{user_name}.pdf"
-            output_path = os.path.join("static", filename)
-            pdf.output(name=output_path, dest="F")
-            st.session_state["pdf_to_view"] = filename
-            show_pdf_section = True
-            st.session_state["last_generated_pdf"] = filename
-            st.session_state["last_context"] = context
+        with col1:
+            if st.button("Exporter le rapport"):
+                pdf = Make_pdf(FILE_NAME2, context)
+                date_str = dt.now().strftime("%Y-%m-%d_%H%M%S")
+                user_name = st.session_state.user_email.split("@")[0].replace(".", "").replace(" ", "")
+                filename = f"{date_str}_{user_name}.pdf"
+                output_path = os.path.join("static", filename)
+                pdf.output(name=output_path, dest="F")
+                st.session_state["pdf_to_view"] = filename
+                show_pdf_section = True
+                st.session_state["last_generated_pdf"] = filename
+                st.session_state["last_context"] = context
+        with col2:
+            if "pdf_to_view" in st.session_state:
+                file_to_display = st.session_state["pdf_to_view"]
+                file_path = os.path.join("static", file_to_display)
+                if os.path.exists(file_path):
+                    with open(file_path, "rb") as f:
+                        st.download_button("Télécharger le PDF", f, file_name=file_to_display, mime="application/pdf")
+                    pdf_url = f"/app/static/{urllib.parse.quote(file_to_display)}"
+                    st.link_button("Voir le PDF", url=pdf_url)
 
-        if "pdf_to_view" in st.session_state:
-            file_to_display = st.session_state["pdf_to_view"]
-            file_path = os.path.join("static", file_to_display)
-            if os.path.exists(file_path):
-                with open(file_path, "rb") as f:
-                    st.download_button("Télécharger le PDF", f, file_name=file_to_display, mime="application/pdf")
-                pdf_url = f"/app/static/{urllib.parse.quote(file_to_display)}"
-                st.link_button("Voir le PDF", url=pdf_url)
-
-        if st.session_state.user_email.lower() == ADMIN_EMAIL.lower():
-            if st.button("Retour vers l'administrateur"):
-                st.session_state.page = "admin"
-                st.rerun()
+        with col3:
+            if st.session_state.user_email.lower() == ADMIN_EMAIL.lower():
+                if st.button("Retour vers l'administrateur"):
+                    st.session_state.page = "admin"
+                    st.rerun()
 
         st.markdown("### 💬 Commentaire sur votre PDF généré")
         pdf_name = st.session_state.get("last_generated_pdf", None)
