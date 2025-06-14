@@ -195,65 +195,82 @@ def user_page():
                     st.session_state.page = "admin"
                     st.rerun()
 
-        st.markdown("### 💬 Commentaire sur votre PDF généré")
-        pdf_name = st.session_state.get("last_generated_pdf", None)
-        user_email = st.session_state.get("user_email", "anyone")
+    # Fonction de sauvegarde du commentaire
 
-        if not pdf_name:
-            st.info("Aucun PDF généré pour le moment. La zone de commentaire apparaîtra après la génération.")
+    def enregistrer_commentaire():
+        commentaire_path = "Commentaire.xlsx"
+        user_email = st.session_state.get("user_email", "anonyme")
+        pdf_name = st.session_state.get("last_generated_pdf", "inconnu")
+        context_labeled = st.session_state.get("last_context_labeled", {})
+        texte = st.session_state.get("comment_text", "").strip()
+
+        new_comment = {
+            "Horodatage": dt.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Utilisateur": user_email,
+            "PDF": pdf_name,
+            "Commentaire": texte,
+            "Santé/contexte": context_labeled.get("Santé/contexte", ""),
+            "Situation perso": context_labeled.get("Situation perso", ""),
+            "Famille": context_labeled.get("Famille", ""),
+            "Patrimoine": context_labeled.get("Patrimoine", ""),
+            "Qualité relation/pb gestion": context_labeled.get("Qualité relation/pb gestion", "")
+        }
+
+        if os.path.exists(commentaire_path):
+            df = pd.read_excel(commentaire_path, engine="openpyxl")
+            df = pd.concat([df, pd.DataFrame([new_comment])], ignore_index=True)
         else:
-            #Zone de texte
-            if "comment_text" not in st.session_state:
-                st.session_state.comment_text = ""
-            
-            st.session_state.comment_text = st.text_area("Votre commentaire: ", value=st.session_state.comment_text, max_chars=1000)
-            if "show_confirm_dialog" not in st.session_state:
-                st.session_state.show_confirm_dialog = False
+            df = pd.DataFrame([new_comment])
 
-            if st.button("Envoyer le commentaire"):
-                if st.session_state.comment_text.strip():
-                    st.session_state.show_confirm_dialog = True
-                else:
-                    st.warning("Le commentaire ne peut pas être vide.")
+        df.to_excel(commentaire_path, index=False, engine="openpyxl")
 
-            if st.session_state.show_confirm_dialog:
-                with st.dialog("Confirmation d'envoi"):
-                    st.write("Souhaitez-vous vraiment envoyer ce commentaire ?")
+        st.success("✅ Commentaire envoyé avec succès.")
+        st.session_state.comment_text = ""
 
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        if st.button("✅ Oui, envoyer", key="confirm_envoyer"):
-                            commentaire_path = "Commentaire.xlsx"
-                            context_labeled = st.session_state.get("last_context_labeled", {})
 
-                            new_comment = {
-                                "Horodatage": dt.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                "Utilisateur": user_email,
-                                "PDF": pdf_name,
-                                "Commentaire": st.session_state.comment_text.strip(),
-                                "Santé/contexte": context_labeled.get("Santé/contexte", ""),
-                                "Situation perso": context_labeled.get("Situation perso", ""),
-                                "Famille": context_labeled.get("Famille", ""),
-                                "Patrimoine": context_labeled.get("Patrimoine", ""),
-                                "Qualité relation/pb gestion": context_labeled.get("Qualité relation/pb gestion", "")                        
-                            }
 
-                            if os.path.exists(commentaire_path):
-                                df = pd.read_excel(commentaire_path, engine="openpyxl")
-                                df = pd.concat([df, pd.DataFrame([new_comment])], ignore_index=True)
-                            else:
-                                df = pd.DataFrame([new_comment])
+    # Dialogue de confirmation
 
-                            df.to_excel(commentaire_path, index=False, engine="openpyxl")
+    @st.dialog("Confirmation d'envoi")
+    def confirmer_envoi_commentaire():
+        st.write("Souhaitez-vous vraiment envoyer ce commentaire ?")
 
-                            st.success("✅ Commentaire envoyé avec succès.")
-                            st.session_state.comment_text = ""
-                            st.session_state.show_confirm_dialog = False
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("✅ Oui, envoyer", key="confirm_envoyer"):
+                enregistrer_commentaire()
+                st.rerun()
+        with col2:
+            if st.button("❌ Annuler", key="cancel_envoyer"):
+                st.rerun()
 
-                    with col2:
-                        if st.button("❌ Annuler", key="cancel_envoyer"):
-                            st.session_state.show_confirm_dialog = False
 
+    # ===============================
+    # Affichage du bloc commentaire
+    # ===============================
+    st.markdown("### 💬 Commentaire sur votre PDF généré")
+
+    pdf_name = st.session_state.get("last_generated_pdf", None)
+    user_email = st.session_state.get("user_email", "anyone")
+
+    if not pdf_name:
+        st.info("Aucun PDF généré pour le moment. La zone de commentaire apparaîtra après la génération.")
+    else:
+        if "comment_text" not in st.session_state:
+            st.session_state.comment_text = ""
+
+        txt = st.text_area(
+            "Votre commentaire :",
+            value=st.session_state.comment_text,
+            max_chars=1000,
+            height=150
+        )
+
+        if st.button("Envoyer le commentaire"):
+            if txt.strip():
+                confirmer_envoi_commentaire()
+            else:
+                st.warning("Le commentaire ne peut pas être vide.")
 
     st.markdown("""
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
