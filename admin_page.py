@@ -315,7 +315,16 @@ def admin_page():
                         with col2:
                             if st.button("❌ Supprimer définitivement", key=f"delete_final_{i}"):
                                 confirmer_suppression_definitive(email)
+    st.markdown("### ⬇️ Télécharger la base des utilisateurs enregistrés")
 
+    user_file = "accepted_user_information.xlsm"
+    if os.path.exists(user_file):
+        url_encoded = f"/app/{urllib.parse.quote(user_file)}"
+        st.markdown(
+            f"<a href='{url_encoded}' download='{user_file}' style='font-size: 16px;'>📥 Télécharger le fichier Excel</a>",
+            unsafe_allow_html=True
+        )
+        
     #General statistics
     st.markdown("---")
     st.markdown("### 📊 Statistiques générales")
