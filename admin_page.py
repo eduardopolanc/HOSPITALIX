@@ -252,7 +252,7 @@ def admin_page():
 
     st.markdown("### 💬 Commentaires des utilisateurs")
 
-    comment_file = "Commentarie.xlsx"
+    comment_file = "Commentaire.xlsx"
     accepted_users_file = "accepted_user_information.xlsm"
 
     search_email = st.text_input("🔍 Rechercher un commentaire par email").strip().lower()
