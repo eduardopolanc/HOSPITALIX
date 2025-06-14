@@ -272,7 +272,7 @@ def admin_page():
                     with st.expander(titre):
                         st.write(f"**Commentaire :** {row['Commentaire']}")
 
-                        st.write(f"**'Santé/contexte' : {row['Santé/contexte']}, **'Situation perso' : {row['Situation perso']}, **'Famille' : {row['Famille']}, **'Patrimoine' : {row['Patrimoine']}, **'Qualité relation/pb gestion' : {row['Qualité relation/pb gestion']}")
+                        st.write(f"**Santé/contexte:** {row['Santé/contexte']}, **Situation perso:** {row['Situation perso']}, **Famille:** {row['Famille']}, **Patrimoine:** {row['Patrimoine']}, **Qualité relation/pb gestion:** {row['Qualité relation/pb gestion']}")
                         
                         if os.path.exists(accepted_users_file):
                             df_users = pd.read_excel(accepted_users_file, engine="openpyxl")
