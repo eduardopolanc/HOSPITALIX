@@ -53,7 +53,7 @@ def send_account_email(to_email, password):
         return False
 
 def enregistrer_historique_statut(email, ancien_statut, nouveau_statut):
-    date_actuelle = datetime.now()
+    date_actuelle = dt.now()
     date_str = date_actuelle.strftime("%Y-%m-%d")
     heure_str = date_actuelle.strftime("%H:%M")
 
@@ -353,11 +353,20 @@ def admin_page():
                             if st.button("❌ Supprimer définitivement", key=f"delete_final_{i}"):
                                 confirmer_suppression_definitive(email)
 
-    url_encoded = f"/app/{urllib.parse.quote(accepted_users_file)}"
-    st.markdown(
-        f"<a href='{url_encoded}' download='{accepted_users_file}' style='font-size: 16px;'>📥 Télécharger le fichier Excel</a>",
-        unsafe_allow_html=True
-    )
+    col_h, col_d, col_j = st.columns([2, 2, 2])
+
+    with col_h:
+        users_url = f"/app/{urllib.parse.quote(accepted_users_file)}"
+        st.markdown(
+            f"<a href='{users_url}' download='{accepted_users_file}' style='font-size: 16px;'>📥 Télécharger le fichier Excel utilisateur</a>",
+            unsafe_allow_html=True
+        )
+    with col_d:
+        download_url = f"/app/{urllib.parse.quote('static/historique_statuts.xlsx')}"
+        st.markdown(
+            f"<a href='{download_url}' download style='font-size:16px;'>📥 Télécharger l'historique des statuts</a>",
+            unsafe_allow_html=True
+        )
 
     #General statistics
     st.markdown("---")
