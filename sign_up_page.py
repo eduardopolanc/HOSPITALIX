@@ -22,7 +22,7 @@ def sign_up_page():
         if not (nom and prenom and telephone and role and entreprise and email):
             st.warning("Veuillez remplir tous les champs obligatoires.")
         else:
-            accepted_path = "accepted_user_information.xlsm"
+            accepted_path = "accepted_user_information.xlsx"
             user_exists = False
             deleted_user = False
 
