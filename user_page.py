@@ -217,7 +217,7 @@ def user_page():
                     st.warning("Le commentaire ne peut pas être vide.")
 
             if st.session_state.show_confirm_dialog:
-                with st.dialog("Confirmation d'envoi", use_container_width=True):
+                with st.dialog("Confirmation d'envoi"):
                     st.write("Souhaitez-vous vraiment envoyer ce commentaire ?")
 
                     col1, col2 = st.columns(2)
