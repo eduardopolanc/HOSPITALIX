@@ -316,25 +316,29 @@ def admin_page():
                             if st.button("❌ Supprimer définitivement", key=f"delete_final_{i}"):
                                 confirmer_suppression_definitive(email)
 
-    #General statistics
-    st.markdown("---")
-    st.markdown("### 📊 Statistiques générales")
+#General statistics
+st.markdown("---")
+st.markdown("### 📊 Statistiques générales")
 
-    accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
-    requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
-    pdf_folder = "static"
-    pdf_files = [f for f in os.listdir(pdf_folder) if f.endswith(".pdf")] if os.path.exists(pdf_folder) else []
+accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
+if "Statut" not in accepted_users.columns:
+    accepted_users["Statut"] = "actif"
+accepted_actifs = accepted_users[accepted_users["Statut"] == "actif"]
 
-    # Compter
-    nb_users = len(accepted_users)
-    nb_requests = len(requests)
-    nb_pdfs = len(pdf_files)
+requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
+pdf_folder = "static"
+pdf_files = [f for f in os.listdir(pdf_folder) if f.endswith(".pdf")] if os.path.exists(pdf_folder) else []
 
-    # Affichage
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("👤 Utilisateurs enregistrés", nb_users)
-    with col2:
-        st.metric("⏳ Demandes en attente", nb_requests)
-    with col3:
-        st.metric("📄 PDFs générés", nb_pdfs)
+# Compter uniquement les utilisateurs actifs
+nb_users = len(accepted_actifs)
+nb_requests = len(requests)
+nb_pdfs = len(pdf_files)
+
+# Affichage
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric("👤 Utilisateurs actifs", nb_users)
+with col2:
+    st.metric("⏳ Demandes en attente", nb_requests)
+with col3:
+    st.metric("📄 PDFs générés", nb_pdfs)
