@@ -220,6 +220,7 @@ def admin_page():
                                         password = generate_password()
                                         enregistrer_historique_statut(row["Email"], "---", "actif")
                                         send_account_email(row["Email"], password)
+                                        date_creation = dt.datetime.now().strftime("%Y-%m-%d")
                                         new_account = pd.DataFrame([{
                                             "Nom": row.get("Nom", ""),
                                             "Prénom": row.get("Prénom", ""),
@@ -229,6 +230,7 @@ def admin_page():
                                             "Email (username)": row["Email"],
                                             "Password": password,
                                             "Statut": "actif"
+                                            "Date Création": date_creation
                                         }])
                                         if os.path.exists(accepted_users_file):
                                             existing = pd.read_excel(accepted_users_file)
@@ -271,7 +273,7 @@ def admin_page():
                 for i, (_, row) in enumerate(actifs.iterrows()):
                     email = row['Email (username)']
                     with st.expander(f"{email}"):
-                        for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
+                        for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut", "Date Création"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
                         if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
@@ -342,9 +344,10 @@ def admin_page():
                 for i, (_, row) in enumerate(supprimes.iterrows()):
                     email = row["Email (username)"]
                     with st.expander(f"{email}"):
-                        for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
+                        for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut", "Date Création"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
+
                         col1, col2 = st.columns(2)
                         with col1:
                             if st.button("✅ Réactiver", key=f"reactiver_{i}"):
