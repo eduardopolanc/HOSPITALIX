@@ -250,6 +250,47 @@ def admin_page():
                     st.markdown("<br>", unsafe_allow_html=True)
                     st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
 
+    st.markdown("### 💬 Commentaires des utilisateurs")
+
+    comment_file = "Commentarie.xlsx"
+    accepted_users_file = "accepted_user_information.xlsm"
+
+    search_email = st.text_input("🔍 Rechercher un commentaire par email").strip().lower()
+
+    if os.path.exists(comment_file):
+        df_comments = pd.read_excel(comment_file, engine="openpyxl")
+
+        if not df_comments.empty:
+            if search_email:
+                df_comments = df_comments[df_comments["Utilisateur"].str.lower().str.contains(search_email)]
+            
+            df_comments = df_comments.sort_values(by="Horodatage", ascending=False)
+
+            with st.container(height=300):
+                for _, row in df_comments.iterrows():
+                    titre = f"📄 {row['PDF']} — ✉️ {row['Utilisateur']} — 🕒 {row['Horodatage']}"
+                    with st.expander(titre):
+                        st.write(f"**Commentaire :**{row['Commentaire']}")
+
+                        for var in ["Santé/contexte", "Situation perso", "Famille", "Patrimoine", "Qualité relation/pb gestion"]:
+                            if var in row and pd.notna(row[var]):
+                                st.write(f"**{var} :** {row[var]}")
+                        
+                        if os.path.exists(accepted_users_file):
+                            df_users = pd.read_excel(accepted_users_file, engine="openpyxl")
+                            user_data = df_users[df_users["Email (username)"].str.lower() == row["Utilisateur"].lower()]
+                            if not user_data.empty:
+                                with st.expander("🧾 Informations de l'utilisateur"):
+                                    for field in ["Nom", "Prenom", "Téléphone", "Entreprise", "Rôle", "Statut"]:
+                                        if field in user_data.columns and pd.notna(user_data.iloc[0][field]):
+                                            st.write(f"**{field} :** {user_data.iloc[0][field]}")
+        else:
+            st.info("Aucun commentaire disponible.")
+    
+    else:
+        st.info("Aucun fichier de commentaires trouvé.")
+    
+
     #General statistics
     st.markdown("---")
     st.markdown("### 📊 Statistiques générales")
