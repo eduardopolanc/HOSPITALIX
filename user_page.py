@@ -164,7 +164,7 @@ def user_page():
         }
 
         show_pdf_section = False
-        col1, col2, col3 = st.columns([2, 2, 2])
+        col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
 
         with col1:
             if st.button("Exporter le rapport"):
@@ -186,9 +186,10 @@ def user_page():
                     with open(file_path, "rb") as f:
                         st.download_button("Télécharger le PDF", f, file_name=file_to_display, mime="application/pdf")
                     pdf_url = f"/app/static/{urllib.parse.quote(file_to_display)}"
-                    st.link_button("Voir le PDF", url=pdf_url)
+                    with col3:
+                        st.link_button("Voir le PDF", url=pdf_url)
 
-        with col3:
+        with col4:
             if st.session_state.user_email.lower() == ADMIN_EMAIL.lower():
                 if st.button("Retour vers l'administrateur"):
                     st.session_state.page = "admin"
