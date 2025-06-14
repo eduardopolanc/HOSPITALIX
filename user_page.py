@@ -207,42 +207,53 @@ def user_page():
                 st.session_state.comment_text = ""
             
             st.session_state.comment_text = st.text_area("Votre commentaire: ", value=st.session_state.comment_text, max_chars=1000)
-            st.write(f"Il vous reste {len(st.session_state.comment_text)}/1000 caractères.")
-            confirm = st.checkbox("Je confirme vouloir envoyer ce commentaire.")
+            if "show_confirm_dialog" not in st.session_state:
+                st.session_state.show_confirm_dialog = False
 
             if st.button("Envoyer le commentaire"):
-                if confirm and st.session_state.comment_text.strip():
-                    commentaire_path = "Commentaire.xlsx"
-                    context_labeled = st.session_state.get("last_context_labeled", {})
-
-                    new_comment = {
-                        "Horodatage": dt.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "Utilisateur": user_email,
-                        "PDF": pdf_name,
-                        "Commentaire": st.session_state.comment_text.strip(),
-                        "Santé/contexte": context_labeled.get("Santé/contexte", ""),
-                        "Situation perso": context_labeled.get("Situation perso", ""),
-                        "Famille": context_labeled.get("Famille", ""),
-                        "Patrimoine": context_labeled.get("Patrimoine", ""),
-                        "Qualité relation/pb gestion": context_labeled.get("Qualité relation/pb gestion", "")                        
-                    }
-
-                    if os.path.exists(commentaire_path):
-                        df = pd.read_excel(commentaire_path, engine="openpyxl")
-                        df = pd.concat([df, pd.DataFrame([new_comment])], ignore_index=True)
-
-                    else:
-                        df = pd.DataFrame([new_comment])
-                    
-                    df.to_excel(commentaire_path, index=False, engine="openpyxl")
-
-                    st.success("✅ Commentaire envoyé avec succès.")
-                    st.session_state.comment_text = "" # Réinitialise le champ texte
-
-                elif not confirm:
-                    st.warning("Veuillez confirmer l'envoi en cochant la case.")
+                if st.session_state.comment_text.strip():
+                    st.session_state.show_confirm_dialog = True
                 else:
                     st.warning("Le commentaire ne peut pas être vide.")
+
+            if st.session_state.show_confirm_dialog:
+                with st.dialog("Confirmation d'envoi", use_container_width=True):
+                    st.write("Souhaitez-vous vraiment envoyer ce commentaire ?")
+
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("✅ Oui, envoyer", key="confirm_envoyer"):
+                            commentaire_path = "Commentaire.xlsx"
+                            context_labeled = st.session_state.get("last_context_labeled", {})
+
+                            new_comment = {
+                                "Horodatage": dt.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "Utilisateur": user_email,
+                                "PDF": pdf_name,
+                                "Commentaire": st.session_state.comment_text.strip(),
+                                "Santé/contexte": context_labeled.get("Santé/contexte", ""),
+                                "Situation perso": context_labeled.get("Situation perso", ""),
+                                "Famille": context_labeled.get("Famille", ""),
+                                "Patrimoine": context_labeled.get("Patrimoine", ""),
+                                "Qualité relation/pb gestion": context_labeled.get("Qualité relation/pb gestion", "")                        
+                            }
+
+                            if os.path.exists(commentaire_path):
+                                df = pd.read_excel(commentaire_path, engine="openpyxl")
+                                df = pd.concat([df, pd.DataFrame([new_comment])], ignore_index=True)
+                            else:
+                                df = pd.DataFrame([new_comment])
+
+                            df.to_excel(commentaire_path, index=False, engine="openpyxl")
+
+                            st.success("✅ Commentaire envoyé avec succès.")
+                            st.session_state.comment_text = ""
+                            st.session_state.show_confirm_dialog = False
+
+                    with col2:
+                        if st.button("❌ Annuler", key="cancel_envoyer"):
+                            st.session_state.show_confirm_dialog = False
+
 
     st.markdown("""
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
