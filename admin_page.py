@@ -211,7 +211,7 @@ def admin_page():
                                             all_accounts = pd.concat([existing, new_account], ignore_index=True)
                                         else:
                                             all_accounts = new_account
-                                        all_accounts.to_excel(accepted_users_file, index=False)
+                                        all_accounts.to_excel(accepted_users_file, index=False, engine="openpyxl")
   
                                         requests = requests[requests['Email'] != row['Email']]
                                         requests.to_excel("demandes_en_attente.xlsx", index=False)
@@ -251,7 +251,7 @@ def admin_page():
                                 st.write(f"**{field} :** {row[field]}")
                         if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
                             accepted_users.loc[accepted_users['Email (username)'] == row['Email (username)'], 'Statut'] = 'supprimé'
-                            accepted_users.to_excel(accepted_users_file, index=False)
+                            accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
                             st.success("Utilisateur marqué comme supprimé.")
                             st.rerun()
                 if not search_email and len(actifs) > 25:
@@ -273,7 +273,7 @@ def admin_page():
                 with col1:
                     if st.button("✅ Oui, réactiver"):
                         accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = 'actif'
-                        accepted_users.to_excel(accepted_users_file, index=False)
+                        accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
                         st.success("Utilisateur réactivé.")
                         st.rerun()
                 with col2:
@@ -290,7 +290,7 @@ def admin_page():
                     if st.button("🗑️ Oui, supprimer définitivement"):
                         # Remplacer le statut par "supprimé_def"
                         accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = 'supprimé_def'
-                        accepted_users.to_excel(accepted_users_file, index=False)
+                        accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
                         st.success("Utilisateur supprimé définitivement.")
                         st.rerun()
                 with col2:
