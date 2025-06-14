@@ -9,6 +9,7 @@ from email.message import EmailMessage
 import smtplib
 from dotenv import load_dotenv
 import urllib.parse
+import datetime as dt
 
 # Fonction pour générer un mot de passe aléatoire
 def generate_password(length=10):
@@ -50,6 +51,28 @@ def send_account_email(to_email, password):
     except Exception as e:
         print(f"Erreur envoi email : {e}")
         return False
+
+def enregistrer_historique_statut(email, ancien_statut, nouveau_statut):
+    date_actuelle = datetime.now()
+    date_str = date_actuelle.strftime("%Y-%m-%d")
+    heure_str = date_actuelle.strftime("%H:%M")
+
+    historique_path = "static/historique_statuts.xlsx"
+    nouvelle_ligne = pd.DataFrame([{
+        "Email": email,
+        "Ancien Statut": ancien_statut,
+        "Nouveau Statut": nouveau_statut,
+        "Date": date_str,
+        "Heure": heure_str
+    }])
+
+    if os.path.exists(historique_path):
+        historique_df = pd.read_excel(historique_path)
+        historique_df = pd.concat([historique_df, nouvelle_ligne], ignore_index=True)
+    else:
+        historique_df = nouvelle_ligne
+
+    historique_df.to_excel(historique_path, index=False, engine="openpyxl")
 
 # Page Admin
 def admin_page():
@@ -195,6 +218,7 @@ def admin_page():
                                 if st.checkbox("Confirmez l'acceptation", key=f"confirm_accept_{i}"):               
                                     if st.button("✅ Accepter", key=f"accept_{i}"):
                                         password = generate_password()
+                                        enregistrer_historique_statut(row["Email"], "---", "actif")
                                         send_account_email(row["Email"], password)
                                         new_account = pd.DataFrame([{
                                             "Nom": row.get("Nom", ""),
@@ -245,18 +269,23 @@ def admin_page():
                 st.info("Aucun utilisateur trouvé.")
             else:
                 for i, (_, row) in enumerate(actifs.iterrows()):
-                    with st.expander(f"{row['Email (username)']}"):
+                    email = row['Email (username)']
+                    with st.expander(f"{email}"):
                         for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
                         if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
-                            accepted_users.loc[accepted_users['Email (username)'] == row['Email (username)'], 'Statut'] = 'supprimé'
+                            old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
+                            new_status = "supprimé"
+                            enregistrer_historique_statut(email, old_status, new_status)
+
+                            accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
                             accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
                             st.success("Utilisateur marqué comme supprimé.")
                             st.rerun()
-                if not search_email and len(actifs) > 25:
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
+        if not search_email and len(actifs) > 25:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
 
     # ---- Utilisateurs supprimés ----
     with col_s:
@@ -272,7 +301,11 @@ def admin_page():
                 col1, col2 = st.columns(2)
                 with col1:
                     if st.button("✅ Oui, réactiver"):
-                        accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = 'actif'
+                        old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
+                        new_status = "actif"
+                        enregistrer_historique_statut(email, old_status, new_status)
+
+                        accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
                         accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
                         st.success("Utilisateur réactivé.")
                         st.rerun()
@@ -281,6 +314,7 @@ def admin_page():
                         st.rerun()
             dialog()
 
+
         def confirmer_suppression_definitive(email):
             @st.dialog("Confirmer la suppression définitive")
             def dialog():
@@ -288,8 +322,11 @@ def admin_page():
                 col1, col2 = st.columns(2)
                 with col1:
                     if st.button("🗑️ Oui, supprimer définitivement"):
-                        # Remplacer le statut par "supprimé_def"
-                        accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = 'supprimé_def'
+                        old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
+                        new_status = "supprimé_def"
+                        enregistrer_historique_statut(email, old_status, new_status)
+
+                        accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
                         accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
                         st.success("Utilisateur supprimé définitivement.")
                         st.rerun()
