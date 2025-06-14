@@ -67,7 +67,7 @@ def admin_page():
                 st.rerun()
 
     request_file = "demandes_en_attente.xlsx"
-    accepted_users_file = "accepted_user_information.xlsx"
+    accepted_users_file = "static/accepted_user_information.xlsx"
     requests = pd.DataFrame()
     if os.path.exists(request_file):
         try:
