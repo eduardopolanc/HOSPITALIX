@@ -7,21 +7,21 @@ from dotenv import load_dotenv
 
 # Cette fonction définit la page d'inscription utilisateur
 def sign_up_page():
+    st.image("dq-legaltech-logo.ico", width=100)
     st.title("Demande de création de compte")
 
     # Champs du formulaire
     nom = st.text_input("Nom")
     prenom = st.text_input("Prénom")
-    telephone = st.text_input("Téléphone (optionnel)")
+    telephone = st.text_input("Téléphone")
     role = st.text_input("Rôle / Profession")
     entreprise = st.text_input("Nom de l'entreprise")
     email = st.text_input("Email (utilisé comme identifiant)").strip().lower()
 
     if st.button("Soumettre la demande"):
-        if not (nom and prenom and email and role and entreprise):
+        if not (nom and prenom and telephone and role and entreprise and email):
             st.warning("Veuillez remplir tous les champs obligatoires.")
         else:
-            # Vérification dans accepted_user_information.xlsm
             accepted_path = "accepted_user_information.xlsm"
             user_exists = False
             deleted_user = False
@@ -36,14 +36,12 @@ def sign_up_page():
                     else:
                         user_exists = True
 
-            # Vérification dans demandes_en_attente.xlsx
             request_path = "demandes_en_attente.xlsx"
             already_pending = False
             if os.path.exists(request_path):
                 pending_df = pd.read_excel(request_path)
                 already_pending = not pending_df[pending_df["Email"].str.lower() == email].empty
 
-            # Affichage des cas bloquants
             if already_pending:
                 st.warning("⏳ Une demande de création de compte a déjà été envoyée pour cette adresse email. Veuillez utiliser une autre adresse ou contacter contact@droitsquotidiens.fr.")
             elif user_exists:
@@ -51,7 +49,6 @@ def sign_up_page():
             elif deleted_user:
                 st.error("🚫 Un compte associé à cette adresse email a été précédemment supprimé. Veuillez utiliser une autre adresse ou contacter contact@droitsquotidiens.fr.")
             else:
-                # Création de la ligne de demande
                 new_request = pd.DataFrame([{
                     "Nom": nom,
                     "Prénom": prenom,
@@ -69,7 +66,6 @@ def sign_up_page():
 
                 all_requests.to_excel(request_path, index=False, engine="openpyxl")
 
-                # Envoi des emails
                 load_dotenv()
                 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
                 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
@@ -104,7 +100,7 @@ def sign_up_page():
                                 <p>Bonjour {prenom},</p>
                                 <p>Votre demande a bien été enregistrée.</p>
                                 <p>Nous la traiterons dans les plus brefs délais.</p>
-                                <p>Merci,<br>L'équipe Hospitalix</p>
+                                <p>Cordialement,<br>L'équipe Droits Quotidiens Legal Tech</p>
                             </body>
                         </html>
                     """, subtype='html')
@@ -119,6 +115,23 @@ def sign_up_page():
 
                 st.success("✅ Votre demande a été soumise avec succès.")
 
+                # Nettoyage du formulaire et retour à la connexion
+                st.session_state.page = "login"
+                st.rerun()
+
     if st.button("Retour à la connexion"):
         st.session_state.page = "login"
         st.rerun()
+
+    # Pied de page
+    st.markdown(
+        """
+        <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
+            <p style="text-align:center; color:white; font-size:0.9em; margin:0;">
+                Droits Quotidiens Legal Tech<br>
+                📧 Pour toute question, contactez-nous à <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )

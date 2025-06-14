@@ -17,12 +17,35 @@ import pandas as pd
 import smtplib
 from email.message import EmailMessage
 from dotenv import load_dotenv
+import urllib.parse
+
+st.markdown("""
+    <style>
+    [data-testid="collapsedControl"] {
+        display: none;
+    }
+    section[data-testid="stSidebar"] {
+        min-width: 300px !important;
+        max-width: 300px !important;
+        background-color: #f4f5f7 !important;
+        padding-top: 1rem !important;
+        padding-bottom: 0rem !important;
+    }
+    .block-container {
+        padding-top: 1rem !important;
+    }
+    [class^="css-"][class*="e1fqkh3o3"] {
+        min-height: 0px !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 load_dotenv()
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
 
 def send_password_change_email(user_email):
     msg = EmailMessage()
@@ -35,7 +58,7 @@ def send_password_change_email(user_email):
         <body>
             <p>Bonjour,</p>
             <p>Votre mot de passe a été modifié avec succès.</p>
-            <p>Si vous n'êtes pas à l'origine de cette modification, veuillez contacter notre équipe à l'adresse suivante :
+            <p>Si vous n'êtes pas à l'origine de cette modification, veuillez contacter notre équipe :
             <a href='mailto:contact@droitsquotidiens.fr'>contact@droitsquotidiens.fr</a>.</p>
             <p>Merci,<br>L'équipe Droits Quotidiens</p>
         </body>
@@ -54,8 +77,7 @@ def send_password_change_email(user_email):
 
 
 def user_page():
-    colq, colw = st.columns([2,2])
-
+    colq, colw = st.columns([2, 2])
     with colq:
         st.image("dq-legaltech-logo.ico", width=100)
     with colw:
@@ -64,7 +86,6 @@ def user_page():
     FILE_NAME1 = "script/fonction/Fiche1.txt"
     FILE_NAME2 = "script/fonction/Fiche2.txt"
     USER_FILE = "accepted_user_information.xlsm"
-    COMMENT_FILE = "Commentaire.xlsx"
 
     def load_users():
         if not os.path.exists(USER_FILE):
@@ -83,36 +104,6 @@ def user_page():
         st.stop()
 
     if "user_email" in st.session_state:
-        with st.expander("Options"):
-            menu_options = ["Profil", "Déconnexion"]
-            if st.session_state.user_email.lower() != ADMIN_EMAIL.lower():
-                menu_options.insert(1, "Changer mot de passe")
-
-            menu_option = st.radio("Options", menu_options, key="user_menu")
-
-            if menu_option == "Changer mot de passe":
-                st.subheader("Changer le mot de passe")
-                current = st.text_input("Mot de passe actuel", type="password")
-                new_pwd = st.text_input("Nouveau mot de passe", type="password")
-                confirm_pwd = st.text_input("Confirmez le nouveau mot de passe", type="password")
-                if st.button("Mettre à jour"):
-                    row = df_users[df_users["Email (username)"].str.lower() == st.session_state.user_email.lower()]
-                    if not row.empty and current == str(row.iloc[0]["Password"]):
-                        if new_pwd == confirm_pwd:
-                            df_users.loc[row.index, "Password"] = new_pwd
-                            df_users.to_excel(USER_FILE, index=False, engine="openpyxl")
-                            send_password_change_email(st.session_state.user_email)
-                            st.success("Mot de passe mis à jour.")
-                        else:
-                            st.error("Les mots de passe ne correspondent pas.")
-                    else:
-                        st.error("Mot de passe actuel incorrect.")
-
-            elif menu_option == "Déconnexion":
-                st.session_state.clear()
-                st.success("Déconnecté avec succès.")
-                st.rerun()
-
         st.sidebar.title('Choix')
         list_contexte = st.sidebar.multiselect('Santé /contexte', (
             'mémoire', 'santé', 'surendettement', 'maltraitance', 'internet',
@@ -127,18 +118,13 @@ def user_page():
             'bonnes relations', 'relation tendues', 'admin', 'budget', 'suivi med', 'aucun pb', 'gestion pat', 'indifférent'))
 
         context = [list_contexte, situation_perso, aidant, patrimoine, relation]
-        array_vchoisi = []
-
-        v1 = [fonction.val_contexte2(x) for x in list_contexte]
-        array_vchoisi.append(v1)
-        v2 = fonction.val_situ_perso2(situation_perso)
-        array_vchoisi.append(v2[0])
-        v3 = fonction.val_aidant2(aidant)
-        array_vchoisi.append(v3[0])
-        v4 = fonction.val_patrimoine2(patrimoine)
-        array_vchoisi.append(v4[0])
-        v5 = [fonction.val_relation2(x) for x in relation]
-        array_vchoisi.append(v5)
+        array_vchoisi = [
+            [fonction.val_contexte2(x) for x in list_contexte],
+            fonction.val_situ_perso2(situation_perso)[0],
+            fonction.val_aidant2(aidant)[0],
+            fonction.val_patrimoine2(patrimoine)[0],
+            [fonction.val_relation2(x) for x in relation]
+        ]
 
         if "show_form" not in st.session_state:
             st.session_state.show_form = False
@@ -147,8 +133,8 @@ def user_page():
 
         if st.session_state.show_form:
             st.subheader('Code fiche :')
-            st.write(v1, v2, v3, v4, v5)
-            if (len(v1) > 1) or (len(v5) > 1):
+            st.write(*array_vchoisi)
+            if len(array_vchoisi[0]) > 1 or len(array_vchoisi[4]) > 1:
                 fonction.generate(array_vchoisi, FILE_NAME1)
                 fonction.generate_with_regle(array_vchoisi, FILE_NAME2)
                 fiche1 = open(FILE_NAME1, encoding='utf-8').readlines()
@@ -166,11 +152,11 @@ def user_page():
         st.write('Commentaire')
         title = st.text_input('Commentaire', '')
 
-        v1 = fonction.recup_variable_com(v1)
-        v2 = fonction.recup_variable_com(v2)
-        v3 = fonction.recup_variable_com(v3)
-        v4 = fonction.recup_variable_com(v4)
-        v5 = fonction.recup_variable_com(v5)
+        v1 = fonction.recup_variable_com(array_vchoisi[0])
+        v2 = fonction.recup_variable_com(array_vchoisi[1])
+        v3 = fonction.recup_variable_com(array_vchoisi[2])
+        v4 = fonction.recup_variable_com(array_vchoisi[3])
+        v5 = fonction.recup_variable_com(array_vchoisi[4])
 
         if st.button("ajouter le commentaire"):
             com = [dt.now(), 'Code fiche :', v1, v2, v3, v4, v5, title]
@@ -183,34 +169,38 @@ def user_page():
             except Exception as e:
                 st.error(f"Erreur lors de l'ajout du commentaire : {e}")
 
+        show_pdf_section = False
+
         if st.button("Exporter le rapport"):
             pdf = Make_pdf(FILE_NAME2, context)
-
             date_str = dt.now().strftime("%Y-%m-%d_%H%M%S")
             user_name = st.session_state.user_email.split("@")[0].replace(".", "").replace(" ", "")
             filename = f"{date_str}_{user_name}.pdf"
-            output_path = os.path.join("static",filename)
+            output_path = os.path.join("static", filename)
             pdf.output(name=output_path, dest="F")
+            st.session_state["pdf_to_view"] = filename
+            show_pdf_section = True
 
-            b64 = base64.b64encode(open(output_path, "rb").read()).decode()
-            html = f'<a href="data:application/octet-stream;base64,{b64}" download="{filename}">Download file</a>'
-            st.markdown(html, unsafe_allow_html=True)
-
+        if "pdf_to_view" in st.session_state:
+            file_to_display = st.session_state["pdf_to_view"]
+            file_path = os.path.join("static", file_to_display)
+            if os.path.exists(file_path):
+                with open(file_path, "rb") as f:
+                    st.download_button("Télécharger le PDF", f, file_name=file_to_display, mime="application/pdf")
+                pdf_url = f"/app/static/{urllib.parse.quote(file_to_display)}"
+                st.link_button("Voir le PDF", url=pdf_url)
 
         if st.session_state.user_email.lower() == ADMIN_EMAIL.lower():
             if st.button("Retour vers l'administrateur"):
                 st.session_state.page = "admin"
                 st.rerun()
 
-    st.markdown(
-        """
+    st.markdown("""
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
             <p style="text-align:center; color:white; font-size:0.9em; margin:0;">
                 Droits Quotidiens Legal Tech<br>
-                ^=^s  Pour toute question, contactez-nous à <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
+                Pour toute question, contactez-nous à
+                <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
             </p>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-
+    """, unsafe_allow_html=True)

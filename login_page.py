@@ -61,7 +61,7 @@ Voici votre mot de passe : {password}
 Si vous n'avez pas fait cette demande, merci d'ignorer ce message.
 
 Cordialement,
-L'équipe Droits Quotidiens
+L'équipe Droits Quotidiens Legal Tech
 """)
             with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
                 smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
@@ -113,7 +113,7 @@ L'équipe Droits Quotidiens
             else:
                 st.error("Impossible de charger les utilisateurs.")
 
-    # Pied de page 
+    # Pied de page
     st.markdown(
         """
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">

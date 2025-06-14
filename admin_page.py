@@ -53,7 +53,6 @@ def send_account_email(to_email, password):
 
 # Page Admin
 def admin_page():
-    st.set_page_config(layout="wide")
     cola, cols, cold = st.columns([2, 2, 2])
 
     # Titre de la page Admin
@@ -141,12 +140,13 @@ def admin_page():
     # ---- Demandes en attente ----
     with col_o:
         st.markdown("#### 🕒 Demandes en attente")
-        requests = pd.read_excel("demandes_en_attente.xlsx") if os.path.exists("demandes_en_attente.xlsx") else pd.DataFrame()
 
         if search_email:
             filtered_requests = requests[requests['Email'].str.lower().str.contains(search_email)]
         else:
             filtered_requests = requests.head(25)
+        if "selected_user_idx" not in st.session_state:
+            st.session_state.selected_user_idx = None
 
         with st.container(height=300):
             if filtered_requests.empty:
@@ -157,38 +157,46 @@ def admin_page():
                         for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
-                        colA, colB = st.columns(2)
-                        with colA:
-                            if st.button("✅ Accepter", key=f"accept_{i}"):
-                                password = generate_password()
-                                send_account_email(row["Email"], password)
-                                new_account = pd.DataFrame([{
-                                    "Nom": row.get("Nom", ""),
-                                    "Prénom": row.get("Prénom", ""),
-                                    "Téléphone": row.get("Téléphone", ""),
-                                    "Entreprise": row.get("Entreprise", ""),
-                                    "Rôle": row.get("Rôle", ""),
-                                    "Email (username)": row["Email"],
-                                    "Password": password,
-                                    "Statut": "actif"
-                                }])
-                                if os.path.exists("accepted_user_information.xlsm"):
-                                    existing = pd.read_excel("accepted_user_information.xlsm")
-                                    all_accounts = pd.concat([existing, new_account], ignore_index=True)
-                                else:
-                                    all_accounts = new_account
-                                all_accounts.to_excel("accepted_user_information.xlsm", index=False)
-
-                                requests = requests[requests['Email'] != row['Email']]
-                                requests.to_excel("demandes_en_attente.xlsx", index=False)
-                                st.success("Utilisateur accepté.")
+                        colA, colB, colC = st.columns([1, 1, 2])  # ✅ 定义三列
+                        with colC:
+                            if st.button("🟢 Commencer validation", key=f"start_confirm_{i}"):
+                                st.session_state.selected_user_idx = i
                                 st.rerun()
-                        with colB:
-                            if st.button("❌ Rejeter", key=f"reject_{i}"):
-                                requests = requests[requests['Email'] != row['Email']]
-                                requests.to_excel("demandes_en_attente.xlsx", index=False)
-                                st.warning("Demande rejetée.")
-                                st.rerun()
+                        if st.session_state.selected_user_idx == i:            
+                            with colA:
+                                if st.checkbox("Confirmez l'acceptation", key=f"confirm_accept_{i}"):               
+                                    if st.button("✅ Accepter", key=f"accept_{i}"):
+                                        password = generate_password()
+                                        send_account_email(row["Email"], password)
+                                        new_account = pd.DataFrame([{
+                                            "Nom": row.get("Nom", ""),
+                                            "Prénom": row.get("Prénom", ""),
+                                            "Téléphone": row.get("Téléphone", ""),
+                                            "Entreprise": row.get("Entreprise", ""),
+                                            "Rôle": row.get("Rôle", ""),
+                                            "Email (username)": row["Email"],
+                                            "Password": password,
+                                            "Statut": "actif"
+                                        }])
+                                        if os.path.exists("accepted_user_information.xlsm"):
+                                            existing = pd.read_excel("accepted_user_information.xlsm")
+                                            all_accounts = pd.concat([existing, new_account], ignore_index=True)
+                                        else:
+                                            all_accounts = new_account
+                                        all_accounts.to_excel("accepted_user_information.xlsm", index=False)
+  
+                                        requests = requests[requests['Email'] != row['Email']]
+                                        requests.to_excel("demandes_en_attente.xlsx", index=False)
+                                        st.session_state.selected_user_idx = None                                        
+                                        st.success("Utilisateur accepté.")
+                                        st.rerun()
+                                with colB:
+                                    if st.button("❌ Rejeter", key=f"reject_{i}"):
+                                        requests = requests[requests['Email'] != row['Email']]
+                                        requests.to_excel("demandes_en_attente.xlsx", index=False)
+                                        st.session_state.selected_user_idx = None             
+                                        st.warning("Demande rejetée.")
+                                        st.rerun()
                 if not search_email and len(requests) > 25:
                     st.markdown("<br>", unsafe_allow_html=True)
                     st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
