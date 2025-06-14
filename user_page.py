@@ -171,8 +171,12 @@ def user_page():
 
         show_pdf_section = False
 
+        
+
         if st.button("Exporter le rapport"):
             pdf = Make_pdf(FILE_NAME2, context)
+            st.session_state["last_generated_pdf"] = filename
+            st.session_state["last_context"] = context
             date_str = dt.now().strftime("%Y-%m-%d_%H%M%S")
             user_name = st.session_state.user_email.split("@")[0].replace(".", "").replace(" ", "")
             filename = f"{date_str}_{user_name}.pdf"
@@ -204,3 +208,5 @@ def user_page():
             </p>
         </div>
     """, unsafe_allow_html=True)
+
+
