@@ -4,7 +4,6 @@ from admin_page import admin_page
 from login_page import login_page
 from sign_up_page import sign_up_page
 from user_page import user_page
-from pdf_viewer_page import pdf_viewer_page
 
 # ➕ Appliquer le style global pour enlever le header/padding Streamlit
 st.markdown("""
