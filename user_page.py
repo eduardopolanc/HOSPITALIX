@@ -164,7 +164,7 @@ def user_page():
         }
 
         show_pdf_section = False
-        col1, col2, col3 = st.columns(2)
+        col1, col2, col3 = st.columns([2, 2, 2])
 
         with col1:
             if st.button("Exporter le rapport"):
