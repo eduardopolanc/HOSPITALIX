@@ -67,7 +67,7 @@ def admin_page():
                 st.rerun()
 
     request_file = "demandes_en_attente.xlsx"
-    account_file = "accepted_user_information.xlsm"
+    accepted_users_file = "accepted_user_information.xlsx"
     requests = pd.DataFrame()
     if os.path.exists(request_file):
         try:
@@ -206,12 +206,12 @@ def admin_page():
                                             "Password": password,
                                             "Statut": "actif"
                                         }])
-                                        if os.path.exists("accepted_user_information.xlsm"):
-                                            existing = pd.read_excel("accepted_user_information.xlsm")
+                                        if os.path.exists(accepted_users_file):
+                                            existing = pd.read_excel(accepted_users_file)
                                             all_accounts = pd.concat([existing, new_account], ignore_index=True)
                                         else:
                                             all_accounts = new_account
-                                        all_accounts.to_excel("accepted_user_information.xlsm", index=False)
+                                        all_accounts.to_excel(accepted_users_file, index=False)
   
                                         requests = requests[requests['Email'] != row['Email']]
                                         requests.to_excel("demandes_en_attente.xlsx", index=False)
@@ -232,7 +232,7 @@ def admin_page():
     # ---- Utilisateurs actifs ----
     with col_p:
         st.markdown("#### ✅ Utilisateurs actifs")
-        accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
+        accepted_users = pd.read_excel(accepted_users_file) if os.path.exists(accepted_users_file) else pd.DataFrame()
         if "Statut" not in accepted_users.columns:
             accepted_users["Statut"] = "actif"
 
@@ -251,7 +251,7 @@ def admin_page():
                                 st.write(f"**{field} :** {row[field]}")
                         if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
                             accepted_users.loc[accepted_users['Email (username)'] == row['Email (username)'], 'Statut'] = 'supprimé'
-                            accepted_users.to_excel("accepted_user_information.xlsm", index=False)
+                            accepted_users.to_excel(accepted_users_file, index=False)
                             st.success("Utilisateur marqué comme supprimé.")
                             st.rerun()
                 if not search_email and len(actifs) > 25:
@@ -273,7 +273,7 @@ def admin_page():
                 with col1:
                     if st.button("✅ Oui, réactiver"):
                         accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = 'actif'
-                        accepted_users.to_excel("accepted_user_information.xlsm", index=False)
+                        accepted_users.to_excel(accepted_users_file, index=False)
                         st.success("Utilisateur réactivé.")
                         st.rerun()
                 with col2:
@@ -290,7 +290,7 @@ def admin_page():
                     if st.button("🗑️ Oui, supprimer définitivement"):
                         # Remplacer le statut par "supprimé_def"
                         accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = 'supprimé_def'
-                        accepted_users.to_excel("accepted_user_information.xlsm", index=False)
+                        accepted_users.to_excel(accepted_users_file, index=False)
                         st.success("Utilisateur supprimé définitivement.")
                         st.rerun()
                 with col2:
@@ -315,21 +315,18 @@ def admin_page():
                         with col2:
                             if st.button("❌ Supprimer définitivement", key=f"delete_final_{i}"):
                                 confirmer_suppression_definitive(email)
-    st.markdown("### ⬇️ Télécharger la base des utilisateurs enregistrés")
 
-    user_file = "accepted_user_information.xlsm"
-    if os.path.exists(user_file):
-        url_encoded = f"/app/{urllib.parse.quote(user_file)}"
-        st.markdown(
-            f"<a href='{url_encoded}' download='{user_file}' style='font-size: 16px;'>📥 Télécharger le fichier Excel</a>",
-            unsafe_allow_html=True
-        )
-        
+    url_encoded = f"/app/{urllib.parse.quote(accepted_users_file)}"
+    st.markdown(
+        f"<a href='{url_encoded}' download='{accepted_users_file}' style='font-size: 16px;'>📥 Télécharger le fichier Excel</a>",
+        unsafe_allow_html=True
+    )
+
     #General statistics
     st.markdown("---")
     st.markdown("### 📊 Statistiques générales")
 
-    accepted_users = pd.read_excel("accepted_user_information.xlsm") if os.path.exists("accepted_user_information.xlsm") else pd.DataFrame()
+    accepted_users = pd.read_excel(accepted_users_file) if os.path.exists(accepted_users_file) else pd.DataFrame()
     if "Statut" not in accepted_users.columns:
         accepted_users["Statut"] = "actif"
     accepted_actifs = accepted_users[accepted_users["Statut"] == "actif"]
