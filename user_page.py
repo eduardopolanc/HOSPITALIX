@@ -158,6 +158,14 @@ def user_page():
         v4 = fonction.recup_variable_com(array_vchoisi[3])
         v5 = fonction.recup_variable_com(array_vchoisi[4])
 
+        st.session_state["last_context_labeled"] = {
+            "Santé/contexte": v1,
+            "Situation perso": v2,
+            "Famille": v3,
+            "Patrimoine": v4,
+            "Qualité relation/pb gestion": v5
+        }
+
         if st.button("ajouter le commentaire"):
             com = [dt.now(), 'Code fiche :', v1, v2, v3, v4, v5, title]
             try:
@@ -215,14 +223,18 @@ def user_page():
             if st.button("Envoyer le commentaire"):
                 if confirm and st.session_state.comment_text.strip():
                     commentaire_path = "Commentaire.xlsx"
-                    context_used = st.session_state.get("last_context", [])
+                    context_labeled = st.session_state.get("last_context_labeled", {})
 
                     new_comment = {
                         "Horodatage": dt.now().strftime("%Y-%m-%d %H:%M:%S"),
                         "Utilisateur": user_email,
                         "PDF": pdf_name,
                         "Commentaire": st.session_state.comment_text.strip(),
-                        "Variables utilisées": ", ".join(str(v) for v in context_used)
+                        "Santé/contexte": context_labeled.get("Santé/contexte", ""),
+                        "Situation perso": context_labeled.get("Situation perso", ""),
+                        "Famille": context_labeled.get("Famille", ""),
+                        "Patrimoine": context_labeled.get("Patrimoine", ""),
+                        "Qualité relation/pb gestion": context_labeled.get("Qualité relation/pb gestion", "")                        
                     }
 
                     if os.path.exists(commentaire_path):
