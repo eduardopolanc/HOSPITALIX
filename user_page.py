@@ -85,7 +85,7 @@ def user_page():
 
     FILE_NAME1 = "script/fonction/Fiche1.txt"
     FILE_NAME2 = "script/fonction/Fiche2.txt"
-    USER_FILE = "accepted_user_information.xlsm"
+    USER_FILE = "static/accepted_user_information.xlsx"
 
     def load_users():
         if not os.path.exists(USER_FILE):

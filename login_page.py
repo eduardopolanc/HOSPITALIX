@@ -20,7 +20,7 @@ def login_page():
     EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
     # Fichier Excel des utilisateurs
-    user_file = "accepted_user_information.xlsm"
+    user_file = "static/accepted_user_information.xlsx"
     ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
