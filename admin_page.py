@@ -53,7 +53,7 @@ def send_account_email(to_email, password):
         return False
 
 def enregistrer_historique_statut(email, ancien_statut, nouveau_statut):
-    date_actuelle = dt.now()
+    date_actuelle = dt.datetime.now()
     date_str = date_actuelle.strftime("%Y-%m-%d")
     heure_str = date_actuelle.strftime("%H:%M")
 
