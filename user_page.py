@@ -163,7 +163,6 @@ def user_page():
             "Qualité relation/pb gestion": v5
         }
 
-        show_pdf_section = False
         col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
 
         with col1:
@@ -195,20 +194,32 @@ def user_page():
                     st.session_state.page = "admin"
                     st.rerun()
 
-    # Fonction de sauvegarde du commentaire
+    commentaire_path = "Commentaire.xlsx"
 
-    def enregistrer_commentaire():
-        commentaire_path = "Commentaire.xlsx"
+    # ===============================
+    # Fonction de sauvegarde du commentaire
+    # ===============================
+    def enregistrer_commentaire(texte):
         user_email = st.session_state.get("user_email", "anonyme")
         pdf_name = st.session_state.get("last_generated_pdf", "inconnu")
         context_labeled = st.session_state.get("last_context_labeled", {})
-        texte = st.session_state.get("comment_text", "").strip()
+
+        # Vérifier s'il existe déjà un commentaire pour ce PDF et utilisateur
+        if os.path.exists(commentaire_path):
+            df = pd.read_excel(commentaire_path, engine="openpyxl")
+            duplicate = df[
+                (df["Utilisateur"] == user_email) &
+                (df["PDF"] == pdf_name)
+            ]
+            if not duplicate.empty:
+                st.warning("⚠️ Un commentaire a déjà été envoyé pour ce PDF.")
+                return
 
         new_comment = {
             "Horodatage": dt.now().strftime("%Y-%m-%d %H:%M:%S"),
             "Utilisateur": user_email,
             "PDF": pdf_name,
-            "Commentaire": texte,
+            "Commentaire": texte.strip(),
             "Santé/contexte": context_labeled.get("Santé/contexte", ""),
             "Situation perso": context_labeled.get("Situation perso", ""),
             "Famille": context_labeled.get("Famille", ""),
@@ -217,29 +228,27 @@ def user_page():
         }
 
         if os.path.exists(commentaire_path):
-            df = pd.read_excel(commentaire_path, engine="openpyxl")
             df = pd.concat([df, pd.DataFrame([new_comment])], ignore_index=True)
         else:
             df = pd.DataFrame([new_comment])
 
         df.to_excel(commentaire_path, index=False, engine="openpyxl")
-
         st.success("✅ Commentaire envoyé avec succès.")
         st.session_state.comment_text = ""
+        st.rerun()
 
 
-
+    # ===============================
     # Dialogue de confirmation
-
+    # ===============================
     @st.dialog("Confirmation d'envoi")
-    def confirmer_envoi_commentaire():
+    def confirmer_envoi_commentaire(texte):
         st.write("Souhaitez-vous vraiment envoyer ce commentaire ?")
 
         col1, col2 = st.columns(2)
         with col1:
             if st.button("✅ Oui, envoyer", key="confirm_envoyer"):
-                enregistrer_commentaire()
-                st.rerun()
+                enregistrer_commentaire(texte)
         with col2:
             if st.button("❌ Annuler", key="cancel_envoyer"):
                 st.rerun()
@@ -251,7 +260,6 @@ def user_page():
     st.markdown("### 💬 Commentaire sur votre PDF généré")
 
     pdf_name = st.session_state.get("last_generated_pdf", None)
-    user_email = st.session_state.get("user_email", "anyone")
 
     if not pdf_name:
         st.info("Aucun PDF généré pour le moment. La zone de commentaire apparaîtra après la génération.")
@@ -268,7 +276,7 @@ def user_page():
 
         if st.button("Envoyer le commentaire"):
             if txt.strip():
-                confirmer_envoi_commentaire()
+                confirmer_envoi_commentaire(txt)
             else:
                 st.warning("Le commentaire ne peut pas être vide.")
 
