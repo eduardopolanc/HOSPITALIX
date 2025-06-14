@@ -229,7 +229,7 @@ def admin_page():
                                             "Rôle": row.get("Rôle", ""),
                                             "Email (username)": row["Email"],
                                             "Password": password,
-                                            "Statut": "actif"
+                                            "Statut": "actif",
                                             "Date Création": date_creation
                                         }])
                                         if os.path.exists(accepted_users_file):
