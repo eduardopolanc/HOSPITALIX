@@ -144,6 +144,7 @@ def admin_page():
                 df_comments = df_comments[df_comments["Utilisateur"].str.lower().str.contains(search_email)]
             
             df_comments = df_comments.sort_values(by="Horodatage", ascending=False)
+            df_comments = df_comments.head(100)
 
             with st.container(height=300):
                 for _, row in df_comments.iterrows():

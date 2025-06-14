@@ -206,8 +206,8 @@ def user_page():
             if "comment_text" not in st.session_state:
                 st.session_state.comment_text = ""
             
-            st.session_state.comment_text = st.text_area("Votre commentaire: ", value=st.session_state.comment_text)
-
+            st.session_state.comment_text = st.text_area("Votre commentaire: ", value=st.session_state.comment_text, max_chars=1000)
+            st.write(f"Il vous reste {len(st.session_state.comment_text)}/1000 caractères.")
             confirm = st.checkbox("Je confirme vouloir envoyer ce commentaire.")
 
             if st.button("Envoyer le commentaire"):
