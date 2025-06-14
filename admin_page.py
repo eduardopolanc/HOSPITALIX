@@ -265,18 +265,56 @@ def admin_page():
         if search_email:
             supprimes = supprimes[supprimes['Email (username)'].str.lower().str.contains(search_email)]
 
+        def confirmer_reactivation(email):
+            @st.dialog("Confirmer la réactivation")
+            def dialog():
+                st.write(f"Souhaitez-vous vraiment réactiver l'utilisateur {email} ?")
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("✅ Oui, réactiver"):
+                        accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = 'actif'
+                        accepted_users.to_excel("accepted_user_information.xlsm", index=False)
+                        st.success("Utilisateur réactivé.")
+                        st.rerun()
+                with col2:
+                    if st.button("❌ Annuler"):
+                        st.rerun()
+            dialog()
+
+        def confirmer_suppression_definitive(email):
+            @st.dialog("Confirmer la suppression définitive")
+            def dialog():
+                st.write(f"Voulez-vous vraiment supprimer définitivement {email} ? (Cela le rendra invisible mais restera dans le fichier Excel.)")
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("🗑️ Oui, supprimer définitivement"):
+                        # Remplacer le statut par "supprimé_def"
+                        accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = 'supprimé_def'
+                        accepted_users.to_excel("accepted_user_information.xlsm", index=False)
+                        st.success("Utilisateur supprimé définitivement.")
+                        st.rerun()
+                with col2:
+                    if st.button("❌ Annuler"):
+                        st.rerun()
+            dialog()
+
         with st.container(height=300):
             if supprimes.empty:
                 st.info("Aucun utilisateur supprimé.")
             else:
                 for i, (_, row) in enumerate(supprimes.iterrows()):
-                    with st.expander(f"{row['Email (username)']}"):
+                    email = row["Email (username)"]
+                    with st.expander(f"{email}"):
                         for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
-                if not search_email and len(supprimes) > 25:
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            if st.button("✅ Réactiver", key=f"reactiver_{i}"):
+                                confirmer_reactivation(email)
+                        with col2:
+                            if st.button("❌ Supprimer définitivement", key=f"delete_final_{i}"):
+                                confirmer_suppression_definitive(email)
 
     #General statistics
     st.markdown("---")
