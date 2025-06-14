@@ -208,7 +208,7 @@ def user_page():
             if "comment_text" not in st.session_state:
                 st.session_state.comment_text = ""
             
-            st.session_state.comment_text = st.text_Area("Votre commentaire: ", value=st.session_state.comment_text)
+            st.session_state.comment_text = st.text_area("Votre commentaire: ", value=st.session_state.comment_text)
 
             confirm = st.checkbox("Je confirme vouloir envoyer ce commentaire.")
 
