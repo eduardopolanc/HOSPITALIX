@@ -196,9 +196,7 @@ def user_page():
 
     commentaire_path = "Commentaire.xlsx"
 
-    # ===============================
     # Fonction de sauvegarde du commentaire
-    # ===============================
     def enregistrer_commentaire(texte):
         user_email = st.session_state.get("user_email", "anonyme")
         pdf_name = st.session_state.get("last_generated_pdf", "inconnu")
@@ -237,10 +235,7 @@ def user_page():
         st.session_state.comment_text = ""
         st.rerun()
 
-
-    # ===============================
     # Dialogue de confirmation
-    # ===============================
     @st.dialog("Confirmation d'envoi")
     def confirmer_envoi_commentaire(texte):
         st.write("Souhaitez-vous vraiment envoyer ce commentaire ?")
@@ -249,14 +244,12 @@ def user_page():
         with col1:
             if st.button("✅ Oui, envoyer", key="confirm_envoyer"):
                 enregistrer_commentaire(texte)
+                st.rerun()
         with col2:
             if st.button("❌ Annuler", key="cancel_envoyer"):
                 st.rerun()
 
-
-    # ===============================
     # Affichage du bloc commentaire
-    # ===============================
     st.markdown("### 💬 Commentaire sur votre PDF généré")
 
     pdf_name = st.session_state.get("last_generated_pdf", None)
