@@ -104,6 +104,8 @@ L'équipe Droits Quotidiens Legal Tech
                     statut = user_row.iloc[0].get("Statut", "actif")
                     if statut == "supprimé":
                         st.error("🚫 Ce compte a été supprimé. Pour plus d'informations, contactez contact@droitsquotidiens.fr")
+                    elif statut == "supprimé_def":
+                        st.error("Aucun compte associé à cet email.")
                     else:
                         user_password = str(user_row.iloc[0]["Password"])
                         if send_password_email(email, user_password):
