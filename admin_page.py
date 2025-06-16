@@ -213,34 +213,44 @@ def admin_page():
                         if st.session_state.selected_user_idx == i:            
                             with colA:
                                 if st.checkbox("Confirmez l'acceptation", key=f"confirm_accept_{i}"):               
-                                    if st.button("✅ Accepter", key=f"accept_{i}"):
-                                        password = generate_password()
-                                        enregistrer_historique_statut(row["Email"], "---", "actif")
-                                        send_account_email(row["Email"], password)
-                                        date_creation = dt.datetime.now().strftime("%Y-%m-%d")
-                                        new_account = pd.DataFrame([{
-                                            "Nom": row.get("Nom", ""),
-                                            "Prénom": row.get("Prénom", ""),
-                                            "Téléphone": row.get("Téléphone", ""),
-                                            "Entreprise": row.get("Entreprise", ""),
-                                            "Rôle": row.get("Rôle", ""),
-                                            "Email (username)": row["Email"],
-                                            "Password": password,
-                                            "Statut": "actif",
-                                            "Date Création": date_creation
-                                        }])
-                                        if os.path.exists(accepted_users_file):
-                                            existing = pd.read_excel(accepted_users_file)
-                                            all_accounts = pd.concat([existing, new_account], ignore_index=True)
-                                        else:
-                                            all_accounts = new_account
-                                        all_accounts.to_excel(accepted_users_file, index=False, engine="openpyxl")
-  
-                                        requests = requests[requests['Email'] != row['Email']]
-                                        requests.to_excel("demandes_en_attente.xlsx", index=False)
-                                        st.session_state.selected_user_idx = None                                        
-                                        st.success("Utilisateur accepté.")
-                                        st.rerun()
+                                    @st.dialog("Confirmer l'acceptation")
+                                    def confirmer_acceptation_utilisateur():
+                                        st.write(f"Souhaitez-vous vraiment accepter la demande de {row['Email']} ?")
+                                        colX, colY = st.columns(2)
+                                        with colX:
+                                            if st.button("✅ Oui, accepter"):
+                                                password = generate_password()
+                                                enregistrer_historique_statut(row["Email"], "---", "actif")
+                                                send_account_email(row["Email"], password)
+                                                date_creation = dt.datetime.now().strftime("%Y-%m-%d")
+                                                new_account = pd.DataFrame([{
+                                                    "Nom": row.get("Nom", ""),
+                                                    "Prénom": row.get("Prénom", ""),
+                                                    "Téléphone": row.get("Téléphone", ""),
+                                                    "Entreprise": row.get("Entreprise", ""),
+                                                    "Rôle": row.get("Rôle", ""),
+                                                    "Email (username)": row["Email"],
+                                                    "Password": password,
+                                                    "Statut": "actif",
+                                                    "Date Création": date_creation
+                                                }])
+                                                if os.path.exists(accepted_users_file):
+                                                    existing = pd.read_excel(accepted_users_file)
+                                                    all_accounts = pd.concat([existing, new_account], ignore_index=True)
+                                                else:
+                                                    all_accounts = new_account
+                                                all_accounts.to_excel(accepted_users_file, index=False, engine="openpyxl")
+                                                requests.drop(index=_, inplace=True)
+                                                requests.to_excel("demandes_en_attente.xlsx", index=False)
+                                                st.success("Utilisateur accepté.")
+                                                st.session_state.selected_user_idx = None
+                                                st.rerun()
+                                        with colY:
+                                            if st.button("❌ Annuler"):
+                                                st.rerun()
+
+                                    confirmer_acceptation_utilisateur()
+
                                 with colB:
                                     if st.button("❌ Rejeter", key=f"reject_{i}"):
                                         requests = requests[requests['Email'] != row['Email']]
