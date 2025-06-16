@@ -206,48 +206,13 @@ def admin_page():
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
                         
-                        colA, colB = st.columns([2,2])
+                        colA, colB = st.columns([2, 2])
                         with colA:
                             if st.button("✅ Accepter", key=f"accept_{i}"):
-                                def lancer_dialogue_acceptation():
-                                    @st.dialog("Confirmer l'acceptation")
-                                    def dialog():
-                                        st.write(f"Souhaitez-vous vraiment accepter la demande de {row['Email']} ?")
-                                        colX, colY = st.columns(2)
-                                        with colX:
-                                            if st.button("✅ Oui, accepter"):
-                                                password = generate_password()
-                                                enregistrer_historique_statut(row["Email"], "---", "actif")
-                                                send_account_email(row["Email"], password)
-                                                date_creation = dt.datetime.now().strftime("%Y-%m-%d")
-                                                new_account = pd.DataFrame([{
-                                                    "Nom": row.get("Nom", ""),
-                                                    "Prénom": row.get("Prénom", ""),
-                                                    "Téléphone": row.get("Téléphone", ""),
-                                                    "Entreprise": row.get("Entreprise", ""),
-                                                    "Rôle": row.get("Rôle", ""),
-                                                    "Email (username)": row["Email"],
-                                                    "Password": password,
-                                                    "Statut": "actif",
-                                                    "Date Création": date_creation
-                                                }])
-                                                if os.path.exists(accepted_users_file):
-                                                    existing = pd.read_excel(accepted_users_file)
-                                                    all_accounts = pd.concat([existing, new_account], ignore_index=True)
-                                                else:
-                                                    all_accounts = new_account
-                                                all_accounts.to_excel(accepted_users_file, index=False, engine="openpyxl")
-                                                requests.drop(index=_, inplace=True)
-                                                requests.to_excel("demandes_en_attente.xlsx", index=False)
-                                                st.success("Utilisateur accepté.")
-                                                st.session_state.selected_user_idx = None
-                                                st.rerun()
-                                        with colY:
-                                            if st.button("❌ Annuler"):
-                                                st.rerun()
-                                    dialog()
+                                st.session_state["demande_email"] = row["Email"]
+                                st.session_state["demande_index"] = _
+                                st.session_state["trigger_accept_dialog"] = True
 
-                                lancer_dialogue_acceptation()
                         with colB:
                             if st.button("❌ Rejeter", key=f"reject_{i}"):
                                 requests = requests[requests['Email'] != row['Email']]
@@ -255,9 +220,57 @@ def admin_page():
                                 st.session_state.selected_user_idx = None             
                                 st.warning("Demande rejetée.")
                                 st.rerun()
-                if not search_email and len(requests) > 25:
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
+
+        if st.session_state.get("trigger_accept_dialog", False):
+            @st.dialog("Confirmer l'acceptation")
+            def confirmer_acceptation():
+                email = st.session_state["demande_email"]
+                index = st.session_state["demande_index"]
+                st.write(f"Souhaitez-vous vraiment accepter la demande de {email} ?")
+                colX, colY = st.columns(2)
+                with colX:
+                    if st.button("✅ Oui, accepter"):
+                        password = generate_password()
+                        enregistrer_historique_statut(email, "---", "actif")
+                        send_account_email(email, password)
+                        date_creation = dt.datetime.now().strftime("%Y-%m-%d")
+
+                        row_data = filtered_requests.loc[index]
+
+                        new_account = pd.DataFrame([{
+                            "Nom": row_data.get("Nom", ""),
+                            "Prénom": row_data.get("Prénom", ""),
+                            "Téléphone": row_data.get("Téléphone", ""),
+                            "Entreprise": row_data.get("Entreprise", ""),
+                            "Rôle": row_data.get("Rôle", ""),
+                            "Email (username)": row_data["Email"],
+                            "Password": password,
+                            "Statut": "actif",
+                            "Date Création": date_creation
+                        }])
+                        if os.path.exists(accepted_users_file):
+                            existing = pd.read_excel(accepted_users_file)
+                            all_accounts = pd.concat([existing, new_account], ignore_index=True)
+                        else:
+                            all_accounts = new_account
+                        all_accounts.to_excel(accepted_users_file, index=False, engine="openpyxl")
+                        requests.drop(index=index, inplace=True)
+                        requests.to_excel("demandes_en_attente.xlsx", index=False)
+                        st.success("Utilisateur accepté.")
+                        st.session_state["trigger_accept_dialog"] = False
+                        st.session_state.selected_user_idx = None
+                        st.rerun()
+                with colY:
+                    if st.button("❌ Annuler"):
+                        st.session_state["trigger_accept_dialog"] = False
+                        st.rerun()
+
+            confirmer_acceptation()
+
+        if not search_email and len(requests) > 25:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
+
 
     # ---- Utilisateurs actifs ----
     with col_p:
@@ -284,7 +297,6 @@ def admin_page():
                             st.session_state["email_a_supprimer"] = email
                             st.session_state["delete_user_trigger"] = True
 
-        # ✅ Diálogo fuera del bucle
         if st.session_state.get("delete_user_trigger", False):
             @st.dialog("Confirmer la suppression")
             def confirmer_suppression_utilisateur():
