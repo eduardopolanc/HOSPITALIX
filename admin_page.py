@@ -188,11 +188,7 @@ def admin_page():
     # ---- Demandes en attente ----
     with col_o:
         st.markdown("#### 🕒 Demandes en attente")
-
-        if search_email:
-            filtered_requests = requests[requests['Email'].str.lower().str.contains(search_email)]
-        else:
-            filtered_requests = requests.head(25)
+        filtered_requests = requests[requests['Email'].str.lower().str.contains(search_email)] if search_email else requests.head(25)
 
         if "selected_user_idx" not in st.session_state:
             st.session_state.selected_user_idx = None
@@ -206,7 +202,6 @@ def admin_page():
                         for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
-                        
                         colA, colB = st.columns([2, 2])
                         with colA:
                             if st.button("✅ Accepter", key=f"accept_{i}"):
@@ -237,9 +232,7 @@ def admin_page():
                         enregistrer_historique_statut(email, "---", "actif")
                         send_account_email(email, password)
                         date_creation = dt.datetime.now().strftime("%Y-%m-%d")
-
                         row_data = filtered_requests.loc[index]
-
                         new_account = pd.DataFrame([{
                             "Nom": row_data.get("Nom", ""),
                             "Prénom": row_data.get("Prénom", ""),
@@ -302,7 +295,6 @@ def admin_page():
             st.markdown("<br>", unsafe_allow_html=True)
             st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
 
-
     # ---- Utilisateurs actifs ----
     with col_p:
         st.markdown("#### ✅ Utilisateurs actifs")
@@ -328,7 +320,9 @@ def admin_page():
                             st.session_state["email_a_supprimer"] = email
                             st.session_state["delete_user_trigger"] = True
 
-        if st.session_state.get("delete_user_trigger", False):
+        if st.session_state.get("delete_user_trigger", False) and "dialog_delete_open" not in st.session_state:
+            st.session_state["dialog_delete_open"] = True
+
             @st.dialog("Confirmer la suppression")
             def confirmer_suppression_utilisateur():
                 target_email = st.session_state["email_a_supprimer"]
@@ -343,17 +337,19 @@ def admin_page():
                         accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
                         st.success("Utilisateur marqué comme supprimé.")
                         st.session_state["delete_user_trigger"] = False
+                        st.session_state["dialog_delete_open"] = False
                         st.rerun()
                 with colY:
                     if st.button("❌ No"):
                         st.session_state["delete_user_trigger"] = False
+                        st.session_state["dialog_delete_open"] = False
                         st.rerun()
 
             confirmer_suppression_utilisateur()
 
-        if not search_email and len(actifs) > 25:
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
+        # 🔒 Corrige si el cuadro fue cerrado manualmente con ❌
+        if st.session_state.get("dialog_delete_open") and not st.session_state.get("delete_user_trigger", False):
+            st.session_state["dialog_delete_open"] = False
 
 
     # ---- Utilisateurs supprimés ----
