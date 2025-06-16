@@ -318,7 +318,7 @@ def admin_page():
                                 st.write(f"**{field} :** {row[field]}")
                         if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
                             st.session_state["email_a_supprimer"] = email
-                            st.session_state["delete_user_trigger"] = True
+                            st.session_state["trigger_conf_dialog"] = True
 
 
     # ✅ Diálogo reutilizable definido una sola vez
