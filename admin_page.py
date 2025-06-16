@@ -283,15 +283,27 @@ def admin_page():
                         for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut", "Date Création"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
-                        if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
-                            old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
-                            new_status = "supprimé"
-                            enregistrer_historique_statut(email, old_status, new_status)
+                        @st.dialog("Confirmer la suppression")
+                        def confirmer_suppression_utilisateur():
+                            st.write(f"Voulez-vous vraiment supprimer {email} ?")
+                            colX, colY = st.columns(2)
+                            with colX:
+                                if st.button("🗑️ Oui, supprimer"):
+                                    old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
+                                    new_status = "supprimé"
+                                    enregistrer_historique_statut(email, old_status, new_status)
 
-                            accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
-                            accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
-                            st.success("Utilisateur marqué comme supprimé.")
-                            st.rerun()
+                                    accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
+                                    accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
+                                    st.success("Utilisateur marqué comme supprimé.")
+                                    st.rerun()
+                            with colY:
+                                if st.button("❌ Annuler"):
+                                    st.rerun()
+
+                        # Llama al diálogo
+                        confirmer_suppression_utilisateur()
+
         if not search_email and len(actifs) > 25:
             st.markdown("<br>", unsafe_allow_html=True)
             st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
