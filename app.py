@@ -33,8 +33,6 @@ elif page == "signup":
     sign_up_page()
 elif page == "user":
     user_page()
-elif page == "pdf_viewer":
-    pdf_viewer_page()
 else:
     st.warning("Page not authorized. Redirecting to Login...")
     st.session_state.page = 'login'
