@@ -319,6 +319,7 @@ def admin_page():
                         if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
                             st.session_state["email_a_supprimer"] = email
                             st.session_state["trigger_conf_dialog"] = True
+                            st.session_state.pop("dialog_conf_open", None)
 
 
     # ✅ Diálogo reutilizable definido una sola vez
@@ -340,12 +341,14 @@ def admin_page():
                     accepted_users.loc[accepted_users['Email (username)'] == target_email, 'Statut'] = new_status
                     accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
                     st.success("Utilisateur marqué comme supprimé.")
-                    st.session_state["delete_user_trigger"] = False
+                    st.session_state["trigger_conf_dialog"] = False
+                    st.session_state["dialog_conf_open"] = False
                     st.rerun()
 
             with colY:
                 if st.button("❌ Non"):
-                    st.session_state["delete_user_trigger"] = False
+                    st.session_state["trigger_conf_dialog"] = False
+                    st.session_state["dialog_conf_open"] = False
                     st.rerun()
         confirmer_suppression_utilisateur()
 
