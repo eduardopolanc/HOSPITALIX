@@ -172,6 +172,7 @@ def admin_page():
                         st.write(f"**Commentaire :** {row['Commentaire']}")
 
                         st.write(f"**Santé/contexte:** {row['Santé/contexte']} | **Situation perso:** {row['Situation perso']} | **Famille:** {row['Famille']} | **Patrimoine:** {row['Patrimoine']} | **Qualité relation/pb gestion:** {row['Qualité relation/pb gestion']}")
+        else:
             st.info("Aucun commentaire disponible.")
     
     else:
