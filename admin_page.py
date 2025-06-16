@@ -183,19 +183,42 @@ def admin_page():
     with colr:
         search_email = st.text_input("🔍 Rechercher un utilisateur (email)").strip().lower()
 
+    @st.dialog("Confirmation")
+    def confirmation_dialog():
+        data = st.session_state.get("confirm_action", {})
+        if not data:
+            return
+
+        st.subheader(data.get("title", "Confirmation"))
+        st.write(data.get("message", "Confirmer l'action ?"))
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("✅ Oui"):
+                data["on_confirm"]()
+        with col2:
+            if st.button("❌ Non"):
+                if data.get("on_cancel"):
+                    data["on_cancel"]()
+                else:
+                    st.session_state["show_dialog"] = False
+                    st.rerun()
+
+    def trigger_confirmation(title, message, on_confirm, on_cancel=None):
+        st.session_state["confirm_action"] = {
+            "title": title,
+            "message": message,
+            "on_confirm": on_confirm,
+            "on_cancel": on_cancel
+        }
+        st.session_state["show_dialog"] = True
+
+    # Bloque completo para demandes en attente, utilisateurs actifs, supprimés
     col_o, col_p, col_s = st.columns(3)
 
-    # ---- Demandes en attente ----
     with col_o:
         st.markdown("#### 🕒 Demandes en attente")
-
-        if search_email:
-            filtered_requests = requests[requests['Email'].str.lower().str.contains(search_email)]
-        else:
-            filtered_requests = requests.head(25)
-
-        if "selected_user_idx" not in st.session_state:
-            st.session_state.selected_user_idx = None
+        filtered_requests = requests[requests['Email'].str.lower().str.contains(search_email)] if search_email else requests.head(25)
 
         with st.container(height=300):
             if filtered_requests.empty:
@@ -206,104 +229,47 @@ def admin_page():
                         for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
-                        
                         colA, colB = st.columns([2, 2])
                         with colA:
                             if st.button("✅ Accepter", key=f"accept_{i}"):
-                                st.session_state["demande_email"] = row["Email"]
-                                st.session_state["demande_index"] = _
-                                st.session_state["trigger_accept_dialog"] = True
-                                st.session_state.pop("dialog_accept_open", None)
+                                def on_accept():
+                                    password = generate_password()
+                                    enregistrer_historique_statut(row['Email'], "---", "actif")
+                                    send_account_email(row['Email'], password)
+                                    date_creation = dt.datetime.now().strftime("%Y-%m-%d")
+                                    new_account = pd.DataFrame([{**row, "Email (username)": row['Email'], "Password": password, "Statut": "actif", "Date Création": date_creation}])
+                                    if os.path.exists(accepted_users_file):
+                                        existing = pd.read_excel(accepted_users_file)
+                                        all_accounts = pd.concat([existing, new_account], ignore_index=True)
+                                    else:
+                                        all_accounts = new_account
+                                    all_accounts.to_excel(accepted_users_file, index=False, engine="openpyxl")
+                                    requests.drop(index=row.name, inplace=True)
+                                    requests.to_excel("demandes_en_attente.xlsx", index=False)
+                                    st.success("Utilisateur accepté.")
+                                    st.session_state["show_dialog"] = False
+                                    st.rerun()
 
+                                trigger_confirmation(
+                                    "Confirmer l'acceptation",
+                                    f"Souhaitez-vous vraiment accepter la demande de {row['Email']} ?",
+                                    on_accept
+                                )
                         with colB:
                             if st.button("❌ Rejeter", key=f"reject_{i}"):
-                                st.session_state["demande_email_rejet"] = row["Email"]
-                                st.session_state["demande_index_rejet"] = _
-                                st.session_state["trigger_reject_dialog"] = True
-                                st.session_state.pop("dialog_reject_open", None)
+                                def on_reject():
+                                    requests.drop(index=row.name, inplace=True)
+                                    requests.to_excel("demandes_en_attente.xlsx", index=False)
+                                    st.warning("Demande rejetée.")
+                                    st.session_state["show_dialog"] = False
+                                    st.rerun()
 
-        if st.session_state.get("trigger_accept_dialog", False) and "dialog_accept_open" not in st.session_state:
-            st.session_state["dialog_accept_open"] = True
+                                trigger_confirmation(
+                                    "Confirmer le rejet",
+                                    f"Voulez-vous vraiment rejeter la demande de {row['Email']} ?",
+                                    on_reject
+                                )
 
-            @st.dialog("Confirmer l'acceptation")
-            def confirmer_acceptation():
-                email = st.session_state["demande_email"]
-                index = st.session_state["demande_index"]
-                st.write(f"Souhaitez-vous vraiment accepter la demande de {email} ?")
-                colX, colY = st.columns(2)
-                with colX:
-                    if st.button("✅ Oui"):
-                        password = generate_password()
-                        enregistrer_historique_statut(email, "---", "actif")
-                        send_account_email(email, password)
-                        date_creation = dt.datetime.now().strftime("%Y-%m-%d")
-
-                        row_data = filtered_requests.loc[index]
-
-                        new_account = pd.DataFrame([{
-                            "Nom": row_data.get("Nom", ""),
-                            "Prénom": row_data.get("Prénom", ""),
-                            "Téléphone": row_data.get("Téléphone", ""),
-                            "Entreprise": row_data.get("Entreprise", ""),
-                            "Rôle": row_data.get("Rôle", ""),
-                            "Email (username)": row_data["Email"],
-                            "Password": password,
-                            "Statut": "actif",
-                            "Date Création": date_creation
-                        }])
-                        if os.path.exists(accepted_users_file):
-                            existing = pd.read_excel(accepted_users_file)
-                            all_accounts = pd.concat([existing, new_account], ignore_index=True)
-                        else:
-                            all_accounts = new_account
-                        all_accounts.to_excel(accepted_users_file, index=False, engine="openpyxl")
-                        requests.drop(index=index, inplace=True)
-                        requests.to_excel("demandes_en_attente.xlsx", index=False)
-                        st.success("Utilisateur accepté.")
-                        st.session_state["trigger_accept_dialog"] = False
-                        st.session_state["dialog_accept_open"] = False
-                        st.session_state.selected_user_idx = None
-                        st.rerun()
-                with colY:
-                    if st.button("❌ No"):
-                        st.session_state["trigger_accept_dialog"] = False
-                        st.session_state["dialog_accept_open"] = False
-                        st.rerun()
-
-            confirmer_acceptation()
-
-        if st.session_state.get("trigger_reject_dialog", False) and "dialog_reject_open" not in st.session_state:
-            st.session_state["dialog_reject_open"] = True
-
-            @st.dialog("Confirmer le rejet")
-            def confirmer_rejet():
-                email = st.session_state["demande_email_rejet"]
-                index = st.session_state["demande_index_rejet"]
-                st.write(f"Voulez-vous vraiment rejeter la demande de {email} ?")
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("✅ Oui"):
-                        requests.drop(index=index, inplace=True)
-                        requests.to_excel("demandes_en_attente.xlsx", index=False)
-                        st.session_state["trigger_reject_dialog"] = False
-                        st.session_state["dialog_reject_open"] = False
-                        st.session_state.selected_user_idx = None
-                        st.warning("Demande rejetée.")
-                        st.rerun()
-                with col2:
-                    if st.button("❌ No"):
-                        st.session_state["trigger_reject_dialog"] = False
-                        st.session_state["dialog_reject_open"] = False
-                        st.rerun()
-
-            confirmer_rejet()
-
-        if not search_email and len(requests) > 25:
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
-
-
-    # ---- Utilisateurs actifs ----
     with col_p:
         st.markdown("#### ✅ Utilisateurs actifs")
         accepted_users = pd.read_excel(accepted_users_file) if os.path.exists(accepted_users_file) else pd.DataFrame()
@@ -325,38 +291,22 @@ def admin_page():
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
                         if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
-                            st.session_state["email_a_supprimer"] = email
-                            st.session_state["delete_user_trigger"] = True
+                            def on_delete():
+                                old_status = row['Statut']
+                                new_status = "supprimé"
+                                enregistrer_historique_statut(email, old_status, new_status)
+                                accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
+                                accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
+                                st.success("Utilisateur supprimé.")
+                                st.session_state["show_dialog"] = False
+                                st.rerun()
 
-        if st.session_state.get("delete_user_trigger", False):
-            @st.dialog("Confirmer la suppression")
-            def confirmer_suppression_utilisateur():
-                target_email = st.session_state["email_a_supprimer"]
-                st.write(f"Voulez-vous vraiment supprimer {target_email} ?")
-                colX, colY = st.columns(2)
-                with colX:
-                    if st.button("✅ Oui"):
-                        old_status = accepted_users.loc[accepted_users['Email (username)'] == target_email, 'Statut'].values[0]
-                        new_status = "supprimé"
-                        enregistrer_historique_statut(target_email, old_status, new_status)
-                        accepted_users.loc[accepted_users['Email (username)'] == target_email, 'Statut'] = new_status
-                        accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
-                        st.success("Utilisateur marqué comme supprimé.")
-                        st.session_state["delete_user_trigger"] = False
-                        st.rerun()
-                with colY:
-                    if st.button("❌ No"):
-                        st.session_state["delete_user_trigger"] = False
-                        st.rerun()
+                            trigger_confirmation(
+                                "Confirmer la suppression",
+                                f"Voulez-vous vraiment supprimer {email} ?",
+                                on_delete
+                            )
 
-            confirmer_suppression_utilisateur()
-
-        if not search_email and len(actifs) > 25:
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
-
-
-    # ---- Utilisateurs supprimés ----
     with col_s:
         st.markdown("#### 🗑️ Utilisateurs supprimés")
         supprimes = accepted_users[accepted_users["Statut"] == "supprimé"]
@@ -377,71 +327,41 @@ def admin_page():
                         col1, col2 = st.columns(2)
                         with col1:
                             if st.button("✅ Réactiver", key=f"reactiver_{i}"):
-                                st.session_state["email_reactiver"] = email
-                                st.session_state["trigger_reactivation_dialog"] = True
-                                st.session_state.pop("dialog_reactivation_open", None)
+                                def on_reactivate():
+                                    old_status = row['Statut']
+                                    new_status = "actif"
+                                    enregistrer_historique_statut(email, old_status, new_status)
+                                    accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
+                                    accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
+                                    st.success("Utilisateur réactivé.")
+                                    st.session_state["show_dialog"] = False
+                                    st.rerun()
 
+                                trigger_confirmation(
+                                    "Confirmer la réactivation",
+                                    f"Souhaitez-vous vraiment réactiver l'utilisateur {email} ?",
+                                    on_reactivate
+                                )
                         with col2:
                             if st.button("❌ Supprimer définitivement", key=f"delete_final_{i}"):
-                                st.session_state["email_supprimer_def"] = email
-                                st.session_state["trigger_suppression_def_dialog"] = True
-                                st.session_state.pop("dialog_suppression_def_open", None)
+                                def on_delete_def():
+                                    old_status = row['Statut']
+                                    new_status = "supprimé_def"
+                                    enregistrer_historique_statut(email, old_status, new_status)
+                                    accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
+                                    accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
+                                    st.success("Utilisateur supprimé définitivement.")
+                                    st.session_state["show_dialog"] = False
+                                    st.rerun()
 
-    # ✅ Dialog: Réactivation
-    if st.session_state.get("trigger_reactivation_dialog", False) and "dialog_reactivation_open" not in st.session_state:
-        st.session_state["dialog_reactivation_open"] = True
+                                trigger_confirmation(
+                                    "Confirmer la suppression définitive",
+                                    f"Voulez-vous vraiment supprimer définitivement {email} ?",
+                                    on_delete_def
+                                )
 
-        @st.dialog("Confirmer la réactivation")
-        def confirmer_reactivation():
-            email = st.session_state["email_reactiver"]
-            st.write(f"Souhaitez-vous vraiment réactiver l'utilisateur {email} ?")
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("✅ Oui"):
-                    old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
-                    new_status = "actif"
-                    enregistrer_historique_statut(email, old_status, new_status)
-                    accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
-                    accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
-                    st.success("Utilisateur réactivé.")
-                    st.session_state["trigger_reactivation_dialog"] = False
-                    st.session_state["dialog_reactivation_open"] = False
-                    st.rerun()
-            with col2:
-                if st.button("❌ Non"):
-                    st.session_state["trigger_reactivation_dialog"] = False
-                    st.session_state["dialog_reactivation_open"] = False
-                    st.rerun()
-
-        confirmer_reactivation()
-
-    # ✅ Dialog: Suppression définitive
-    if st.session_state.get("trigger_suppression_def_dialog", False) and "dialog_suppression_def_open" not in st.session_state:
-        st.session_state["dialog_suppression_def_open"] = True
-
-        @st.dialog("Confirmer la suppression définitive")
-        def confirmer_suppression_definitive():
-            email = st.session_state["email_supprimer_def"]
-            st.write(f"Voulez-vous vraiment supprimer définitivement {email} ? (Cela le rendra invisible mais restera dans le fichier Excel.)")
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("🗑️ Oui, supprimer définitivement"):
-                    old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
-                    new_status = "supprimé_def"
-                    enregistrer_historique_statut(email, old_status, new_status)
-                    accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
-                    accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
-                    st.success("Utilisateur supprimé définitivement.")
-                    st.session_state["trigger_suppression_def_dialog"] = False
-                    st.session_state["dialog_suppression_def_open"] = False
-                    st.rerun()
-            with col2:
-                if st.button("❌ Non"):
-                    st.session_state["trigger_suppression_def_dialog"] = False
-                    st.session_state["dialog_suppression_def_open"] = False
-                    st.rerun()
-
-        confirmer_suppression_definitive()
+    if st.session_state.get("show_dialog", False):
+        confirmation_dialog()
 
 
     col_h, col_d, col_j = st.columns([2, 2, 2])
