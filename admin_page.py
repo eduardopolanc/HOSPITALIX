@@ -363,47 +363,6 @@ def admin_page():
         if search_email:
             supprimes = supprimes[supprimes['Email (username)'].str.lower().str.contains(search_email)]
 
-        def confirmer_reactivation(email):
-            @st.dialog("Confirmer la réactivation")
-            def dialog():
-                st.write(f"Souhaitez-vous vraiment réactiver l'utilisateur {email} ?")
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("✅ Oui"):
-                        old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
-                        new_status = "actif"
-                        enregistrer_historique_statut(email, old_status, new_status)
-
-                        accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
-                        accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
-                        st.success("Utilisateur réactivé.")
-                        st.rerun()
-                with col2:
-                    if st.button("❌ No"):
-                        st.rerun()
-            dialog()
-
-
-        def confirmer_suppression_definitive(email):
-            @st.dialog("Confirmer la suppression définitive")
-            def dialog():
-                st.write(f"Voulez-vous vraiment supprimer définitivement {email} ? (Cela le rendra invisible mais restera dans le fichier Excel.)")
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("🗑️ Oui, supprimer définitivement"):
-                        old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
-                        new_status = "supprimé_def"
-                        enregistrer_historique_statut(email, old_status, new_status)
-
-                        accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
-                        accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
-                        st.success("Utilisateur supprimé définitivement.")
-                        st.rerun()
-                with col2:
-                    if st.button("❌ Annuler"):
-                        st.rerun()
-            dialog()
-
         with st.container(height=300):
             if supprimes.empty:
                 st.info("Aucun utilisateur supprimé.")
@@ -418,10 +377,70 @@ def admin_page():
                         col1, col2 = st.columns(2)
                         with col1:
                             if st.button("✅ Réactiver", key=f"reactiver_{i}"):
-                                confirmer_reactivation(email)
+                                st.session_state["email_reactiver"] = email
+                                st.session_state["trigger_reactivation_dialog"] = True
+                                st.session_state.pop("dialog_reactivation_open", None)
+
                         with col2:
                             if st.button("❌ Supprimer définitivement", key=f"delete_final_{i}"):
-                                confirmer_suppression_definitive(email)
+                                st.session_state["email_supprimer_def"] = email
+                                st.session_state["trigger_suppression_def_dialog"] = True
+                                st.session_state.pop("dialog_suppression_def_open", None)
+
+        if st.session_state.get("trigger_reactivation_dialog", False) and "dialog_reactivation_open" not in st.session_state:
+            st.session_state["dialog_reactivation_open"] = True
+
+            @st.dialog("Confirmer la réactivation")
+            def confirmer_reactivation():
+                email = st.session_state["email_reactiver"]
+                st.write(f"Souhaitez-vous vraiment réactiver l'utilisateur {email} ?")
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("✅ Oui"):
+                        old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
+                        new_status = "actif"
+                        enregistrer_historique_statut(email, old_status, new_status)
+                        accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
+                        accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
+                        st.success("Utilisateur réactivé.")
+                        st.session_state["trigger_reactivation_dialog"] = False
+                        st.session_state["dialog_reactivation_open"] = False
+                        st.rerun()
+                with col2:
+                    if st.button("❌ Non"):
+                        st.session_state["trigger_reactivation_dialog"] = False
+                        st.session_state["dialog_reactivation_open"] = False
+                        st.rerun()
+
+            confirmer_reactivation()
+
+        if st.session_state.get("trigger_suppression_def_dialog", False) and "dialog_suppression_def_open" not in st.session_state:
+            st.session_state["dialog_suppression_def_open"] = True
+
+            @st.dialog("Confirmer la suppression définitive")
+            def confirmer_suppression_definitive():
+                email = st.session_state["email_supprimer_def"]
+                st.write(f"Voulez-vous vraiment supprimer définitivement {email} ? (Cela le rendra invisible mais restera dans le fichier Excel.)")
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("🗑️ Oui, supprimer définitivement"):
+                        old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
+                        new_status = "supprimé_def"
+                        enregistrer_historique_statut(email, old_status, new_status)
+                        accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'] = new_status
+                        accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
+                        st.success("Utilisateur supprimé définitivement.")
+                        st.session_state["trigger_suppression_def_dialog"] = False
+                        st.session_state["dialog_suppression_def_open"] = False
+                        st.rerun()
+                with col2:
+                    if st.button("❌ Non"):
+                        st.session_state["trigger_suppression_def_dialog"] = False
+                        st.session_state["dialog_suppression_def_open"] = False
+                        st.rerun()
+
+            confirmer_suppression_definitive()
+
 
     col_h, col_d, col_j = st.columns([2, 2, 2])
 
