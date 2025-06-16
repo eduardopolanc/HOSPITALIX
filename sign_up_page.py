@@ -1,11 +1,15 @@
 import streamlit as st
 import pandas as pd
 import os
+import re
 import smtplib
 from email.message import EmailMessage
 from dotenv import load_dotenv
 
-# Cette fonction définit la page d'inscription utilisateur
+# Vérifie les caractères spéciaux non autorisés dans un champ
+def contient_caracteres_speciaux(texte):
+    return bool(re.search(r"[^a-zA-Z0-9@._\- +]", texte))
+
 def sign_up_page():
     st.image("dq-legaltech-logo.ico", width=100)
     st.title("Demande de création de compte")
@@ -13,14 +17,19 @@ def sign_up_page():
     # Champs du formulaire
     nom = st.text_input("Nom")
     prenom = st.text_input("Prénom")
-    telephone = st.text_input("Téléphone")
+    telephone = st.text_input("Téléphone", max_chars=10)
     role = st.text_input("Rôle / Profession")
     entreprise = st.text_input("Nom de l'entreprise")
     email = st.text_input("Email (utilisé comme identifiant)").strip().lower()
 
     if st.button("Soumettre la demande"):
+        # Vérification des champs obligatoires
         if not (nom and prenom and telephone and role and entreprise and email):
             st.warning("Veuillez remplir tous les champs obligatoires.")
+        elif len(telephone) != 10 or not telephone.isdigit():
+            st.error("🚫 Le numéro de téléphone doit contenir exactement 10 chiffres.")
+        elif any(contient_caracteres_speciaux(champ) for champ in [nom, prenom, telephone, role, entreprise, email]):
+            st.error("🚫 Certains champs contiennent des caractères non autorisés. Veuillez vérifier vos saisies.")
         else:
             accepted_path = "static/accepted_user_information.xlsx"
             user_exists = False
@@ -34,7 +43,6 @@ def sign_up_page():
                     if statut == "supprimé":
                         deleted_user = True
                     elif statut == "supprimé_def":
-                        # Supprimer la ligne définitivement supprimée pour recréer
                         accepted_df = accepted_df[accepted_df["Email (username)"].str.lower() != email]
                         accepted_df.to_excel(accepted_path, index=False)
                     else:
@@ -47,11 +55,11 @@ def sign_up_page():
                 already_pending = not pending_df[pending_df["Email"].str.lower() == email].empty
 
             if already_pending:
-                st.warning("⏳ Une demande de création de compte a déjà été envoyée pour cette adresse email. Veuillez utiliser une autre adresse ou contacter contact@droitsquotidiens.fr.")
+                st.warning("⏳ Une demande est déjà en attente pour cet email.")
             elif user_exists:
-                st.info("🚫 Un compte est déjà associé à cette adresse email. Veuillez utiliser une autre adresse.")
+                st.info("🚫 Un compte existe déjà avec cet email.")
             elif deleted_user:
-                st.error("🚫 Un compte associé à cette adresse email a été précédemment supprimé. Veuillez utiliser une autre adresse ou contacter contact@droitsquotidiens.fr.")
+                st.error("🚫 Un compte supprimé est associé à cet email. Contactez-nous.")
             else:
                 new_request = pd.DataFrame([{
                     "Nom": nom,
@@ -89,7 +97,7 @@ def sign_up_page():
                                 <b>Email :</b> {email}<br>
                                 <b>Entreprise :</b> {entreprise}<br>
                                 <b>Rôle :</b> {role}<br>
-                                <b>Téléphone :</b> {telephone or 'Non fourni'}</p>
+                                <b>Téléphone :</b> {telephone}</p>
                             </body>
                         </html>
                     """, subtype='html')
@@ -125,7 +133,6 @@ def sign_up_page():
         st.session_state.page = "login"
         st.rerun()
 
-    # Pied de page
     st.markdown(
         """
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
