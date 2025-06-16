@@ -324,10 +324,9 @@ def admin_page():
     # ✅ Diálogo reutilizable definido una sola vez
     if st.session_state.get("trigger_conf_dialog", False) and "dialog_conf_open" not in st.session_state:
         st.session_state["dialog_conf_open"] = True
+
         @st.dialog("Confirmer la suppression")
         def confirmer_suppression_utilisateur():
-            if not st.session_state.get("delete_user_trigger", False):
-                return  # No mostrar nada si no fue activado
 
             target_email = st.session_state.get("email_a_supprimer", "")
             st.write(f"Voulez-vous vraiment supprimer {target_email} ?")
