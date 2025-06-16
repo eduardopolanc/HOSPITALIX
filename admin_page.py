@@ -193,6 +193,7 @@ def admin_page():
             filtered_requests = requests[requests['Email'].str.lower().str.contains(search_email)]
         else:
             filtered_requests = requests.head(25)
+
         if "selected_user_idx" not in st.session_state:
             st.session_state.selected_user_idx = None
 
@@ -215,11 +216,9 @@ def admin_page():
 
                         with colB:
                             if st.button("❌ Rejeter", key=f"reject_{i}"):
-                                requests = requests[requests['Email'] != row['Email']]
-                                requests.to_excel("demandes_en_attente.xlsx", index=False)
-                                st.session_state.selected_user_idx = None             
-                                st.warning("Demande rejetée.")
-                                st.rerun()
+                                st.session_state["demande_email_rejet"] = row["Email"]
+                                st.session_state["demande_index_rejet"] = _
+                                st.session_state["trigger_reject_dialog"] = True
 
         if st.session_state.get("trigger_accept_dialog", False):
             @st.dialog("Confirmer l'acceptation")
@@ -229,7 +228,7 @@ def admin_page():
                 st.write(f"Souhaitez-vous vraiment accepter la demande de {email} ?")
                 colX, colY = st.columns(2)
                 with colX:
-                    if st.button("✅ Oui, accepter"):
+                    if st.button("✅ Oui"):
                         password = generate_password()
                         enregistrer_historique_statut(email, "---", "actif")
                         send_account_email(email, password)
@@ -261,16 +260,37 @@ def admin_page():
                         st.session_state.selected_user_idx = None
                         st.rerun()
                 with colY:
-                    if st.button("❌ Annuler"):
+                    if st.button("❌ No"):
                         st.session_state["trigger_accept_dialog"] = False
                         st.rerun()
 
             confirmer_acceptation()
 
+        if st.session_state.get("trigger_reject_dialog", False):
+            @st.dialog("Confirmer le rejet")
+            def confirmer_rejet():
+                email = st.session_state["demande_email_rejet"]
+                index = st.session_state["demande_index_rejet"]
+                st.write(f"Voulez-vous vraiment rejeter la demande de {email} ?")
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("✅ Oui"):
+                        requests.drop(index=index, inplace=True)
+                        requests.to_excel("demandes_en_attente.xlsx", index=False)
+                        st.session_state["trigger_reject_dialog"] = False
+                        st.session_state.selected_user_idx = None
+                        st.warning("Demande rejetée.")
+                        st.rerun()
+                with col2:
+                    if st.button("Annuler"):
+                        st.session_state["trigger_reject_dialog"] = False
+                        st.rerun()
+
+            confirmer_rejet()
+
         if not search_email and len(requests) > 25:
             st.markdown("<br>", unsafe_allow_html=True)
             st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
-
 
     # ---- Utilisateurs actifs ----
     with col_p:
@@ -304,7 +324,7 @@ def admin_page():
                 st.write(f"Voulez-vous vraiment supprimer {target_email} ?")
                 colX, colY = st.columns(2)
                 with colX:
-                    if st.button("🗑️ Oui, supprimer"):
+                    if st.button("✅ Oui"):
                         old_status = accepted_users.loc[accepted_users['Email (username)'] == target_email, 'Statut'].values[0]
                         new_status = "supprimé"
                         enregistrer_historique_statut(target_email, old_status, new_status)
@@ -314,7 +334,7 @@ def admin_page():
                         st.session_state["delete_user_trigger"] = False
                         st.rerun()
                 with colY:
-                    if st.button("❌ Annuler"):
+                    if st.button("❌ No"):
                         st.session_state["delete_user_trigger"] = False
                         st.rerun()
 
@@ -338,7 +358,7 @@ def admin_page():
                 st.write(f"Souhaitez-vous vraiment réactiver l'utilisateur {email} ?")
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.button("✅ Oui, réactiver"):
+                    if st.button("✅ Oui"):
                         old_status = accepted_users.loc[accepted_users['Email (username)'] == email, 'Statut'].values[0]
                         new_status = "actif"
                         enregistrer_historique_statut(email, old_status, new_status)
@@ -348,7 +368,7 @@ def admin_page():
                         st.success("Utilisateur réactivé.")
                         st.rerun()
                 with col2:
-                    if st.button("❌ Annuler"):
+                    if st.button("❌ No"):
                         st.rerun()
             dialog()
 
