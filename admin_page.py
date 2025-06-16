@@ -194,7 +194,7 @@ def admin_page():
         if "selected_user_idx" not in st.session_state:
             st.session_state.selected_user_idx = None
 
-        with st.container(height=300):
+        with st.container(height=400):
             if filtered_requests.empty:
                 st.info("Aucune demande trouvée.")
             else:
@@ -307,7 +307,7 @@ def admin_page():
         if search_email:
             actifs = actifs[actifs['Email (username)'].str.lower().str.contains(search_email)]
 
-        with st.container(height=300):
+        with st.container(height=400):
             if actifs.empty:
                 st.info("Aucun utilisateur trouvé.")
             else:
@@ -360,7 +360,7 @@ def admin_page():
         if search_email:
             supprimes = supprimes[supprimes['Email (username)'].str.lower().str.contains(search_email)]
 
-        with st.container(height=300):
+        with st.container(height=400):
             if supprimes.empty:
                 st.info("Aucun utilisateur supprimé.")
             else:
