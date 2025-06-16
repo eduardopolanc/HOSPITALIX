@@ -108,13 +108,11 @@ def admin_page():
     pdf_folder = "static"
     all_pdfs = sorted([f for f in os.listdir(pdf_folder) if f.endswith(".pdf")], reverse=True) if os.path.exists(pdf_folder) else []
 
-    # Filtrado por búsqueda
     if search_term:
         filtered_pdfs = [f for f in all_pdfs if search_term in f.lower()]
     else:
-        filtered_pdfs = all_pdfs[:25]  # Limitar a 25 si no se está buscando
+        filtered_pdfs = all_pdfs[:25]
 
-    # Mostrar PDFs
     if not filtered_pdfs:
         st.info("Aucun PDF trouvé.")
     else:
@@ -143,7 +141,6 @@ def admin_page():
                     pdf_url = f"/app/static/{urllib.parse.quote(filename)}"
                     st.link_button("👁️ Voir", url=pdf_url)
 
-            # Mostrar mensaje si hay más de 25 y no hay búsqueda activa
             if not search_term and len(all_pdfs) > 25:
                 st.markdown("<br>", unsafe_allow_html=True)
                 st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
