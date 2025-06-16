@@ -258,7 +258,7 @@ def admin_page():
                         st.session_state.selected_user_idx = None
                         st.rerun()
                 with colY:
-                    if st.button("❌ No"):
+                    if st.button("❌ Non"):
                         st.session_state["trigger_accept_dialog"] = False
                         st.session_state["dialog_accept_open"] = False
                         st.rerun()
@@ -284,7 +284,7 @@ def admin_page():
                         st.warning("Demande rejetée.")
                         st.rerun()
                 with col2:
-                    if st.button("❌ No"):
+                    if st.button("❌ Non"):
                         st.session_state["trigger_reject_dialog"] = False
                         st.session_state["dialog_reject_open"] = False
                         st.rerun()
@@ -322,7 +322,6 @@ def admin_page():
                             st.session_state.pop("dialog_conf_open", None)
 
 
-    # ✅ Diálogo reutilizable definido una sola vez
     if st.session_state.get("trigger_conf_dialog", False) and "dialog_conf_open" not in st.session_state:
         st.session_state["dialog_conf_open"] = True
 
@@ -384,7 +383,6 @@ def admin_page():
                                 st.session_state["trigger_suppression_def_dialog"] = True
                                 st.session_state.pop("dialog_suppression_def_open", None)
 
-    # ✅ Dialog: Réactivation
     if st.session_state.get("trigger_reactivation_dialog", False) and "dialog_reactivation_open" not in st.session_state:
         st.session_state["dialog_reactivation_open"] = True
 
@@ -412,7 +410,6 @@ def admin_page():
 
         confirmer_reactivation()
 
-    # ✅ Dialog: Suppression définitive
     if st.session_state.get("trigger_suppression_def_dialog", False) and "dialog_suppression_def_open" not in st.session_state:
         st.session_state["dialog_suppression_def_open"] = True
 
