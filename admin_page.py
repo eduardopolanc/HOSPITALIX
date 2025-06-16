@@ -348,8 +348,8 @@ def admin_page():
             confirmer_suppression_utilisateur()
 
         # 🔒 Corrige si el cuadro fue cerrado manualmente con ❌
-        if st.session_state.get("dialog_delete_open") and not st.session_state.get("delete_user_trigger", False):
-            st.session_state["dialog_delete_open"] = False
+        if "dialog_delete_open" in st.session_state and not st.session_state.get("delete_user_trigger", False):
+            st.session_state.pop("dialog_delete_open", None)
 
 
     # ---- Utilisateurs supprimés ----
