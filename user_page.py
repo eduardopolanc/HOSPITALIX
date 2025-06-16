@@ -77,12 +77,6 @@ def send_password_change_email(user_email):
 
 
 def user_page():
-    colq, colw = st.columns([2, 2])
-    with colq:
-        st.image("dq-legaltech-logo.ico", width=100)
-    with colw:
-        st.markdown("<h3 style='text-align: center;'>Générateur de fiches</h3>", unsafe_allow_html=True)
-
     FILE_NAME1 = "script/fonction/Fiche1.txt"
     FILE_NAME2 = "script/fonction/Fiche2.txt"
     USER_FILE = "static/accepted_user_information.xlsx"
@@ -103,13 +97,19 @@ def user_page():
         st.error("Erreur de chargement des utilisateurs. Veuillez contacter l'administrateur.")
         st.stop()
 
-    if "user_email" in st.session_state:
-        with st.expander("Options"):
+    # Barre du haut avec logo, titre et menu Options
+    col1, col2, col3 = st.columns([1, 4, 2])
+    with col1:
+        st.image("dq-legaltech-logo.ico", width=80)
+    with col2:
+        st.markdown("<h3 style='text-align: center;'>Générateur de fiches</h3>", unsafe_allow_html=True)
+    with col3:
+        if "user_email" in st.session_state:
             menu_options = ["Profil", "Déconnexion"]
             if st.session_state.user_email.lower() != ADMIN_EMAIL.lower():
                 menu_options.insert(1, "Changer mot de passe")
 
-            menu_option = st.radio("Options", menu_options, key="user_menu")
+            menu_option = st.selectbox("Options", menu_options, key="user_menu")
 
             if menu_option == "Changer mot de passe":
                 st.subheader("Changer le mot de passe")
@@ -151,109 +151,104 @@ def user_page():
                 st.success("Déconnecté avec succès.")
                 st.rerun()
 
-        st.sidebar.title('Choix')
-        list_contexte = st.sidebar.multiselect('Santé /contexte', (
-            'mémoire', 'santé', 'surendettement', 'maltraitance', 'internet',
-            'tuteur', 'rien', 'plus disponible', 'pas habitude papier', 'indifférent'))
-        situation_perso = st.sidebar.selectbox('Situation perso', (
-            'Seule', 'Veuf', 'Divorce', 'Conjoint pas autonome', 'Conjoint autonome', 'indifférent'))
-        aidant = st.sidebar.selectbox('Famille', (
-            'famille proche', 'famille éloignée', 'autre', 'aucun', 'plus disponible', 'indifférent'))
-        patrimoine = st.sidebar.selectbox('Patrimoine', (
-            'Faible', 'moyen', 'important', 'gestion pat', 'indifférent'))
-        relation = st.sidebar.multiselect('Qualité relation/pb gestion', (
-            'bonnes relations', 'relation tendues', 'admin', 'budget', 'suivi med', 'aucun pb', 'gestion pat', 'indifférent'))
+    if "user_email" not in st.session_state:
+        st.error("Veuillez vous connecter.")
+        st.stop()
 
-        context = [list_contexte, situation_perso, aidant, patrimoine, relation]
-        array_vchoisi = [
-            [fonction.val_contexte2(x) for x in list_contexte],
-            fonction.val_situ_perso2(situation_perso)[0],
-            fonction.val_aidant2(aidant)[0],
-            fonction.val_patrimoine2(patrimoine)[0],
-            [fonction.val_relation2(x) for x in relation]
-        ]
+    st.sidebar.title('Choix')
+    list_contexte = st.sidebar.multiselect('Santé /contexte', (
+        'mémoire', 'santé', 'surendettement', 'maltraitance', 'internet',
+        'tuteur', 'rien', 'plus disponible', 'pas habitude papier', 'indifférent'))
+    situation_perso = st.sidebar.selectbox('Situation perso', (
+        'Seule', 'Veuf', 'Divorce', 'Conjoint pas autonome', 'Conjoint autonome', 'indifférent'))
+    aidant = st.sidebar.selectbox('Famille', (
+        'famille proche', 'famille éloignée', 'autre', 'aucun', 'plus disponible', 'indifférent'))
+    patrimoine = st.sidebar.selectbox('Patrimoine', (
+        'Faible', 'moyen', 'important', 'gestion pat', 'indifférent'))
+    relation = st.sidebar.multiselect('Qualité relation/pb gestion', (
+        'bonnes relations', 'relation tendues', 'admin', 'budget', 'suivi med', 'aucun pb', 'gestion pat', 'indifférent'))
 
-        if "show_form" not in st.session_state:
-            st.session_state.show_form = False
+    context = [list_contexte, situation_perso, aidant, patrimoine, relation]
+    array_vchoisi = [
+        [fonction.val_contexte2(x) for x in list_contexte],
+        fonction.val_situ_perso2(situation_perso)[0],
+        fonction.val_aidant2(aidant)[0],
+        fonction.val_patrimoine2(patrimoine)[0],
+        [fonction.val_relation2(x) for x in relation]
+    ]
 
-        st.toggle("Afficher le formulaire", key="show_form")
+    st.toggle("Afficher le formulaire", key="show_form")
+    if st.session_state.show_form:
+        st.subheader('Code fiche :')
+        st.write(*array_vchoisi)
 
-        if st.session_state.show_form:
-            st.subheader('Code fiche :')
-            st.write(*array_vchoisi)
+        if len(array_vchoisi[0]) > 1 or len(array_vchoisi[4]) > 1:
+            fonction.generate(array_vchoisi, FILE_NAME1)
+            fonction.generate_with_regle(array_vchoisi, FILE_NAME2)
+            fiche1 = open(FILE_NAME1, encoding='utf-8').readlines()
+            fiche2 = open(FILE_NAME2, encoding='utf-8').readlines()
+            st.title('Fiche sans règle:')
+            st.write(fiche1)
+            st.title('Fiche avec règle:')
+            st.write(fiche2)
+        else:
+            fonction.generate(array_vchoisi, FILE_NAME2)
+            fiche2 = open(FILE_NAME2, encoding='utf-8').readlines()
+            st.title('Fiche simple:')
+            st.write(fiche2)
 
-            if len(array_vchoisi[0]) > 1 or len(array_vchoisi[4]) > 1:
-                fonction.generate(array_vchoisi, FILE_NAME1)
-                fonction.generate_with_regle(array_vchoisi, FILE_NAME2)
-                fiche1 = open(FILE_NAME1, encoding='utf-8').readlines()
-                fiche2 = open(FILE_NAME2, encoding='utf-8').readlines()
-                st.title('Fiche sans règle:')
-                st.write(fiche1)
-                st.title('Fiche avec règle:')
-                st.write(fiche2)
-            else:
-                fonction.generate(array_vchoisi, FILE_NAME2)
-                fiche2 = open(FILE_NAME2, encoding='utf-8').readlines()
-                st.title('Fiche simple:')
-                st.write(fiche2)
+    v1 = fonction.recup_variable_com(array_vchoisi[0])
+    v2 = fonction.recup_variable_com(array_vchoisi[1])
+    v3 = fonction.recup_variable_com(array_vchoisi[2])
+    v4 = fonction.recup_variable_com(array_vchoisi[3])
+    v5 = fonction.recup_variable_com(array_vchoisi[4])
 
-        v1 = fonction.recup_variable_com(array_vchoisi[0])
-        v2 = fonction.recup_variable_com(array_vchoisi[1])
-        v3 = fonction.recup_variable_com(array_vchoisi[2])
-        v4 = fonction.recup_variable_com(array_vchoisi[3])
-        v5 = fonction.recup_variable_com(array_vchoisi[4])
+    st.session_state["last_context_labeled"] = {
+        "Santé/contexte": v1,
+        "Situation perso": v2,
+        "Famille": v3,
+        "Patrimoine": v4,
+        "Qualité relation/pb gestion": v5
+    }
 
-        st.session_state["last_context_labeled"] = {
-            "Santé/contexte": v1,
-            "Situation perso": v2,
-            "Famille": v3,
-            "Patrimoine": v4,
-            "Qualité relation/pb gestion": v5
-        }
+    col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
+    with col1:
+        if st.button("Exporter le rapport"):
+            pdf = Make_pdf(FILE_NAME2, context)
+            date_str = dt.now().strftime("%Y-%m-%d_%H%M%S")
+            user_name = st.session_state.user_email.split("@")[0].replace(".", "").replace(" ", "")
+            filename = f"{date_str}_{user_name}.pdf"
+            output_path = os.path.join("static", filename)
+            pdf.output(name=output_path, dest="F")
+            st.session_state["pdf_to_view"] = filename
+            st.session_state["last_generated_pdf"] = filename
+            st.session_state["last_context"] = context
 
-        col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
+    with col2:
+        if "pdf_to_view" in st.session_state:
+            file_to_display = st.session_state["pdf_to_view"]
+            file_path = os.path.join("static", file_to_display)
+            if os.path.exists(file_path):
+                with open(file_path, "rb") as f:
+                    st.download_button("Télécharger le PDF", f, file_name=file_to_display, mime="application/pdf")
+                pdf_url = f"/app/static/{urllib.parse.quote(file_to_display)}"
+                with col3:
+                    st.link_button("Voir le PDF", url=pdf_url)
 
-        with col1:
-            if st.button("Exporter le rapport"):
-                pdf = Make_pdf(FILE_NAME2, context)
-                date_str = dt.now().strftime("%Y-%m-%d_%H%M%S")
-                user_name = st.session_state.user_email.split("@")[0].replace(".", "").replace(" ", "")
-                filename = f"{date_str}_{user_name}.pdf"
-                output_path = os.path.join("static", filename)
-                pdf.output(name=output_path, dest="F")
-                st.session_state["pdf_to_view"] = filename
-                show_pdf_section = True
-                st.session_state["last_generated_pdf"] = filename
-                st.session_state["last_context"] = context
+    with col4:
+        if st.session_state.user_email.lower() == ADMIN_EMAIL.lower():
+            if st.button("Retour vers l'administrateur"):
+                st.session_state.page = "admin"
+                st.rerun()
 
-        with col2:
-            if "pdf_to_view" in st.session_state:
-                file_to_display = st.session_state["pdf_to_view"]
-                file_path = os.path.join("static", file_to_display)
-                if os.path.exists(file_path):
-                    with open(file_path, "rb") as f:
-                        st.download_button("Télécharger le PDF", f, file_name=file_to_display, mime="application/pdf")
-                    pdf_url = f"/app/static/{urllib.parse.quote(file_to_display)}"
-                    with col3:
-                        st.link_button("Voir le PDF", url=pdf_url)
-
-        with col4:
-            if st.session_state.user_email.lower() == ADMIN_EMAIL.lower():
-                if st.button("Retour vers l'administrateur"):
-                    st.session_state.page = "admin"
-                    st.rerun()
-
+    # Bloc Commentaire
     commentaire_path = "Commentaire.xlsx"
 
-
-
-    # Fonction de sauvegarde du commentaire
     def enregistrer_commentaire(texte):
         user_email = st.session_state.get("user_email", "anonyme")
         pdf_name = st.session_state.get("last_generated_pdf", "inconnu")
         context_labeled = st.session_state.get("last_context_labeled", {})
 
-        # Vérifier s'il existe déjà un commentaire pour ce PDF et utilisateur
         if os.path.exists(commentaire_path):
             df = pd.read_excel(commentaire_path, engine="openpyxl")
             duplicate = df[
@@ -286,23 +281,18 @@ def user_page():
         st.session_state.comment_text = ""
         st.rerun()
 
-    # Dialogue de confirmation
     @st.dialog("Confirmation d'envoi")
     def confirmer_envoi_commentaire(texte):
         st.write("Souhaitez-vous vraiment envoyer ce commentaire ?")
-
         col1, col2 = st.columns(2)
         with col1:
             if st.button("✅ Oui, envoyer", key="confirm_envoyer"):
                 enregistrer_commentaire(texte)
-
         with col2:
             if st.button("❌ Annuler", key="cancel_envoyer"):
                 st.rerun()
 
-    # Affichage du bloc commentaire
     st.markdown("### 💬 Commentaire sur votre PDF généré")
-
     pdf_name = st.session_state.get("last_generated_pdf", None)
 
     if not pdf_name:
@@ -333,5 +323,3 @@ def user_page():
             </p>
         </div>
     """, unsafe_allow_html=True)
-
-
