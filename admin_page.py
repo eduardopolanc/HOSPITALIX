@@ -213,14 +213,18 @@ def admin_page():
                                 st.session_state["demande_email"] = row["Email"]
                                 st.session_state["demande_index"] = _
                                 st.session_state["trigger_accept_dialog"] = True
+                                st.session_state.pop("dialog_accept_open", None)
 
                         with colB:
                             if st.button("❌ Rejeter", key=f"reject_{i}"):
                                 st.session_state["demande_email_rejet"] = row["Email"]
                                 st.session_state["demande_index_rejet"] = _
                                 st.session_state["trigger_reject_dialog"] = True
+                                st.session_state.pop("dialog_reject_open", None)
 
-        if st.session_state.get("trigger_accept_dialog", False):
+        if st.session_state.get("trigger_accept_dialog", False) and "dialog_accept_open" not in st.session_state:
+            st.session_state["dialog_accept_open"] = True
+
             @st.dialog("Confirmer l'acceptation")
             def confirmer_acceptation():
                 email = st.session_state["demande_email"]
@@ -257,16 +261,20 @@ def admin_page():
                         requests.to_excel("demandes_en_attente.xlsx", index=False)
                         st.success("Utilisateur accepté.")
                         st.session_state["trigger_accept_dialog"] = False
+                        st.session_state["dialog_accept_open"] = False
                         st.session_state.selected_user_idx = None
                         st.rerun()
                 with colY:
                     if st.button("❌ No"):
                         st.session_state["trigger_accept_dialog"] = False
+                        st.session_state["dialog_accept_open"] = False
                         st.rerun()
 
             confirmer_acceptation()
 
-        if st.session_state.get("trigger_reject_dialog", False):
+        if st.session_state.get("trigger_reject_dialog", False) and "dialog_reject_open" not in st.session_state:
+            st.session_state["dialog_reject_open"] = True
+
             @st.dialog("Confirmer le rejet")
             def confirmer_rejet():
                 email = st.session_state["demande_email_rejet"]
@@ -278,12 +286,14 @@ def admin_page():
                         requests.drop(index=index, inplace=True)
                         requests.to_excel("demandes_en_attente.xlsx", index=False)
                         st.session_state["trigger_reject_dialog"] = False
+                        st.session_state["dialog_reject_open"] = False
                         st.session_state.selected_user_idx = None
                         st.warning("Demande rejetée.")
                         st.rerun()
                 with col2:
-                    if st.button("Annuler"):
+                    if st.button("❌ No"):
                         st.session_state["trigger_reject_dialog"] = False
+                        st.session_state["dialog_reject_open"] = False
                         st.rerun()
 
             confirmer_rejet()
@@ -291,6 +301,7 @@ def admin_page():
         if not search_email and len(requests) > 25:
             st.markdown("<br>", unsafe_allow_html=True)
             st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
+
 
     # ---- Utilisateurs actifs ----
     with col_p:
