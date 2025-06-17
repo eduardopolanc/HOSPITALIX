@@ -12,7 +12,7 @@ BASE_DIR = "/data/copie_windows/version Windows alix02/Desktop/ALIX_APP_DEV"
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-EMAIL_DEST = os.getenv("EMAIL_DEST")
+EMAIL_DEST = os.getenv("ADMIN_EMAIL")
 
 # Définir les chemins des fichiers
 STATIC_FOLDER = os.path.join(BASE_DIR, "static")
