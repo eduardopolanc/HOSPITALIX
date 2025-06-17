@@ -76,16 +76,23 @@ def enregistrer_historique_statut(email, ancien_statut, nouveau_statut):
 
 # Page Admin
 def admin_page():
+# --- Ajouter logo et titre ---
+    colq, colw = st.columns([2, 2])
+    with colq:
+        st.image("dq-legaltech-logo.ico", width=100)
+    with colw:
+        st.markdown("<h3 style='text-align: center;'>Espace administrateur</h3>", unsafe_allow_html=True)
+
     cola, cols, cold = st.columns([2, 2, 2])
 
     # Titre de la page Admin
     with cols:
-        st.markdown("<h1 style='text-align: center;'>Admin Page</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center;'>Espace administrateur</h1>", unsafe_allow_html=True)
 
     with cold:
         colq, colw = st.columns([2, 2])
         with colw:
-            if st.button("log out"):
+            if st.button("Déconnexion"):
                 st.session_state.page = "login"
                 st.rerun()
 
@@ -145,7 +152,7 @@ def admin_page():
                 st.markdown("<br>", unsafe_allow_html=True)
                 st.info("🔎 Utilisez la barre de recherche pour voir les suivants…")
 
-    if st.button("Generer un PDF"):
+    if st.button("Générer un PDF"):
         st.session_state.page = "user"
         st.rerun()
 
@@ -480,3 +487,13 @@ def admin_page():
         st.metric("⏳ Demandes en attente", nb_requests)
     with col3:
         st.metric("📄 PDFs générés", nb_pdfs)
+# --- Pied de page (footer) ---
+    st.markdown("""
+        <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
+            <p style="text-align:center; color:white; font-size:0.9em; margin:0;">
+                Droits Quotidiens Legal Tech<br>
+                Pour toute question, contactez-nous à
+                <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
+            </p>
+        </div>
+    """, unsafe_allow_html=True)

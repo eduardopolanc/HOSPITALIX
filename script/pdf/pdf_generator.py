@@ -46,7 +46,7 @@ def chapter_body(pdf,txt_split,context):
             elif i == 1:
                 pdf.set_font('DejaVu', '', 11)
                 pdf.set_text_color(r = 233, g= 18, b = 194)
-                pdf.cell(0, 5, txt_split[i][:-1], align='C')
+                pdf.multi_cell(0, 6, txt_split[i], align='C')
                 pdf.ln()
 
             elif  txt_split[i][0:7] == 'seule +':

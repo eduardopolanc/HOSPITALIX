@@ -10,6 +10,9 @@ from dotenv import load_dotenv
 def contient_caracteres_speciaux(texte):
     return bool(re.search(r"[^a-zA-Z0-9@._\- +]", texte))
 
+def email_valide(email):
+    return re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email) is not None
+
 def sign_up_page():
     st.image("dq-legaltech-logo.ico", width=100)
     st.title("Demande de création de compte")
@@ -26,8 +29,12 @@ def sign_up_page():
         # Vérification des champs obligatoires
         if not (nom and prenom and telephone and role and entreprise and email):
             st.warning("Veuillez remplir tous les champs obligatoires.")
+        elif not telephone.isdigit():
+            st.error("🚫 Le numéro de téléphone ne doit contenir que des chiffres.")
         elif len(telephone) != 10 or not telephone.isdigit():
             st.error("🚫 Le numéro de téléphone doit contenir exactement 10 chiffres.")
+        elif not email_valide(email):
+            st.error("🚫 L'adresse email saisie n'est pas valide.")
         elif any(contient_caracteres_speciaux(champ) for champ in [nom, prenom, telephone, role, entreprise, email]):
             st.error("🚫 Certains champs contiennent des caractères non autorisés. Veuillez vérifier vos saisies.")
         else:
