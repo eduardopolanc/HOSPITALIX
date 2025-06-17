@@ -86,7 +86,7 @@ if nb_users > 0 and days_of_month > 0:
 
 # Création du message
 msg = EmailMessage()
-msg["Subject"] = "Rapport hebdomadaire ALIX"
+msg["Subject"] = "Rapport hebdomadaire ALIX - Semaine du {last_week.strftime('%d/%m/%Y')} au {today.strftime('%d/%m/%Y')}"
 msg["From"] = EMAIL_SENDER
 msg["To"] = EMAIL_DEST
 
@@ -98,22 +98,22 @@ Bonjour,
 Voici votre rapport hebdomadaire :
 
 📊 Statistiques globales :
+
 - 👤 Utilisateurs actifs : {nb_users}
 - 📄 PDFs totaux sur le site : {len(all_pdfs)}
 - 🗑️ PDFs à supprimer cette semaine : {len(pdfs_to_delete)}
-  {chr(10).join(pdfs_to_delete[:10]) if pdfs_to_delete else 'Aucun.'}
+  {chr(10).join(pdfs_to_delete[:10])}
 - 📈 Taux d'utilisation du site (mois en cours) : {site_usage:.1f} %
 - 🚀 Taux de croissance des utilisateurs ce mois : {growth_rate:.1f} %
 
-📅 Semaine du {last_week.strftime('%d/%m/%Y')} au {today.strftime('%d/%m/%Y')} :
 
-- 📄 PDFs générés : {len(pdfs)}
-  {chr(10).join(pdfs) if pdfs else 'Aucun PDF généré cette semaine.'}
+- 📄 Total de PDFs générés cette semaine : {len(pdfs)}
+  {chr(10).join(pdfs)}
 
 - 💬 Nouveaux commentaires : {nb_comments}
 - ⏳ Demandes en attente : {nb_demandes}
 
-🔗 Accédez à votre plateforme : http://alix.iparme.com/
+🔗 Consultez la plateforme pour plus d’infos : http://alix.iparme.com/
 
 Cordialement,
 L'équipe ALIX
