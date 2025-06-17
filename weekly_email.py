@@ -64,7 +64,6 @@ if os.path.exists(DEMANDE_FILE):
 nb_users = 0
 users_current_month = []
 users_prev_month = []
-growth_rate = 0
 if os.path.exists(ACCEPTED_USERS_FILE):
     df_users = pd.read_excel(ACCEPTED_USERS_FILE)
     if "Statut" in df_users.columns and "Date Création" in df_users.columns:
@@ -74,15 +73,6 @@ if os.path.exists(ACCEPTED_USERS_FILE):
         df_users["Date Création"] = pd.to_datetime(df_users["Date Création"], errors="coerce")
         users_current_month = df_users[(df_users["Statut"] == "actif") & (df_users["Date Création"] >= first_day_month)]
         users_prev_month = df_users[(df_users["Statut"] == "actif") & (df_users["Date Création"] >= first_day_month) & (df_users["Date Création"] < first_day_month)]
-
-        if len(users_prev_month) > 0:
-            growth_rate = (len(users_current_month) / len(users_prev_month)) * 100
-
-# Utilisation du site
-days_of_month = (today.replace(month=today.month % 12+1, day=1) - timedelta(days=1)).day
-site_usage = 0
-if nb_users > 0 and days_of_month > 0:
-    site_usage = (pdfs_this_month / (nb_users * days_of_month)) * 100
 
 # Création du message
 msg = EmailMessage()
@@ -101,18 +91,15 @@ Veuillez consulter ci-dessous le rapport hebdomadaire de l’application Alix :
 
 - 👤 Utilisateurs actifs : {nb_users}
 - 📄 PDFs totaux sur le site : {len(all_pdfs)}
+- ⏳ Demandes en attente : {nb_demandes}
   {chr(10).join(pdfs_to_delete[:5])}
   ...
 
-- 📈 Taux d'utilisation du site (mois en cours) : {site_usage:.1f} %
-- 🚀 Taux de croissance des utilisateurs ce mois : {growth_rate:.1f} %
-
-
 - 📄 Total de PDFs générés cette semaine : {len(pdfs)}
-
 - 💬 Nouveaux commentaires : {nb_comments}
-- ⏳ Demandes en attente : {nb_demandes}
 - 🗑️ PDFs à supprimer cette semaine : {len(pdfs_to_delete)}
+
+
 
 🔗 Consultez la plateforme pour plus d’infos : http://alix.iparme.com/
 
