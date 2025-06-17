@@ -31,7 +31,7 @@ first_day_previous_month = last_day_previous_month.replace(day=1)
 pdfs = []
 all_pdfs = []
 pdfs_to_delete = []
-pdfs_this_month = []
+pdfs_this_month = 0
 
 if os.path.exists(STATIC_FOLDER):
     for file in os.listdir(STATIC_FOLDER):
