@@ -91,14 +91,12 @@ Veuillez consulter ci-dessous le rapport hebdomadaire de l’application Alix :
 
 - 👤 Utilisateurs actifs : {nb_users}
 - 📄 PDFs totaux sur le site : {len(all_pdfs)}
-- ⏳ Demandes en attente : {nb_demandes}
-  {chr(10).join(pdfs_to_delete[:5])}
-  ...
-
 - 📄 Total de PDFs générés cette semaine : {len(pdfs)}
 - 💬 Nouveaux commentaires : {nb_comments}
+- ⏳ Demandes en attente : {nb_demandes}
 - 🗑️ PDFs à supprimer cette semaine : {len(pdfs_to_delete)}
-
+  {chr(10).join(pdfs_to_delete[:5])}
+  ...
 
 
 🔗 Consultez la plateforme pour plus d’infos : http://alix.iparme.com/
