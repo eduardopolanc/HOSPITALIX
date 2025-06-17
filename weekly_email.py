@@ -95,7 +95,7 @@ msg["To"] = EMAIL_DEST
 body = f"""
 Bonjour,
 
-Voici votre rapport hebdomadaire :
+Veuillez consulter ci-dessous le rapport hebdomadaire de l’application Alix :
 
 📊 Statistiques globales :
 
