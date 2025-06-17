@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 def login_page():
     st.image("dq-legaltech-logo.ico", width=100)
-    st.markdown("<h3 style='text-align: center;'>Bienvenue sur ALIX</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>Bienvenue sur HospitAlix</h3>", unsafe_allow_html=True)
     st.title("Page de Connexion")
 
     # -------------------------
@@ -81,7 +81,7 @@ def login_page():
             return False
         try:
             msg = EmailMessage()
-            msg["Subject"] = "Mot de passe oublié - ALIX"
+            msg["Subject"] = "Mot de passe oublié - HospitAlix"
             msg["From"] = EMAIL_SENDER
             msg["To"] = to_email
             msg.set_content(f"""

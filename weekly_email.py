@@ -76,7 +76,7 @@ if os.path.exists(ACCEPTED_USERS_FILE):
 
 # Création du message
 msg = EmailMessage()
-msg["Subject"] = f"Rapport hebdomadaire ALIX - Semaine du {last_week.strftime('%d/%m/%Y')} au {today.strftime('%d/%m/%Y')}"
+msg["Subject"] = f"Rapport hebdomadaire HospitAlix - Semaine du {last_week.strftime('%d/%m/%Y')} au {today.strftime('%d/%m/%Y')}"
 msg["From"] = EMAIL_SENDER
 msg["To"] = EMAIL_DEST
 
@@ -85,26 +85,24 @@ msg["To"] = EMAIL_DEST
 body = f"""
 Bonjour,
 
-Veuillez consulter ci-dessous le rapport hebdomadaire de l’application Alix :
+Veuillez consulter ci-dessous le rapport hebdomadaire de l’application HospitAlix :
 
 📊 Statistiques globales :
 
 - 👤 Utilisateurs actifs : {nb_users}
 - 📄 PDFs totaux sur le site : {len(all_pdfs)}
-- ⏳ Demandes en attente : {nb_demandes}
-  {chr(10).join(pdfs_to_delete[:5])}
-  ...
-
 - 📄 Total de PDFs générés cette semaine : {len(pdfs)}
 - 💬 Nouveaux commentaires : {nb_comments}
+- ⏳ Demandes en attente : {nb_demandes}
 - 🗑️ PDFs à supprimer cette semaine : {len(pdfs_to_delete)}
-
+  {chr(10).join(pdfs_to_delete[:5])}
+  ...
 
 
 🔗 Consultez la plateforme pour plus d’infos : http://alix.iparme.com/
 
 Cordialement,
-L'équipe ALIX
+L'équipe HospitAlix
 """
 msg.set_content(body)
 

@@ -27,13 +27,13 @@ def send_account_email(to_email, password):
 
     try:
         msg = EmailMessage()
-        msg["Subject"] = "Votre compte ALIX a été activé"
+        msg["Subject"] = "Votre compte HospitAlix a été activé"
         msg["From"] = EMAIL_SENDER
         msg["To"] = to_email
         msg.set_content(f"""
             Bonjour,
 
-            Votre compte ALIX a été validé.
+            Votre compte HospitAlix a été validé.
 
             Voici vos identifiants :
             - Email : {to_email}
