@@ -34,7 +34,7 @@ def chapter_body(pdf,txt_split,context):
 
     # Read text file
     array_Space =['"Vous pouvez peut-être dès maintenant :','"Vous pouvez aussi organiser votre protection juridique future :','La loi vous offre d’autres possibilités :','Vous pouvez prendre dès maintenant l’initiative de mettre en place une mesure de protection juridique :']
-    pdf.add_font('DejaVu', '', "/data/copie_windows/version Windows alix02/Desktop/ALIX_APP/script/pdf/DejaVuSansCondensed.ttf", uni=True)
+    pdf.add_font('DejaVu', '', str(FONT_PATH), uni=True)
     # Output justified text
 
     txt_split=clean_scritp(txt_split)
