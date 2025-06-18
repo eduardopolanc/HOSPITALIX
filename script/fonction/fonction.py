@@ -4,8 +4,11 @@ import xlrd
 import difflib
 import numpy as np
 import script.fonction.fonction_regle as fr
+from pathlib import Path
 
-df_app = pd.read_excel(r"/data/copie_windows/version Windows alix02/Desktop/ALIX_APP/ALIX_4.0.xlsm",sheet_name='Concordance' ,engine='openpyxl')
+FILE_XLSM = Path(__file__).resolve().parents[2] / "ALIX_4.0.xlsm" 
+
+df_app = pd.read_excel(FILE_XLSM, sheet_name='Concordance', engine='openpyxl')
 
 
 def val_relation2(variable):
@@ -123,8 +126,8 @@ def generate(array_nbr,name_file):
 
 def generate_with_regle(array_nbr,name_file):
 
-  df_CVv = fr.load_file("/data/copie_windows/version Windows alix02/Desktop/ALIX_APP/ALIX_4.0.xlsm", sheet_name = 'Célibataire-Veuf variable')
-  df_substitution = fr.load_substitution("/data/copie_windows/version Windows alix02/Desktop/ALIX_APP/ALIX_4.0.xlsm", sheet_name = 'tableau_substitution')
+  df_CVv = fr.load_file(FILE_XLSM, sheet_name = 'Célibataire-Veuf variable')
+  df_substitution = fr.load_substitution(FILE_XLSM, sheet_name = 'tableau_substitution')
   df_ordre = fr.load_ordre("ALIX_4.0.xlsm", sheet_name = 'tableau_ordre')
 
   list_contexte = rajout_Z(array_nbr[0])
