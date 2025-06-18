@@ -3,7 +3,7 @@ from script.pdf.Clean_scritp import clean_scritp
 from pathlib import Path
 
 IMAGE_DIR = Path(__file__).resolve().parent / "image"
-FONT_PATH = Path("/srv/HOSPITALIX/script/pdf/DejaVuSansCondensed.ttf")
+FONT_PATH = Path(__file__).resolve().parent / "DejaVuSansCondensed.ttf"
 
 class PDF(FPDF):
     def header(self):
