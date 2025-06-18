@@ -8,8 +8,8 @@ FONT_PATH = Path(__file__).resolve().parents[2] / "script" / "pdf" / "DejaVuSans
 class PDF(FPDF):
     def header(self):
         # Logo
-        self.image(str(IMAGE_DIR), 10, 8, 33)
-        self.image(str(IMAGE_DIR), 185, 8, 20)
+        self.image(str(IMAGE_DIR / "dq-legaltech-logo.png"), 10, 8, 33)
+        self.image(str(IMAGE_DIR / "Iparme-logo.png"), 185, 8, 20)
         # Arial bold 15
         self.set_font('Arial', 'B', 15)
         # Move to the right
@@ -34,7 +34,7 @@ def chapter_body(pdf,txt_split,context):
 
     # Read text file
     array_Space =['"Vous pouvez peut-être dès maintenant :','"Vous pouvez aussi organiser votre protection juridique future :','La loi vous offre d’autres possibilités :','Vous pouvez prendre dès maintenant l’initiative de mettre en place une mesure de protection juridique :']
-    pdf.add_font('DejaVu', '', STR(FONT_PATH), uni=True)
+    pdf.add_font('DejaVu', '', "/data/copie_windows/version Windows alix02/Desktop/ALIX_APP/script/pdf/DejaVuSansCondensed.ttf", uni=True)
     # Output justified text
 
     txt_split=clean_scritp(txt_split)
@@ -49,7 +49,7 @@ def chapter_body(pdf,txt_split,context):
             elif i == 1:
                 pdf.set_font('DejaVu', '', 11)
                 pdf.set_text_color(r = 233, g= 18, b = 194)
-                pdf.multi_cell(0, 6, txt_split[i], align='C')
+                pdf.cell(0, 5, txt_split[i][:-1], align='C')
                 pdf.ln()
 
             elif  txt_split[i][0:7] == 'seule +':
