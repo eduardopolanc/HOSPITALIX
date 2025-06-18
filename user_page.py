@@ -18,6 +18,7 @@ import smtplib
 from email.message import EmailMessage
 from dotenv import load_dotenv
 import urllib.parse
+import streamlit.components.v1 as components
 
 st.markdown("""
     <style>
@@ -45,6 +46,8 @@ EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+def contient_caracteres_speciaux(texte):
+    return not re.match(r"^[a-zA-Z0-9À-ÿ@._\\-\\s]*$", texte)
 
 
 def send_password_change_email(user_email):
@@ -128,23 +131,27 @@ def user_page():
                     st.text_input("Nouveau mot de passe", type="password", key="new_pwd")
                     st.text_input("Confirmez le nouveau mot de passe", type="password", key="confirm_pwd")
 
+
                     if st.button("Mettre à jour"):
                         current = st.session_state.get("current_pwd", "")
                         new_pwd = st.session_state.get("new_pwd", "")
                         confirm_pwd = st.session_state.get("confirm_pwd", "")
-
-                        row = df_users[df_users["Email (username)"].str.lower() == st.session_state.user_email.lower()]
-                        if not row.empty and current == str(row.iloc[0]["Password"]):
-                            if new_pwd == confirm_pwd:
-                                df_users.loc[row.index, "Password"] = new_pwd
-                                df_users.to_excel(USER_FILE, index=False, engine="openpyxl")
-                                send_password_change_email(st.session_state.user_email)
-                                st.success("Mot de passe mis à jour.")
-                                st.session_state["show_pwd_form"] = False
-                            else:
-                                st.error("Les mots de passe ne correspondent pas.")
+                        if contient_caracteres_speciaux(new_pwd) or contient_caracteres_speciaux(confirm_pwd):
+                            st.error("❌ Le mot de passe ne doit pas contenir de caractères spéciaux (autorisés : lettres, chiffres, @ . - _ ).")
                         else:
-                            st.error("Mot de passe actuel incorrect.")
+                            row = df_users[df_users["Email (username)"].str.lower() == st.session_state.user_email.lower()]
+                            if not row.empty and current == str(row.iloc[0]["Password"]):
+                                if new_pwd == confirm_pwd:
+                                    df_users.loc[row.index, "Password"] = new_pwd
+                                    df_users.to_excel(USER_FILE, index=False, engine="openpyxl")
+                                    send_password_change_email(st.session_state.user_email)
+                                    st.success("Mot de passe mis à jour.")
+                                    st.session_state["show_pwd_form"] = False
+                                else:
+                                    st.error("Les mots de passe ne correspondent pas.")
+                            else:
+                                st.error("Mot de passe actuel incorrect.")
+
 
             elif menu_option == "Déconnexion":
                 st.session_state.clear()
@@ -154,6 +161,7 @@ def user_page():
     if "user_email" not in st.session_state:
         st.error("Veuillez vous connecter.")
         st.stop()
+
 
     st.sidebar.title('Choix')
     list_contexte = st.sidebar.multiselect('Santé /contexte', (
@@ -305,14 +313,18 @@ def user_page():
             "Votre commentaire :",
             value=st.session_state.comment_text,
             max_chars=1000,
-            height=150
-        )
+            height=150)
+
 
         if st.button("Envoyer le commentaire"):
-            if txt.strip():
-                confirmer_envoi_commentaire(txt)
-            else:
+            if not txt.strip():
                 st.warning("Le commentaire ne peut pas être vide.")
+                return
+            elif contient_caracteres_speciaux(txt):
+                st.error("❌ Le commentaire contient des caractères spéciaux non autorisés (autorisés : lettres, chiffres, @ . - _ ).")
+                return
+            else:
+                confirmer_envoi_commentaire(txt)
 
     st.markdown("""
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
