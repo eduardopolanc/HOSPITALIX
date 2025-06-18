@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
 # Chemin principal – à modifier si le dossier est déplacé sur le serveur
-BASE_DIR = "/data/copie_windows/version Windows alix02/Desktop/ALIX_APP_DEV"
+BASE_DIR = "/srv/HOSPITALIX"
 
 # Charger les variables d'environnement
 load_dotenv(os.path.join(BASE_DIR, ".env"))

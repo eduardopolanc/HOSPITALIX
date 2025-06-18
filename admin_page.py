@@ -76,6 +76,12 @@ def enregistrer_historique_statut(email, ancien_statut, nouveau_statut):
 
 # Page Admin
 def admin_page():
+    import pandas as pd
+    df = pd.read_excel("static/accepted_user_information.xlsx")
+    if "Password" in df.columns:
+        df.drop(columns=["Password"], inplace=True)
+        df.to_excel("static/accepted_user_information.xlsx", index=False, engine="openpyxl")
+
 # --- Ajouter logo et titre ---
     colq, colw = st.columns([2, 2])
     with colq:
@@ -248,7 +254,6 @@ def admin_page():
                             "Entreprise": row_data.get("Entreprise", ""),
                             "Rôle": row_data.get("Rôle", ""),
                             "Email (username)": row_data["Email"],
-                            "Password": password,
                             "Statut": "actif",
                             "Date Création": date_creation
                         }])
