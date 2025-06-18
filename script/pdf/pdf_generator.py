@@ -2,7 +2,7 @@ from fpdf import FPDF
 from script.pdf.Clean_scritp import clean_scritp
 from pathlib import Path
 
-IMAGE_DIR = Path(__file__).resolve().parents[2] / "script" / "pdf" / "image"
+IMAGE_DIR = Path(__file__).resolve().parent / "image"
 FONT_PATH = Path("/srv/HOSPITALIX/script/pdf/DejaVuSansCondensed.ttf")
 
 class PDF(FPDF):
