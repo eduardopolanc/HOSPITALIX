@@ -90,7 +90,7 @@ def user_page():
             return None
         try:
             df = pd.read_excel(USER_FILE, engine="openpyxl")
-            if not all(col in df.columns for col in ["Email (username)", "Password"]):
+            if not all(col in df.columns for col in ["Email (username)", "Hashed Password"]):
                 return None
             return df
         except:
