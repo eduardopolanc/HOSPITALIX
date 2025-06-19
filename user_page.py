@@ -103,7 +103,7 @@ def user_page():
     # Barre du haut avec logo, titre et menu Options
     col1, col2, col3 = st.columns([1, 4, 2])
     with col1:
-        st.image("dq-legaltech-logo.ico", width=80)
+        st.image("dq-legaltech-logo.ico", width=170)
     with col2:
         st.markdown("<h3 style='text-align: center;'>Générateur de fiches</h3>", unsafe_allow_html=True)
     with col3:

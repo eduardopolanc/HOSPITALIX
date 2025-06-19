@@ -83,11 +83,7 @@ def admin_page():
         df.to_excel("static/accepted_user_information.xlsx", index=False, engine="openpyxl")
 
 # --- Ajouter logo et titre ---
-    colq, colw = st.columns([2, 2])
-    with colq:
-        st.image("dq-legaltech-logo.ico", width=100)
-    with colw:
-        st.markdown("<h3 style='text-align: center;'>Espace administrateur</h3>", unsafe_allow_html=True)
+    st.image("dq-legaltech-logo.ico", width=170)
 
     cola, cols, cold = st.columns([2, 2, 2])
 
@@ -497,7 +493,7 @@ def admin_page():
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
             <p style="text-align:center; color:white; font-size:0.9em; margin:0;">
                 Droits Quotidiens Legal Tech<br>
-                Pour toute question, contactez-nous à
+                📧 Pour toute question, contactez-nous à
                 <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
             </p>
         </div>
