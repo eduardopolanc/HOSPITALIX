@@ -75,7 +75,7 @@ def login_page():
     def is_valid_user(email, password, df):
         row = df[df["Email (username)"].str.lower() == email.lower()]
         if not row.empty:
-            hashed = str(row.iloc[0]["Hased Password"])
+            hashed = str(row.iloc[0]["Hashed Password"])
             return bcrypt.checkpw(password.encode(), hashed.encode())
         return False
 
@@ -90,7 +90,7 @@ def login_page():
         try:
             df = pd.read_excel(user_file, engine="openpyxl")
             index = df[df["Email (username)"].str.lower() == to_email.lower()].index[0]
-            df.loc[index, "Hased Password"] = hashed
+            df.loc[index, "Hashed Password"] = hashed
             df.to_excel(user_file, index=False, engine="openpyxl")
 
             msg = EmailMessage()
