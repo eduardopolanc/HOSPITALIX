@@ -34,5 +34,5 @@ elif page == "signup":
 elif page == "user":
     user_page()
 else:
-    st.warning("Page not authorized. Redirecting to Login...")
+    st.warning("Page non autorisée. Redirection vers la connexion...")
     st.session_state.page = 'login'
