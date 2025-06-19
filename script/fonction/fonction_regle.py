@@ -1,8 +1,5 @@
 #Import des librairies
 import pandas as pd
-import xlrd
-import difflib
-import numpy as np
 
 
 

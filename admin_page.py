@@ -1,8 +1,6 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import os
 import pandas as pd
-import base64
 import secrets
 import string
 from email.message import EmailMessage
@@ -141,7 +139,6 @@ def admin_page():
                         st.download_button("⬇️ Télécharger", f, file_name=filename, mime="application/pdf")
 
                 with col3:
-                    import urllib.parse
                     pdf_url = f"/app/static/{urllib.parse.quote(filename)}"
                     st.link_button("👁️ Voir", url=pdf_url)
 

@@ -1,5 +1,3 @@
-
-
 def clean_scritp(txt_split):
 
 

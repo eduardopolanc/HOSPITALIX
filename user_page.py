@@ -1,24 +1,15 @@
 import os
 import re
-import xlrd
-import difflib
 import streamlit as st
 import logging
-import time
-from pytrends.request import TrendReq
 import script.fonction.fonction as fonction
-from openpyxl import load_workbook
-from fpdf import FPDF
-import base64
 from script.pdf.pdf_generator import Make_pdf
 from datetime import datetime as dt
-import hashlib
 import pandas as pd
 import smtplib
 from email.message import EmailMessage
 from dotenv import load_dotenv
 import urllib.parse
-import streamlit.components.v1 as components
 import bcrypt
 
 st.markdown("""

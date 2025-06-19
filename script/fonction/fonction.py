@@ -1,7 +1,5 @@
 
 import pandas as pd
-import xlrd
-import difflib
 import numpy as np
 import script.fonction.fonction_regle as fr
 from pathlib import Path
