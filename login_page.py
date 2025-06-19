@@ -175,14 +175,13 @@ L'équipe Droits Quotidiens Legal Tech
     # -------------------------
     # Pied de page
     # -------------------------
-    st.markdown(
-        """
+    st.markdown("""
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
             <p style="text-align:center; color:white; font-size:0.9em; margin:0;">
                 Droits Quotidiens Legal Tech<br>
-                📧 contact@droitsquotidiens.fr
+                   Pour toute question, contactez-nous   
+                <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
             </p>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
+
