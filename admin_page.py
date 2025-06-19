@@ -76,12 +76,6 @@ def enregistrer_historique_statut(email, ancien_statut, nouveau_statut):
 
 # Page Admin
 def admin_page():
-    import pandas as pd
-    df = pd.read_excel("static/accepted_user_information.xlsx")
-    if "Password" in df.columns:
-        df.drop(columns=["Password"], inplace=True)
-        df.to_excel("static/accepted_user_information.xlsx", index=False, engine="openpyxl")
-
 # --- Ajouter logo et titre ---
     st.image("dq-legaltech-logo.ico", width=170)
 
