@@ -98,8 +98,9 @@ def user_page():
 
     df_users = load_users()
     if df_users is None:
-        st.error("Erreur de chargement des utilisateurs. Veuillez contacter l'administrateur.")
-        st.stop()
+        if st.session_state.user_email.lower() != ADMIN_EMAIL.lower():
+            st.error("Erreur de chargement des utilisateurs. Veuillez contacter l'administrateur.")
+            st.stop()
 
     # Barre du haut avec logo, titre et menu Options
     col1, col2, col3 = st.columns([1, 4, 2])
