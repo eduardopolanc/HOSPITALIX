@@ -329,8 +329,8 @@ def admin_page():
                         for field in ["Nom", "Prénom", "Téléphone", "Entreprise", "Rôle", "Email (username)", "Statut", "Date Création"]:
                             if field in row and pd.notna(row[field]):
                                 st.write(f"**{field} :** {row[field]}")
-                        if st.button("🗑️ Supprimer", key=f"delete_user_{i}"):
-                            st.session_state["email_a_supprimer"] = email
+                        if st.button("🗑️ désactiver", key=f"delete_user_{i}"):
+                            st.session_state["email_a_désactiver"] = email
                             st.session_state["trigger_conf_dialog"] = True
                             st.session_state.pop("dialog_conf_open", None)
 
@@ -338,21 +338,21 @@ def admin_page():
     if st.session_state.get("trigger_conf_dialog", False) and "dialog_conf_open" not in st.session_state:
         st.session_state["dialog_conf_open"] = True
 
-        @st.dialog("Confirmer la suppression")
+        @st.dialog("Confirmer la désactivation")
         def confirmer_suppression_utilisateur():
 
-            target_email = st.session_state.get("email_a_supprimer", "")
-            st.write(f"Voulez-vous vraiment supprimer {target_email} ?")
+            target_email = st.session_state.get("email_a_désactiver", "")
+            st.write(f"Voulez-vous vraiment désactiver {target_email} ?")
 
             colX, colY = st.columns(2)
             with colX:
                 if st.button("✅ Oui"):
                     old_status = accepted_users.loc[accepted_users['Email (username)'] == target_email, 'Statut'].values[0]
-                    new_status = "supprimé"
+                    new_status = "désactivé"
                     enregistrer_historique_statut(target_email, old_status, new_status)
                     accepted_users.loc[accepted_users['Email (username)'] == target_email, 'Statut'] = new_status
                     accepted_users.to_excel(accepted_users_file, index=False, engine="openpyxl")
-                    st.success("Utilisateur marqué comme supprimé.")
+                    st.success("Utilisateur marqué comme désactivé.")
                     st.session_state["trigger_conf_dialog"] = False
                     st.session_state["dialog_conf_open"] = False
                     st.rerun()
@@ -365,16 +365,16 @@ def admin_page():
         confirmer_suppression_utilisateur()
 
 
-    # ---- Utilisateurs supprimés ----
+    # ---- Utilisateurs désactivés ----
     with col_s:
-        st.markdown("#### 🗑️ Utilisateurs supprimés")
-        supprimes = accepted_users[accepted_users["Statut"] == "supprimé"]
+        st.markdown("#### 🗑️ Utilisateurs désactivés")
+        supprimes = accepted_users[accepted_users["Statut"] == "désactivé"]
         if search_email:
             supprimes = supprimes[supprimes['Email (username)'].str.lower().str.contains(search_email)]
 
         with st.container(height=450):
             if supprimes.empty:
-                st.info("Aucun utilisateur supprimé.")
+                st.info("Aucun utilisateur désactivé.")
             else:
                 for i, (_, row) in enumerate(supprimes.iterrows()):
                     email = row["Email (username)"]
