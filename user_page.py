@@ -142,7 +142,7 @@ def user_page():
                             st.error("❌ Le mot de passe ne doit pas contenir de caractères spéciaux (autorisés : lettres, chiffres, @ . - _ ).")
                         else:
                             row = df_users[df_users["Email (username)"].str.lower() == st.session_state.user_email.lower()]
-                            if not row.empty and bcrypt.checkpw(current.encode(), str(row.iloc[0]["Password"]).encode()):
+                            if not row.empty and bcrypt.checkpw(current.encode(), str(row.iloc[0]["Hased Password"]).encode()):
                                 if new_pwd == confirm_pwd:
                                     new_hash = bcrypt.hashpw(new_pwd.encode(), bcrypt.gensalt()).decode()
                                     df_users.loc[row.index, "Hashed Password"] = new_hash
