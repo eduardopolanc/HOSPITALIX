@@ -10,6 +10,7 @@ import smtplib
 from dotenv import load_dotenv
 import urllib.parse
 import datetime as dt
+import bcrypt
 
 # Fonction pour générer un mot de passe aléatoire
 def generate_password(length=10):
@@ -233,6 +234,7 @@ def admin_page():
                 with colX:
                     if st.button("✅ Oui"):
                         password = generate_password()
+                        hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
                         enregistrer_historique_statut(email, "---", "actif")
                         send_account_email(email, password)
                         date_creation = dt.datetime.now().strftime("%Y-%m-%d")
@@ -244,6 +246,7 @@ def admin_page():
                             "Entreprise": row_data.get("Entreprise", ""),
                             "Rôle": row_data.get("Rôle", ""),
                             "Email (username)": row_data["Email"],
+                            "Hashed Password": hashed_password,
                             "Statut": "actif",
                             "Date Création": date_creation
                         }])

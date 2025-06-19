@@ -19,6 +19,7 @@ from email.message import EmailMessage
 from dotenv import load_dotenv
 import urllib.parse
 import streamlit.components.v1 as components
+import bcrypt
 
 st.markdown("""
     <style>
@@ -140,9 +141,10 @@ def user_page():
                             st.error("❌ Le mot de passe ne doit pas contenir de caractères spéciaux (autorisés : lettres, chiffres, @ . - _ ).")
                         else:
                             row = df_users[df_users["Email (username)"].str.lower() == st.session_state.user_email.lower()]
-                            if not row.empty and current == str(row.iloc[0]["Password"]):
+                            if not row.empty bcrypt.checkpw(current.encode(), str(row.iloc[0]["Hashed Password"]).encode()):
                                 if new_pwd == confirm_pwd:
-                                    df_users.loc[row.index, "Password"] = new_pwd
+                                    new_hash = bcrypt.hashpw(new_pwd.encode(), bcrypt.gensalt()).decode()
+                                    df_users.loc[row.index, "Hashed Password"] = new_hash
                                     df_users.to_excel(USER_FILE, index=False, engine="openpyxl")
                                     send_password_change_email(st.session_state.user_email)
                                     st.success("Mot de passe mis à jour.")

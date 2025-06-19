@@ -5,6 +5,8 @@ import smtplib
 import re
 from email.message import EmailMessage
 from dotenv import load_dotenv
+import bcrypt
+from admin_page import generate_password
 
 def login_page():
     st.image("dq-legaltech-logo.ico", width=170)
@@ -73,32 +75,44 @@ def login_page():
     def is_valid_user(email, password, df):
         row = df[df["Email (username)"].str.lower() == email.lower()]
         if not row.empty:
-            return password == str(row.iloc[0]["Password"])
+            hashed = str(row.iloc[0]["Hased Password"])
+            return bcrypt.checkpw(password.encode(), hashed.encode())
         return False
 
-    def send_password_email(to_email, password):
+    def send_password_email(to_email):
         if not (EMAIL_SENDER and EMAIL_PASSWORD):
             st.error("Configuration email manquante.")
             return False
+
+        new_password = generate_password()
+        hashed = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+
         try:
+            df = pd.read_excel(user_file, engine="openpyxl")
+            index = df[df["Email (username)"].str.lower() == to_email.lower()].index[0]
+            df.loc[index, "Hased Password"] = hashed
+            df.to_excel(user_file, index=False, engine="openpyxl")
+
             msg = EmailMessage()
-            msg["Subject"] = "Mot de passe oublié - HospitAlix"
+            msg["Subject"] = "Mot de passe réinitialisé - HospitAlix"
             msg["From"] = EMAIL_SENDER
             msg["To"] = to_email
             msg.set_content(f"""
-Bonjour,
+    Bonjour,
 
-Voici votre mot de passe : {password}
+    Votre mot de passe a été réinitialisé.
 
-Si vous n'avez pas fait cette demande, merci d'ignorer ce message.
+    Nouveau mot de passe : {new_password}
 
-Cordialement,
-L'équipe Droits Quotidiens Legal Tech
-""")
+    Cordialement,
+    L'équipe Droits Quotidiens Legal Tech
+    """)
+
             with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
                 smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
                 smtp.send_message(msg)
             return True
+
         except Exception as e:
             st.error(f"Erreur lors de l'envoi de l'email : {e}")
             return False
@@ -159,8 +173,7 @@ L'équipe Droits Quotidiens Legal Tech
                     if not row.empty:
                         statut = row.iloc[0].get("Statut", "inconnu")
                         if statut == "actif":
-                            user_pw = str(row.iloc[0]["Password"])
-                            if send_password_email(email, user_pw):
+                            if send_password_email(email):
                                 st.success("📧 Email de récupération envoyé.")
                         elif statut == "désactivé":
                             st.error("🚫 Ce compte a été désactivé.")
