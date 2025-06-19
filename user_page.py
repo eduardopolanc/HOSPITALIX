@@ -47,7 +47,7 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 def contient_caracteres_speciaux(texte):
-    return not re.match(r"^[a-zA-Z0-9À-ÿ@._\\-\\s]*$", texte)
+    return not re.match(r"^[\wÀ-ÿ@.\-_\s]*$", texte)
 
 
 def send_password_change_email(user_email):
@@ -105,7 +105,7 @@ def user_page():
     with col1:
         st.image("dq-legaltech-logo.ico", width=170)
     with col2:
-        st.markdown("<h3 style='text-align: center;'>Générateur de fiches</h3>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center;'>Générateur de fiches</h1>", unsafe_allow_html=True)
     with col3:
         if "user_email" in st.session_state:
             menu_options = ["Profil", "Déconnexion"]

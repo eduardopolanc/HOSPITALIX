@@ -7,10 +7,11 @@ from email.message import EmailMessage
 from dotenv import load_dotenv
 
 def login_page():
-    st.image("dq-legaltech-logo.ico", width=100)
-    st.markdown("<h3 style='text-align: center;'>Bienvenue sur HospitAlix</h3>", unsafe_allow_html=True)
-    st.title("Page de Connexion")
-
+    st.image("dq-legaltech-logo.ico", width=170)
+    st.markdown("""
+        <h1 style='text-align: center; margin-bottom: 0;'>Bienvenue sur HospitAlix</h1>
+        <h3 style='text-align: left; margin-top: 0;'>Page de connexion</h3>
+    """, unsafe_allow_html=True)
     # -------------------------
     # Initialisation des états
     # -------------------------
@@ -179,7 +180,7 @@ L'équipe Droits Quotidiens Legal Tech
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
             <p style="text-align:center; color:white; font-size:0.9em; margin:0;">
                 Droits Quotidiens Legal Tech<br>
-                   Pour toute question, contactez-nous   
+                📧 Pour toute question, contactez-nous   
                 <a href='mailto:contact@droitsquotidiens.fr' style='color:white;text-decoration:underline;'>contact@droitsquotidiens.fr</a>
             </p>
         </div>
