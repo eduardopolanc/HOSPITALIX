@@ -128,8 +128,8 @@ L'équipe Droits Quotidiens Legal Tech
                         st.session_state.page = "user"
                         st.session_state.user_email = email
                         st.rerun()
-                    elif statut == "supprimé":
-                        st.error("🚫 Ce compte a été supprimé. Merci de recréer un compte ou de nous contacter.")
+                    elif statut == "désactivé":
+                        st.error("🚫 Ce compte a été désactivé. Merci de recréer un compte ou de nous contacter.")
                     elif statut == "supprimé_def":
                         st.error("🚫 Ce compte a été définitivement supprimé.")
                     else:
@@ -162,8 +162,8 @@ L'équipe Droits Quotidiens Legal Tech
                             user_pw = str(row.iloc[0]["Password"])
                             if send_password_email(email, user_pw):
                                 st.success("📧 Email de récupération envoyé.")
-                        elif statut == "supprimé":
-                            st.error("🚫 Ce compte a été supprimé.")
+                        elif statut == "désactivé":
+                            st.error("🚫 Ce compte a été désactivé.")
                         elif statut == "supprimé_def":
                             st.error("Ce compte a été définitivement supprimé.")
                         else:

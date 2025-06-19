@@ -47,7 +47,7 @@ def sign_up_page():
                 match = accepted_df[accepted_df["Email (username)"].str.lower() == email]
                 if not match.empty:
                     statut = match.iloc[0].get("Statut", "actif")
-                    if statut == "supprimé":
+                    if statut == "désactivé":
                         deleted_user = True
                     elif statut == "supprimé_def":
                         accepted_df = accepted_df[accepted_df["Email (username)"].str.lower() != email]
@@ -66,7 +66,7 @@ def sign_up_page():
             elif user_exists:
                 st.info("🚫 Un compte existe déjà avec cet email.")
             elif deleted_user:
-                st.error("🚫 Un compte supprimé est associé à cet email. Contactez-nous.")
+                st.error("🚫 Un compte désactivé est associé à cet email. Contactez-nous.")
             else:
                 new_request = pd.DataFrame([{
                     "Nom": nom,
