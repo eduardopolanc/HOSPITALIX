@@ -14,7 +14,7 @@ def email_valide(email):
     return re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email) is not None
 
 def sign_up_page():
-    cola, colb = st.columns([2,2,2])
+    cola, colb, colc = st.columns([2,2,2])
     
     with cola:
         st.image("dq-legaltech-logo.ico", width=170)

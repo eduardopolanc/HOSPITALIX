@@ -9,7 +9,7 @@ import bcrypt
 from admin_page import generate_password
 
 def login_page():
-    cola, colb = st.columns([2,2,2])
+    cola, colb, colc = st.columns([2,2,2])
 
     with cola:
         st.image("dq-legaltech-logo.ico", width=170)
