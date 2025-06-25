@@ -75,12 +75,11 @@ def enregistrer_historique_statut(email, ancien_statut, nouveau_statut):
 
 # Page Admin
 def admin_page():
-# --- Ajouter logo et titre ---
-    st.image("dq-legaltech-logo.ico", width=170)
-
     cola, cols, cold = st.columns([2, 2, 2])
 
     # Titre de la page Admin
+    with cola:
+        st.image("dq-legaltech-logo.ico", width=170)
     with cols:
         st.markdown("<h1 style='text-align: center;'>Espace administrateur</h1>", unsafe_allow_html=True)
 
