@@ -16,10 +16,10 @@ def email_valide(email):
 def sign_up_page():
     cola, colb, colc = st.columns([2,5,2])
     
-    with cola:
-        st.image("dq-legaltech-logo.ico", width=170)
     with colb:
-        st.title("Demande de création de compte")
+        st.image("dq-legaltech-logo.ico", width=170)
+
+    st.title("Demande de création de compte")
     
     # Champs du formulaire
     nom = st.text_input("Nom")
