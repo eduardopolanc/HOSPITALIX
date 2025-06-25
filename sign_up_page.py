@@ -14,9 +14,13 @@ def email_valide(email):
     return re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email) is not None
 
 def sign_up_page():
-    st.image("dq-legaltech-logo.ico", width=170)
-    st.title("Demande de création de compte")
-
+    cola, colb = st.columns([2,2,2])
+    
+    with cola:
+        st.image("dq-legaltech-logo.ico", width=170)
+    with colb:
+        st.title("Demande de création de compte")
+    
     # Champs du formulaire
     nom = st.text_input("Nom")
     prenom = st.text_input("Prénom")

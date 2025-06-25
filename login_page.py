@@ -9,28 +9,32 @@ import bcrypt
 from admin_page import generate_password
 
 def login_page():
-    st.image("dq-legaltech-logo.ico", width=170)
-    st.markdown("""
-        <h1 style='text-align: center; margin-bottom: 0;'>Bienvenue sur HospitAlix</h1>
-        <h3 style='text-align: left; margin-top: 0;'>Page de connexion</h3>
-    """, unsafe_allow_html=True)
-    # -------------------------
+    cola, colb = st.columns([2,2,2])
+
+    with cola:
+        st.image("dq-legaltech-logo.ico", width=170)
+    with colb:
+        st.markdown("""
+            <h1 style='text-align: center; margin-bottom: 0;'>Bienvenue sur HospitAlix</h1>
+            <h3 style='text-align: left; margin-top: 0;'>Page de connexion</h3>
+        """, unsafe_allow_html=True)
+
     # Initialisation des états
-    # -------------------------
+
     if "hide_password" not in st.session_state:
         st.session_state.hide_password = False
     if "warning_message" not in st.session_state:
         st.session_state.warning_message = False
 
-    # -------------------------
+
     # Fonction de vérification
-    # -------------------------
+
     def contient_caracteres_speciaux(texte):
         return bool(re.search(r"[^a-zA-Z0-9@._\-]", texte))
 
-    # -------------------------
+
     # Saisie email
-    # -------------------------
+
     email = st.text_input("Email").strip()
 
     # Réaffichage du mot de passe si email valide saisi
@@ -41,16 +45,16 @@ def login_page():
     if st.session_state.hide_password and not email and st.session_state.warning_message:
         st.warning("Veuillez entrer votre adresse email ci-dessus.")
 
-    # -------------------------
+
     # Champ mot de passe
-    # -------------------------
+
     password = None
     if not st.session_state.hide_password:
         password = st.text_input("Mot de passe", type="password")
 
-    # -------------------------
+
     # Chargement des variables d’environnement
-    # -------------------------
+
     load_dotenv()
     EMAIL_SENDER = os.getenv("EMAIL_SENDER")
     EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
@@ -58,9 +62,9 @@ def login_page():
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
     user_file = "static/accepted_user_information.xlsx"
 
-    # -------------------------
+
     # Chargement des utilisateurs
-    # -------------------------
+
     def load_users():
         if not os.path.exists(user_file):
             return None
@@ -119,9 +123,9 @@ def login_page():
 
     df_users = load_users()
 
-    # -------------------------
+
     # Boutons
-    # -------------------------
+
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
@@ -186,9 +190,9 @@ def login_page():
                 else:
                     st.error("Impossible de charger les utilisateurs.")
 
-    # -------------------------
+
     # Pied de page
-    # -------------------------
+
     st.markdown("""
         <div style="background-color:#b04587;padding:15px 0;margin-top:40px;">
             <p style="text-align:center; color:white; font-size:0.9em; margin:0;">
