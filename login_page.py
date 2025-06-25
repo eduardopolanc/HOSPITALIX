@@ -16,9 +16,9 @@ def login_page():
     with colb:
         st.markdown("""
             <h1 style='text-align: center; margin-bottom: 0;'>Bienvenue sur HospitAlix</h1>
-            <h3 style='text-align: left; margin-top: 0;'>Page de connexion</h3>
         """, unsafe_allow_html=True)
-
+    st.markdown("""<h3 style='text-align: left; margin-top: 0;'>Page de connexion</h3>""",
+                unsafe_allow_html=True)
     # Initialisation des états
 
     if "hide_password" not in st.session_state:
